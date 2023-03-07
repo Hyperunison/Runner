@@ -1,0 +1,385 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Unison agent API",
+        "description": "API for opensource nextflow runner agent. A federation node",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "\/api\/agent\/v{version}\/{token}\/next-task": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "getNextTask",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get next task for runner agent",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/RunnerMessage"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No tasks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/next-run\/types": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "getTypesMap",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Map of data types",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/TypesMap"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/log-chunk": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "post_app_agent_addrunlogchunk",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "pattern": "\\d+"
+                        }
+                    },
+                    {
+                        "name": "chunk",
+                        "in": "query",
+                        "description": "Logs chunk to be attached",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": ""
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/status": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "post_app_agent_setrunstatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "pattern": "\\d+"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "New run status",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "success"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/process\/logs": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "post_app_agent_setprocesslogs",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "pattern": "\\d+"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "in": "query",
+                        "description": "New run status",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "logs"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/process": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "post_app_agent_updateprocessitem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "pattern": "\\d+"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "RunnerMessage": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "runnerAgentId": {
+                        "type": "integer"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "TypesMap": {
+                "properties": {
+                    "getProcessLogs": {
+                        "$ref": "#\/components\/schemas\/GetProcessLogs"
+                    },
+                    "nextflowRun": {
+                        "$ref": "#\/components\/schemas\/NextflowRun"
+                    }
+                },
+                "type": "object"
+            },
+            "GetProcessLogs": {
+                "properties": {
+                    "processId": {
+                        "type": "string"
+                    },
+                    "linesCount": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "NextflowRun": {
+                "properties": {
+                    "command": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}
