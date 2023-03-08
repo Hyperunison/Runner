@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  unison-agent:
+    build:
+      context: .
+      dockerfile: Resources/docker/Dockerfile
+    container_name: unison-agent
+    network_mode: "host"
+    volumes:
+      - ./:/app:delegated
+      - ./Resources/.kube/:/root/.kube
+      - ./Resources/.aws:/root/.aws

@@ -1,8 +1,9 @@
-apiVersion: 1.0
-apiUrl: "http://localhost:8082"
-agentToken: "63478ac069b96f79b9d97c9"
-workDir: "work/gen/agent/work"
+api_version: 1.0
+api_url: "http://localhost:8082"
+agent_token: "63478ac069b96f79b9d97c9"
+work_dir: "work/gen/agent/work"
 type: k8s
+idle_delay: 1.0
 k8s:
   namespace: "dev"
-  masterPod: "nextflow-dev"
+  master_pod: "nextflow-dev"
