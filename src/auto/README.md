@@ -64,14 +64,16 @@ configuration = auto_api_client.Configuration(
 with auto_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
+    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
+    chunk = "" # str | Logs chunk to be attached (optional) (default to "")
 
     try:
-        api_response = api_instance.get_next_task(version, token)
+        api_response = api_instance.add_run_log_chunk(id, version, token, chunk=chunk)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->get_next_task: %s\n" % e)
+        print("Exception when calling AgentApi->add_run_log_chunk: %s\n" % e)
 ```
 
 ## Documentation for API Endpoints
@@ -80,12 +82,12 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/next-task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
-*AgentApi* | [**post_app_agent_addrunlogchunk**](docs/AgentApi.md#post_app_agent_addrunlogchunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
-*AgentApi* | [**post_app_agent_setprocesslogs**](docs/AgentApi.md#post_app_agent_setprocesslogs) | **POST** /api/agent/v{version}/{token}/run/{id}/process/logs | 
-*AgentApi* | [**post_app_agent_setrunstatus**](docs/AgentApi.md#post_app_agent_setrunstatus) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
-*AgentApi* | [**post_app_agent_updateprocessitem**](docs/AgentApi.md#post_app_agent_updateprocessitem) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
+*AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/run/{id}/process/logs | 
+*AgentApi* | [**set_run_status**](docs/AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+*AgentApi* | [**update_process_item**](docs/AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
 
 ## Documentation For Models

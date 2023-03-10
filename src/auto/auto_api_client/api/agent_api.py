@@ -36,6 +36,86 @@ class AgentApi(object):
         if api_client is None:
             api_client = ApiClient()
         self.api_client = api_client
+        self.add_run_log_chunk_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/log-chunk',
+                'operation_id': 'add_run_log_chunk',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'id',
+                    'version',
+                    'token',
+                    'chunk',
+                ],
+                'required': [
+                    'id',
+                    'version',
+                    'token',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'id':
+                        (int,),
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'chunk':
+                        (str,),
+                },
+                'attribute_map': {
+                    'id': 'id',
+                    'version': 'version',
+                    'token': 'token',
+                    'chunk': 'chunk',
+                },
+                'location_map': {
+                    'id': 'path',
+                    'version': 'path',
+                    'token': 'path',
+                    'chunk': 'query',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client
+        )
         self.get_next_task_endpoint = _Endpoint(
             settings={
                 'response_type': (RunnerMessage,),
@@ -174,99 +254,12 @@ class AgentApi(object):
             },
             api_client=api_client
         )
-        self.post_app_agent_addrunlogchunk_endpoint = _Endpoint(
-            settings={
-                'response_type': (str,),
-                'auth': [],
-                'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/log-chunk',
-                'operation_id': 'post_app_agent_addrunlogchunk',
-                'http_method': 'POST',
-                'servers': None,
-            },
-            params_map={
-                'all': [
-                    'id',
-                    'version',
-                    'token',
-                    'chunk',
-                ],
-                'required': [
-                    'id',
-                    'version',
-                    'token',
-                ],
-                'nullable': [
-                ],
-                'enum': [
-                ],
-                'validation': [
-                    'id',
-                    'version',
-                    'token',
-                ]
-            },
-            root_map={
-                'validations': {
-                    ('id',): {
-
-                        'regex': {
-                            'pattern': r'\d+',  # noqa: E501
-                        },
-                    },
-                    ('version',): {
-
-                        'regex': {
-                            'pattern': r'[\d.]+',  # noqa: E501
-                        },
-                    },
-                    ('token',): {
-
-                        'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
-                        },
-                    },
-                },
-                'allowed_values': {
-                },
-                'openapi_types': {
-                    'id':
-                        (int,),
-                    'version':
-                        (str,),
-                    'token':
-                        (str,),
-                    'chunk':
-                        (str,),
-                },
-                'attribute_map': {
-                    'id': 'id',
-                    'version': 'version',
-                    'token': 'token',
-                    'chunk': 'chunk',
-                },
-                'location_map': {
-                    'id': 'path',
-                    'version': 'path',
-                    'token': 'path',
-                    'chunk': 'query',
-                },
-                'collection_format_map': {
-                }
-            },
-            headers_map={
-                'accept': [
-                    'application/json'
-                ],
-                'content_type': [],
-            },
-            api_client=api_client
-        )
-        self.post_app_agent_setprocesslogs_endpoint = _Endpoint(
+        self.set_process_logs_endpoint = _Endpoint(
             settings={
                 'response_type': (str,),
                 'auth': [],
                 'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/process/logs',
-                'operation_id': 'post_app_agent_setprocesslogs',
+                'operation_id': 'set_process_logs',
                 'http_method': 'POST',
                 'servers': None,
             },
@@ -275,7 +268,7 @@ class AgentApi(object):
                     'id',
                     'version',
                     'token',
-                    '',
+                    'logs',
                 ],
                 'required': [
                     'id',
@@ -287,19 +280,12 @@ class AgentApi(object):
                 'enum': [
                 ],
                 'validation': [
-                    'id',
                     'version',
                     'token',
                 ]
             },
             root_map={
                 'validations': {
-                    ('id',): {
-
-                        'regex': {
-                            'pattern': r'\d+',  # noqa: E501
-                        },
-                    },
                     ('version',): {
 
                         'regex': {
@@ -322,20 +308,20 @@ class AgentApi(object):
                         (str,),
                     'token':
                         (str,),
-                    '':
+                    'logs':
                         (str,),
                 },
                 'attribute_map': {
                     'id': 'id',
                     'version': 'version',
                     'token': 'token',
-                    '': '',
+                    'logs': 'logs',
                 },
                 'location_map': {
                     'id': 'path',
                     'version': 'path',
                     'token': 'path',
-                    '': 'query',
+                    'logs': 'query',
                 },
                 'collection_format_map': {
                 }
@@ -348,12 +334,12 @@ class AgentApi(object):
             },
             api_client=api_client
         )
-        self.post_app_agent_setrunstatus_endpoint = _Endpoint(
+        self.set_run_status_endpoint = _Endpoint(
             settings={
                 'response_type': (str,),
                 'auth': [],
                 'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/status',
-                'operation_id': 'post_app_agent_setrunstatus',
+                'operation_id': 'set_run_status',
                 'http_method': 'POST',
                 'servers': None,
             },
@@ -374,19 +360,12 @@ class AgentApi(object):
                 'enum': [
                 ],
                 'validation': [
-                    'id',
                     'version',
                     'token',
                 ]
             },
             root_map={
                 'validations': {
-                    ('id',): {
-
-                        'regex': {
-                            'pattern': r'\d+',  # noqa: E501
-                        },
-                    },
                     ('version',): {
 
                         'regex': {
@@ -435,12 +414,12 @@ class AgentApi(object):
             },
             api_client=api_client
         )
-        self.post_app_agent_updateprocessitem_endpoint = _Endpoint(
+        self.update_process_item_endpoint = _Endpoint(
             settings={
                 'response_type': (str,),
                 'auth': [],
                 'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/process',
-                'operation_id': 'post_app_agent_updateprocessitem',
+                'operation_id': 'update_process_item',
                 'http_method': 'POST',
                 'servers': None,
             },
@@ -460,19 +439,12 @@ class AgentApi(object):
                 'enum': [
                 ],
                 'validation': [
-                    'id',
                     'version',
                     'token',
                 ]
             },
             root_map={
                 'validations': {
-                    ('id',): {
-
-                        'regex': {
-                            'pattern': r'\d+',  # noqa: E501
-                        },
-                    },
                     ('version',): {
 
                         'regex': {
@@ -517,6 +489,97 @@ class AgentApi(object):
             },
             api_client=api_client
         )
+
+    def add_run_log_chunk(
+        self,
+        id,
+        version,
+        token,
+        **kwargs
+    ):
+        """add_run_log_chunk  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.add_run_log_chunk(id, version, token, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            id (int): Run ID, example: 1234. It may be taken from /next-task API method
+            version (str):
+            token (str):
+
+        Keyword Args:
+            chunk (str): Logs chunk to be attached. [optional] if omitted the server will use the default value of ""
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['id'] = \
+            id
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        return self.add_run_log_chunk_endpoint.call_with_http_info(**kwargs)
 
     def get_next_task(
         self,
@@ -690,19 +753,19 @@ class AgentApi(object):
             token
         return self.get_types_map_endpoint.call_with_http_info(**kwargs)
 
-    def post_app_agent_addrunlogchunk(
+    def set_process_logs(
         self,
         id,
         version,
         token,
         **kwargs
     ):
-        """post_app_agent_addrunlogchunk  # noqa: E501
+        """set_process_logs  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
 
-        >>> thread = api.post_app_agent_addrunlogchunk(id, version, token, async_req=True)
+        >>> thread = api.set_process_logs(id, version, token, async_req=True)
         >>> result = thread.get()
 
         Args:
@@ -711,7 +774,7 @@ class AgentApi(object):
             token (str):
 
         Keyword Args:
-            chunk (str): Logs chunk to be attached. [optional] if omitted the server will use the default value of ""
+            logs (str): Logs of process. [optional] if omitted the server will use the default value of ""
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -779,112 +842,21 @@ class AgentApi(object):
             version
         kwargs['token'] = \
             token
-        return self.post_app_agent_addrunlogchunk_endpoint.call_with_http_info(**kwargs)
+        return self.set_process_logs_endpoint.call_with_http_info(**kwargs)
 
-    def post_app_agent_setprocesslogs(
+    def set_run_status(
         self,
         id,
         version,
         token,
         **kwargs
     ):
-        """post_app_agent_setprocesslogs  # noqa: E501
+        """set_run_status  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
 
-        >>> thread = api.post_app_agent_setprocesslogs(id, version, token, async_req=True)
-        >>> result = thread.get()
-
-        Args:
-            id (int): Run ID, example: 1234. It may be taken from /next-task API method
-            version (str):
-            token (str):
-
-        Keyword Args:
-             (str): New run status. [optional] if omitted the server will use the default value of "logs"
-            _return_http_data_only (bool): response data without head status
-                code and headers. Default is True.
-            _preload_content (bool): if False, the urllib3.HTTPResponse object
-                will be returned without reading/decoding response data.
-                Default is True.
-            _request_timeout (int/float/tuple): timeout setting for this request. If
-                one number provided, it will be total request timeout. It can also
-                be a pair (tuple) of (connection, read) timeouts.
-                Default is None.
-            _check_input_type (bool): specifies if type checking
-                should be done one the data sent to the server.
-                Default is True.
-            _check_return_type (bool): specifies if type checking
-                should be done one the data received from the server.
-                Default is True.
-            _spec_property_naming (bool): True if the variable names in the input data
-                are serialized names, as specified in the OpenAPI document.
-                False if the variable names in the input data
-                are pythonic names, e.g. snake case (default)
-            _content_type (str/None): force body content-type.
-                Default is None and content-type will be predicted by allowed
-                content-types and body.
-            _host_index (int/None): specifies the index of the server
-                that we want to use.
-                Default is read from the configuration.
-            _request_auths (list): set to override the auth_settings for an a single
-                request; this effectively ignores the authentication
-                in the spec for a single request.
-                Default is None
-            async_req (bool): execute request asynchronously
-
-        Returns:
-            str
-                If the method is called asynchronously, returns the request
-                thread.
-        """
-        kwargs['async_req'] = kwargs.get(
-            'async_req', False
-        )
-        kwargs['_return_http_data_only'] = kwargs.get(
-            '_return_http_data_only', True
-        )
-        kwargs['_preload_content'] = kwargs.get(
-            '_preload_content', True
-        )
-        kwargs['_request_timeout'] = kwargs.get(
-            '_request_timeout', None
-        )
-        kwargs['_check_input_type'] = kwargs.get(
-            '_check_input_type', True
-        )
-        kwargs['_check_return_type'] = kwargs.get(
-            '_check_return_type', True
-        )
-        kwargs['_spec_property_naming'] = kwargs.get(
-            '_spec_property_naming', False
-        )
-        kwargs['_content_type'] = kwargs.get(
-            '_content_type')
-        kwargs['_host_index'] = kwargs.get('_host_index')
-        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
-        kwargs['id'] = \
-            id
-        kwargs['version'] = \
-            version
-        kwargs['token'] = \
-            token
-        return self.post_app_agent_setprocesslogs_endpoint.call_with_http_info(**kwargs)
-
-    def post_app_agent_setrunstatus(
-        self,
-        id,
-        version,
-        token,
-        **kwargs
-    ):
-        """post_app_agent_setrunstatus  # noqa: E501
-
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-
-        >>> thread = api.post_app_agent_setrunstatus(id, version, token, async_req=True)
+        >>> thread = api.set_run_status(id, version, token, async_req=True)
         >>> result = thread.get()
 
         Args:
@@ -961,21 +933,21 @@ class AgentApi(object):
             version
         kwargs['token'] = \
             token
-        return self.post_app_agent_setrunstatus_endpoint.call_with_http_info(**kwargs)
+        return self.set_run_status_endpoint.call_with_http_info(**kwargs)
 
-    def post_app_agent_updateprocessitem(
+    def update_process_item(
         self,
         id,
         version,
         token,
         **kwargs
     ):
-        """post_app_agent_updateprocessitem  # noqa: E501
+        """update_process_item  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
 
-        >>> thread = api.post_app_agent_updateprocessitem(id, version, token, async_req=True)
+        >>> thread = api.update_process_item(id, version, token, async_req=True)
         >>> result = thread.get()
 
         Args:
@@ -1051,5 +1023,5 @@ class AgentApi(object):
             version
         kwargs['token'] = \
             token
-        return self.post_app_agent_updateprocessitem_endpoint.call_with_http_info(**kwargs)
+        return self.update_process_item_endpoint.call_with_http_info(**kwargs)
 

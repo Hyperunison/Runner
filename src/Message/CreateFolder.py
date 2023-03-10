@@ -1,8 +1,11 @@
 from src.Message.BaseMessage import BaseMessage
+from src.auto.auto_api_client.model.runner_message import RunnerMessage
 
 
 class CreateFolder(BaseMessage):
-    type: str
+    folder: str
 
-    def decode(self, data: {}):
-        raise NotImplementedError("Please Implement this method")
+    def __init__(self, message: RunnerMessage):
+        self.type = 'CreateFolder'
+        self.folder = message.data['folder']
+

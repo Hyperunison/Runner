@@ -21,4 +21,4 @@ RUN sudo ./aws/install
 RUN rm -rf awscliv2.zip aws
 
 
-ENTRYPOINT  pip install -r requirements.txt; sleep 10000
+ENTRYPOINT  pip install -r requirements.txt; sleep 1000000

@@ -101,7 +101,7 @@
                 "tags": [
                     "Agent"
                 ],
-                "operationId": "post_app_agent_addrunlogchunk",
+                "operationId": "addRunLogChunk",
                 "parameters": [
                     {
                         "name": "id",
@@ -109,8 +109,7 @@
                         "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "pattern": "\\d+"
+                            "type": "integer"
                         }
                     },
                     {
@@ -162,7 +161,7 @@
                 "tags": [
                     "Agent"
                 ],
-                "operationId": "post_app_agent_setrunstatus",
+                "operationId": "setRunStatus",
                 "parameters": [
                     {
                         "name": "id",
@@ -170,8 +169,7 @@
                         "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "pattern": "\\d+"
+                            "type": "integer"
                         }
                     },
                     {
@@ -223,7 +221,7 @@
                 "tags": [
                     "Agent"
                 ],
-                "operationId": "post_app_agent_setprocesslogs",
+                "operationId": "setProcessLogs",
                 "parameters": [
                     {
                         "name": "id",
@@ -231,19 +229,18 @@
                         "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "pattern": "\\d+"
+                            "type": "integer"
                         }
                     },
                     {
-                        "name": "",
+                        "name": "logs",
                         "in": "query",
-                        "description": "New run status",
+                        "description": "Logs of process",
                         "required": false,
                         "allowEmptyValue": false,
                         "schema": {
                             "type": "string",
-                            "default": "logs"
+                            "default": ""
                         }
                     },
                     {
@@ -284,7 +281,7 @@
                 "tags": [
                     "Agent"
                 ],
-                "operationId": "post_app_agent_updateprocessitem",
+                "operationId": "updateProcessItem",
                 "parameters": [
                     {
                         "name": "id",
@@ -292,8 +289,7 @@
                         "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "pattern": "\\d+"
+                            "type": "integer"
                         }
                     },
                     {
@@ -376,6 +372,18 @@
                 "properties": {
                     "command": {
                         "type": "string"
+                    },
+                    "dir": {
+                        "type": "string"
+                    },
+                    "runId": {
+                        "type": "integer"
+                    },
+                    "nextflowCode": {
+                        "type": "string"
+                    },
+                    "datasetId": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"

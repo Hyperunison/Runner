@@ -1,3 +1,5 @@
+set -e
+
 rm -rf src/auto/
 mkdir src/auto/
 
@@ -10,4 +12,4 @@ docker run --rm -v "${PWD}/src/auto/:/local" \
   -o /local/ \
   -p packageName=auto_api_client
 
-pip install -r requirements.txt
+docker exec -ti unison-agent pip install -r requirements.txt

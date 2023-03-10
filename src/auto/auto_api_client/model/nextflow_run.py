@@ -82,6 +82,10 @@ class NextflowRun(ModelNormal):
         """
         return {
             'command': (str,),  # noqa: E501
+            'dir': (str,),  # noqa: E501
+            'run_id': (int,),  # noqa: E501
+            'nextflow_code': (str,),  # noqa: E501
+            'dataset_id': (int,),  # noqa: E501
         }
 
     @cached_property
@@ -91,6 +95,10 @@ class NextflowRun(ModelNormal):
 
     attribute_map = {
         'command': 'command',  # noqa: E501
+        'dir': 'dir',  # noqa: E501
+        'run_id': 'runId',  # noqa: E501
+        'nextflow_code': 'nextflowCode',  # noqa: E501
+        'dataset_id': 'datasetId',  # noqa: E501
     }
 
     read_only_vars = {
@@ -135,6 +143,10 @@ class NextflowRun(ModelNormal):
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
             command (str): [optional]  # noqa: E501
+            dir (str): [optional]  # noqa: E501
+            run_id (int): [optional]  # noqa: E501
+            nextflow_code (str): [optional]  # noqa: E501
+            dataset_id (int): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -221,6 +233,10 @@ class NextflowRun(ModelNormal):
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
             command (str): [optional]  # noqa: E501
+            dir (str): [optional]  # noqa: E501
+            run_id (int): [optional]  # noqa: E501
+            nextflow_code (str): [optional]  # noqa: E501
+            dataset_id (int): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

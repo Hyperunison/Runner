@@ -4,13 +4,90 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**add_run_log_chunk**](AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 [**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/next-task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
-[**post_app_agent_addrunlogchunk**](AgentApi.md#post_app_agent_addrunlogchunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
-[**post_app_agent_setprocesslogs**](AgentApi.md#post_app_agent_setprocesslogs) | **POST** /api/agent/v{version}/{token}/run/{id}/process/logs | 
-[**post_app_agent_setrunstatus**](AgentApi.md#post_app_agent_setrunstatus) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
-[**post_app_agent_updateprocessitem**](AgentApi.md#post_app_agent_updateprocessitem) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
+[**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/run/{id}/process/logs | 
+[**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+[**update_process_item**](AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
+
+# **add_run_log_chunk**
+> str add_run_log_chunk(id, version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
+    version = "1" # str | 
+    token = "f" # str | 
+    chunk = "" # str | Logs chunk to be attached (optional) if omitted the server will use the default value of ""
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.add_run_log_chunk(id, version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->add_run_log_chunk: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.add_run_log_chunk(id, version, token, chunk=chunk)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->add_run_log_chunk: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **chunk** | **str**| Logs chunk to be attached | [optional] if omitted the server will use the default value of ""
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_next_task**
 > RunnerMessage get_next_task(version, token)
@@ -145,8 +222,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **post_app_agent_addrunlogchunk**
-> str post_app_agent_addrunlogchunk(id, version, token)
+# **set_process_logs**
+> str set_process_logs(id, version, token)
 
 
 
@@ -172,22 +249,22 @@ with auto_api_client.ApiClient() as api_client:
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
-    chunk = "" # str | Logs chunk to be attached (optional) if omitted the server will use the default value of ""
+    logs = "" # str | Logs of process (optional) if omitted the server will use the default value of ""
 
     # example passing only required values which don't have defaults set
     try:
-        api_response = api_instance.post_app_agent_addrunlogchunk(id, version, token)
+        api_response = api_instance.set_process_logs(id, version, token)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_addrunlogchunk: %s\n" % e)
+        print("Exception when calling AgentApi->set_process_logs: %s\n" % e)
 
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.post_app_agent_addrunlogchunk(id, version, token, chunk=chunk)
+        api_response = api_instance.set_process_logs(id, version, token, logs=logs)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_addrunlogchunk: %s\n" % e)
+        print("Exception when calling AgentApi->set_process_logs: %s\n" % e)
 ```
 
 
@@ -198,7 +275,7 @@ Name | Type | Description  | Notes
  **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
  **version** | **str**|  |
  **token** | **str**|  |
- **chunk** | **str**| Logs chunk to be attached | [optional] if omitted the server will use the default value of ""
+ **logs** | **str**| Logs of process | [optional] if omitted the server will use the default value of ""
 
 ### Return type
 
@@ -222,85 +299,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **post_app_agent_setprocesslogs**
-> str post_app_agent_setprocesslogs(id, version, token)
-
-
-
-### Example
-
-
-```python
-import time
-import auto_api_client
-from auto_api_client.api import agent_api
-from pprint import pprint
-# Defining the host is optional and defaults to http://localhost
-# See configuration.py for a list of all supported configuration parameters.
-configuration = auto_api_client.Configuration(
-    host = "http://localhost"
-)
-
-
-# Enter a context with an instance of the API client
-with auto_api_client.ApiClient() as api_client:
-    # Create an instance of the API class
-    api_instance = agent_api.AgentApi(api_client)
-    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
-    version = "1" # str | 
-    token = "f" # str | 
-     = "logs" # str | New run status (optional) if omitted the server will use the default value of "logs"
-
-    # example passing only required values which don't have defaults set
-    try:
-        api_response = api_instance.post_app_agent_setprocesslogs(id, version, token)
-        pprint(api_response)
-    except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_setprocesslogs: %s\n" % e)
-
-    # example passing only required values which don't have defaults set
-    # and optional values
-    try:
-        api_response = api_instance.post_app_agent_setprocesslogs(id, version, token, =)
-        pprint(api_response)
-    except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_setprocesslogs: %s\n" % e)
-```
-
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
- **version** | **str**|  |
- **token** | **str**|  |
- **** | **str**| New run status | [optional] if omitted the server will use the default value of "logs"
-
-### Return type
-
-**str**
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**200** | List all bricks |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **post_app_agent_setrunstatus**
-> str post_app_agent_setrunstatus(id, version, token)
+# **set_run_status**
+> str set_run_status(id, version, token)
 
 
 
@@ -330,18 +330,18 @@ with auto_api_client.ApiClient() as api_client:
 
     # example passing only required values which don't have defaults set
     try:
-        api_response = api_instance.post_app_agent_setrunstatus(id, version, token)
+        api_response = api_instance.set_run_status(id, version, token)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_setrunstatus: %s\n" % e)
+        print("Exception when calling AgentApi->set_run_status: %s\n" % e)
 
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.post_app_agent_setrunstatus(id, version, token, status=status)
+        api_response = api_instance.set_run_status(id, version, token, status=status)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_setrunstatus: %s\n" % e)
+        print("Exception when calling AgentApi->set_run_status: %s\n" % e)
 ```
 
 
@@ -376,8 +376,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **post_app_agent_updateprocessitem**
-> str post_app_agent_updateprocessitem(id, version, token)
+# **update_process_item**
+> str update_process_item(id, version, token)
 
 
 
@@ -406,10 +406,10 @@ with auto_api_client.ApiClient() as api_client:
 
     # example passing only required values which don't have defaults set
     try:
-        api_response = api_instance.post_app_agent_updateprocessitem(id, version, token)
+        api_response = api_instance.update_process_item(id, version, token)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->post_app_agent_updateprocessitem: %s\n" % e)
+        print("Exception when calling AgentApi->update_process_item: %s\n" % e)
 ```
 
 

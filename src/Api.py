@@ -14,3 +14,9 @@ class Api:
 
     def next_task(self) -> RunnerMessage:
         return self.api_instance.get_next_task(self.version, self.token)
+
+    def set_run_status(self, id: int, status: str):
+        self.api_instance.set_run_status(id=id, status=status, version=self.version, token=self.token)
+
+    def add_log_chunk(self, id: int, chunk: str):
+        self.api_instance.add_run_log_chunk(id=id, chunk=chunk, token=self.token, version=self.version)

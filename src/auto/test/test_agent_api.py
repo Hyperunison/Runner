@@ -23,6 +23,12 @@ class TestAgentApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_add_run_log_chunk(self):
+        """Test case for add_run_log_chunk
+
+        """
+        pass
+
     def test_get_next_task(self):
         """Test case for get_next_task
 
@@ -35,26 +41,20 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
-    def test_post_app_agent_addrunlogchunk(self):
-        """Test case for post_app_agent_addrunlogchunk
+    def test_set_process_logs(self):
+        """Test case for set_process_logs
 
         """
         pass
 
-    def test_post_app_agent_setprocesslogs(self):
-        """Test case for post_app_agent_setprocesslogs
+    def test_set_run_status(self):
+        """Test case for set_run_status
 
         """
         pass
 
-    def test_post_app_agent_setrunstatus(self):
-        """Test case for post_app_agent_setrunstatus
-
-        """
-        pass
-
-    def test_post_app_agent_updateprocessitem(self):
-        """Test case for post_app_agent_updateprocessitem
+    def test_update_process_item(self):
+        """Test case for update_process_item
 
         """
         pass
