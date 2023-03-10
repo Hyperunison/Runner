@@ -9,6 +9,7 @@
 # import sys
 # sys.setrecursionlimit(n)
 
+from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.get_process_logs import GetProcessLogs
 from auto_api_client.model.nextflow_run import NextflowRun
 from auto_api_client.model.runner_message import RunnerMessage

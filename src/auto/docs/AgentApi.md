@@ -24,6 +24,7 @@ Method | HTTP request | Description
 import time
 import auto_api_client
 from auto_api_client.api import agent_api
+from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from pprint import pprint
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
@@ -39,7 +40,9 @@ with auto_api_client.ApiClient() as api_client:
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
-    chunk = "" # str | Logs chunk to be attached (optional) if omitted the server will use the default value of ""
+    add_run_log_chunk_request = AddRunLogChunkRequest(
+        chunk="",
+    ) # AddRunLogChunkRequest |  (optional)
 
     # example passing only required values which don't have defaults set
     try:
@@ -51,7 +54,7 @@ with auto_api_client.ApiClient() as api_client:
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.add_run_log_chunk(id, version, token, chunk=chunk)
+        api_response = api_instance.add_run_log_chunk(id, version, token, add_run_log_chunk_request=add_run_log_chunk_request)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->add_run_log_chunk: %s\n" % e)
@@ -65,7 +68,7 @@ Name | Type | Description  | Notes
  **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
  **version** | **str**|  |
  **token** | **str**|  |
- **chunk** | **str**| Logs chunk to be attached | [optional] if omitted the server will use the default value of ""
+ **add_run_log_chunk_request** | [**AddRunLogChunkRequest**](AddRunLogChunkRequest.md)|  | [optional]
 
 ### Return type
 
@@ -77,7 +80,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 

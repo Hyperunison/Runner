@@ -113,17 +113,6 @@
                         }
                     },
                     {
-                        "name": "chunk",
-                        "in": "query",
-                        "description": "Logs chunk to be attached",
-                        "required": false,
-                        "allowEmptyValue": false,
-                        "schema": {
-                            "type": "string",
-                            "default": ""
-                        }
-                    },
-                    {
                         "name": "version",
                         "in": "path",
                         "required": true,
@@ -142,6 +131,24 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "chunk"
+                                ],
+                                "properties": {
+                                    "chunk": {
+                                        "type": "string",
+                                        "default": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "List all bricks",

@@ -12,7 +12,8 @@ from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
 from src.Message.NextflowRun import NextflowRun
 
-sendLogsPeriod = 10
+sendLogsPeriod = 3
+
 
 class K8s(BaseAdapter):
     namespace: str = None
@@ -37,14 +38,20 @@ class K8s(BaseAdapter):
         if folder == "" or folder is None:
             folder = 'tmp_' + self._random_word(16)
 
-        cmd = self.get_kube_exec_cmd('cd {}; {}'.format(self.work_dir+'/'+folder, message.command))
+        cmd = self.get_kube_exec_cmd('cd {}; {}'.format(self.work_dir + '/' + folder, message.command))
 
         # todo: send folder name to server
 
         self._create_folder_remote(folder)
 
-        self._upload_file(message.nextflow_code, folder+'/main.nf')
-        self._upload_file(json.dumps(message.input_data), folder+'/data.json')
+        # upload aws credentials
+        self._upload_file(message.nextflow_code, folder + '/main.nf')
+        self._upload_file(json.dumps(message.input_data), folder + '/data.json')
+        self._upload_file("[default]\nregion = eu-central-1\n", folder+"/aws_config")
+        self._upload_file(
+            "[default]\naws_access_key_id={}\naws_secret_access_key={}\n".format(message.aws_id, message.aws_key),
+            folder+"/aws_credentials"
+        )
 
         # hack
         # cmd = 'bash -c "for i in {1..3}; do sleep 1; echo test; done"'
@@ -54,7 +61,6 @@ class K8s(BaseAdapter):
         p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         self.api_client.set_run_status(message.run_id, 'process')
-
 
         last_send = time.perf_counter()
         buffer = ''

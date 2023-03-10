@@ -9,6 +9,8 @@ class NextflowRun(BaseMessage):
     dir: str
     input_data: object
     nextflow_code: str
+    aws_id: str
+    aws_key: str
 
     def __init__(self, message: RunnerMessage):
         self.type = 'NextflowRun'
@@ -18,3 +20,5 @@ class NextflowRun(BaseMessage):
         self.input_data = message.data['inputData']
         self.nextflow_code = message.data['nextflowCode']
         self.run_id = int(message.data['runId'])
+        self.aws_id = message.data['awsId']
+        self.aws_key = message.data['awsKey']

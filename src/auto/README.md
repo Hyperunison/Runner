@@ -50,6 +50,7 @@ import time
 import auto_api_client
 from pprint import pprint
 from auto_api_client.api import agent_api
+from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.types_map import TypesMap
 # Defining the host is optional and defaults to http://localhost
@@ -67,10 +68,12 @@ with auto_api_client.ApiClient(configuration) as api_client:
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
-    chunk = "" # str | Logs chunk to be attached (optional) (default to "")
+    add_run_log_chunk_request = AddRunLogChunkRequest(
+        chunk="",
+    ) # AddRunLogChunkRequest |  (optional)
 
     try:
-        api_response = api_instance.add_run_log_chunk(id, version, token, chunk=chunk)
+        api_response = api_instance.add_run_log_chunk(id, version, token, add_run_log_chunk_request=add_run_log_chunk_request)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->add_run_log_chunk: %s\n" % e)
@@ -92,6 +95,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AddRunLogChunkRequest](docs/AddRunLogChunkRequest.md)
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [NextflowRun](docs/NextflowRun.md)
  - [RunnerMessage](docs/RunnerMessage.md)

@@ -6,15 +6,14 @@ import yaml
 import time
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
+from src.LogConfigurator import configure_logs
 from src.Message.CreateFolder import CreateFolder
 from src.Message.NextflowRun import NextflowRun
 from src.MessageFactory import MessageFactory
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-
 config = yaml.safe_load(open("config.yaml", "r"))
 
+configure_logs(config)
 configuration = auto_api_client.Configuration(host=config['api_url'])
 
 with auto_api_client.ApiClient(configuration) as api_client:
@@ -38,4 +37,4 @@ with auto_api_client.ApiClient(configuration) as api_client:
 
             time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:
-            logging.critical("Exception when calling AgentApi\n")
+            logging.critical("Exception when calling AgentApi: %s\n" % e)

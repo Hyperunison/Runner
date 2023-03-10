@@ -21,6 +21,7 @@ from auto_api_client.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
+from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.types_map import TypesMap
 
@@ -50,7 +51,7 @@ class AgentApi(object):
                     'id',
                     'version',
                     'token',
-                    'chunk',
+                    'add_run_log_chunk_request',
                 ],
                 'required': [
                     'id',
@@ -90,20 +91,19 @@ class AgentApi(object):
                         (str,),
                     'token':
                         (str,),
-                    'chunk':
-                        (str,),
+                    'add_run_log_chunk_request':
+                        (AddRunLogChunkRequest,),
                 },
                 'attribute_map': {
                     'id': 'id',
                     'version': 'version',
                     'token': 'token',
-                    'chunk': 'chunk',
                 },
                 'location_map': {
                     'id': 'path',
                     'version': 'path',
                     'token': 'path',
-                    'chunk': 'query',
+                    'add_run_log_chunk_request': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -112,7 +112,9 @@ class AgentApi(object):
                 'accept': [
                     'application/json'
                 ],
-                'content_type': [],
+                'content_type': [
+                    'application/json'
+                ]
             },
             api_client=api_client
         )
@@ -511,7 +513,7 @@ class AgentApi(object):
             token (str):
 
         Keyword Args:
-            chunk (str): Logs chunk to be attached. [optional] if omitted the server will use the default value of ""
+            add_run_log_chunk_request (AddRunLogChunkRequest): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
