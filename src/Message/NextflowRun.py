@@ -11,6 +11,7 @@ class NextflowRun(BaseMessage):
     nextflow_code: str
     aws_id: str
     aws_key: str
+    aws_s3_path: str
 
     def __init__(self, message: RunnerMessage):
         self.type = 'NextflowRun'
@@ -22,3 +23,4 @@ class NextflowRun(BaseMessage):
         self.run_id = int(message.data['runId'])
         self.aws_id = message.data['awsId']
         self.aws_key = message.data['awsKey']
+        self.aws_s3_path = message.data['s3Path']

@@ -78,6 +78,9 @@ class K8s(BaseAdapter):
             self.api_client.add_log_chunk(message.run_id, buffer)
 
         logging.info("Exit code={}".format(p.returncode))
+
+        self._upload_file_to_s3(self.work_dir+"/"+folder, ".nextflow.log", message.aws_s3_path+"/basic/")
+        self._upload_file_to_s3(self.work_dir+"/"+folder, "trace-*.txt", message.aws_s3_path+"/basic/")
         if p.returncode == 0:
             self.api_client.set_run_status(message.run_id, 'success')
         else:
@@ -110,6 +113,15 @@ class K8s(BaseAdapter):
             logging.critical("Can't upload file {}, stdout={}, error={}".format(filename, p.stdout, p.stderr))
 
         logging.debug("stdout={}, err={}".format(p.stdout, p.stderr))
+
+    def _upload_file_to_s3(self, folder: str, remote_file_name: str, s3_path: str):
+        logging.info("Uploading file {} to {}".format(folder+'/'+remote_file_name, s3_path))
+        cmd = 'cd {}; export AWS_CONFIG_FILE=aws_config; export AWS_SHARED_CREDENTIALS_FILE=aws_credentials; aws s3 ' \
+              'cp {} {}'.format(folder, remote_file_name, s3_path)
+        [code, output, err] = self._exec_cmd_remote(cmd)
+        if code > 0:
+            logging.error("Cant upload file to s3, error={}".format(err))
+
 
     def _exec_cmd_remote(self, cmd: str) -> [int, str]:
         cmd_wrapped = self.get_kube_exec_cmd(cmd)
