@@ -3,7 +3,7 @@ api_url: "http://localhost:8082"
 agent_token: "63478ac069b96f79b9d97c9"
 work_dir: "/data/nextflow/pipelines"
 type: k8s
-idle_delay: 1.0
+idle_delay: 5.0
 log:
   level: 10 # 10 - debug, 50 - critical
   filename: "" #filename or empty for stdout
