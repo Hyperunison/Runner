@@ -23,6 +23,8 @@ from auto_api_client.model_utils import (  # noqa: F401
 )
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.runner_message import RunnerMessage
+from auto_api_client.model.set_kill_result_request import SetKillResultRequest
+from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.types_map import TypesMap
 
 
@@ -256,12 +258,12 @@ class AgentApi(object):
             },
             api_client=api_client
         )
-        self.set_process_logs_endpoint = _Endpoint(
+        self.set_kill_result_endpoint = _Endpoint(
             settings={
                 'response_type': (str,),
                 'auth': [],
-                'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/process/logs',
-                'operation_id': 'set_process_logs',
+                'endpoint_path': '/api/agent/v{version}/{token}/run/{id}/kill-result',
+                'operation_id': 'set_kill_result',
                 'http_method': 'POST',
                 'servers': None,
             },
@@ -270,7 +272,7 @@ class AgentApi(object):
                     'id',
                     'version',
                     'token',
-                    'logs',
+                    'set_kill_result_request',
                 ],
                 'required': [
                     'id',
@@ -310,20 +312,19 @@ class AgentApi(object):
                         (str,),
                     'token':
                         (str,),
-                    'logs':
-                        (str,),
+                    'set_kill_result_request':
+                        (SetKillResultRequest,),
                 },
                 'attribute_map': {
                     'id': 'id',
                     'version': 'version',
                     'token': 'token',
-                    'logs': 'logs',
                 },
                 'location_map': {
                     'id': 'path',
                     'version': 'path',
                     'token': 'path',
-                    'logs': 'query',
+                    'set_kill_result_request': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -332,7 +333,102 @@ class AgentApi(object):
                 'accept': [
                     'application/json'
                 ],
-                'content_type': [],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_process_logs_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/process/{processId}/logs',
+                'operation_id': 'set_process_logs',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'process_id',
+                    'version',
+                    'token',
+                    'channel',
+                    'set_process_logs_request',
+                ],
+                'required': [
+                    'process_id',
+                    'version',
+                    'token',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'process_id',
+                    'version',
+                    'token',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('process_id',): {
+
+                        'regex': {
+                            'pattern': r'[\w-]+',  # noqa: E501
+                        },
+                    },
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'process_id':
+                        (str,),
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'channel':
+                        (str,),
+                    'set_process_logs_request':
+                        (SetProcessLogsRequest,),
+                },
+                'attribute_map': {
+                    'process_id': 'processId',
+                    'version': 'version',
+                    'token': 'token',
+                    'channel': 'channel',
+                },
+                'location_map': {
+                    'process_id': 'path',
+                    'version': 'path',
+                    'token': 'path',
+                    'channel': 'query',
+                    'set_process_logs_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
             },
             api_client=api_client
         )
@@ -755,19 +851,19 @@ class AgentApi(object):
             token
         return self.get_types_map_endpoint.call_with_http_info(**kwargs)
 
-    def set_process_logs(
+    def set_kill_result(
         self,
         id,
         version,
         token,
         **kwargs
     ):
-        """set_process_logs  # noqa: E501
+        """set_kill_result  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
 
-        >>> thread = api.set_process_logs(id, version, token, async_req=True)
+        >>> thread = api.set_kill_result(id, version, token, async_req=True)
         >>> result = thread.get()
 
         Args:
@@ -776,7 +872,7 @@ class AgentApi(object):
             token (str):
 
         Keyword Args:
-            logs (str): Logs of process. [optional] if omitted the server will use the default value of ""
+            set_kill_result_request (SetKillResultRequest): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -840,6 +936,98 @@ class AgentApi(object):
         kwargs['_request_auths'] = kwargs.get('_request_auths', None)
         kwargs['id'] = \
             id
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        return self.set_kill_result_endpoint.call_with_http_info(**kwargs)
+
+    def set_process_logs(
+        self,
+        process_id,
+        version,
+        token,
+        **kwargs
+    ):
+        """set_process_logs  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_process_logs(process_id, version, token, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            process_id (str): Run ID, example: 1234. It may be taken from /next-task API method
+            version (str):
+            token (str):
+
+        Keyword Args:
+            channel (str): WS channel to send reply. [optional]
+            set_process_logs_request (SetProcessLogsRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['process_id'] = \
+            process_id
         kwargs['version'] = \
             version
         kwargs['token'] = \

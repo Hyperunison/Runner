@@ -223,12 +223,12 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/process\/logs": {
+        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/kill-result": {
             "post": {
                 "tags": [
                     "Agent"
                 ],
-                "operationId": "setProcessLogs",
+                "operationId": "setKillResult",
                 "parameters": [
                     {
                         "name": "id",
@@ -237,17 +237,6 @@
                         "required": true,
                         "schema": {
                             "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "logs",
-                        "in": "query",
-                        "description": "Logs of process",
-                        "required": false,
-                        "allowEmptyValue": false,
-                        "schema": {
-                            "type": "string",
-                            "default": ""
                         }
                     },
                     {
@@ -269,6 +258,103 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "channel"
+                                ],
+                                "properties": {
+                                    "channel": {
+                                        "type": "string",
+                                        "default": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/process\/{processId}\/logs": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setProcessLogs",
+                "parameters": [
+                    {
+                        "name": "processId",
+                        "in": "path",
+                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    },
+                    {
+                        "name": "channel",
+                        "in": "query",
+                        "description": "WS channel to send reply",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": null
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "logs"
+                                ],
+                                "properties": {
+                                    "logs": {
+                                        "type": "string",
+                                        "default": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "List all bricks",
@@ -369,7 +455,10 @@
                     "processId": {
                         "type": "string"
                     },
-                    "linesCount": {
+                    "replyChannel": {
+                        "type": "string"
+                    },
+                    "linesLimit": {
                         "type": "integer"
                     }
                 },
@@ -391,6 +480,15 @@
                     },
                     "datasetId": {
                         "type": "integer"
+                    },
+                    "awsId": {
+                        "type": "string"
+                    },
+                    "awsKey": {
+                        "type": "string"
+                    },
+                    "s3Path": {
+                        "type": "string"
                     }
                 },
                 "type": "object"

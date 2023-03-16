@@ -7,7 +7,8 @@ Method | HTTP request | Description
 [**add_run_log_chunk**](AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 [**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/next-task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
-[**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/run/{id}/process/logs | 
+[**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
+[**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
 [**update_process_item**](AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
@@ -225,8 +226,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **set_process_logs**
-> str set_process_logs(id, version, token)
+# **set_kill_result**
+> str set_kill_result(id, version, token)
 
 
 
@@ -237,6 +238,7 @@ No authorization required
 import time
 import auto_api_client
 from auto_api_client.api import agent_api
+from auto_api_client.model.set_kill_result_request import SetKillResultRequest
 from pprint import pprint
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
@@ -252,22 +254,24 @@ with auto_api_client.ApiClient() as api_client:
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
-    logs = "" # str | Logs of process (optional) if omitted the server will use the default value of ""
+    set_kill_result_request = SetKillResultRequest(
+        channel="channel_example",
+    ) # SetKillResultRequest |  (optional)
 
     # example passing only required values which don't have defaults set
     try:
-        api_response = api_instance.set_process_logs(id, version, token)
+        api_response = api_instance.set_kill_result(id, version, token)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->set_process_logs: %s\n" % e)
+        print("Exception when calling AgentApi->set_kill_result: %s\n" % e)
 
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.set_process_logs(id, version, token, logs=logs)
+        api_response = api_instance.set_kill_result(id, version, token, set_kill_result_request=set_kill_result_request)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->set_process_logs: %s\n" % e)
+        print("Exception when calling AgentApi->set_kill_result: %s\n" % e)
 ```
 
 
@@ -278,7 +282,7 @@ Name | Type | Description  | Notes
  **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
  **version** | **str**|  |
  **token** | **str**|  |
- **logs** | **str**| Logs of process | [optional] if omitted the server will use the default value of ""
+ **set_kill_result_request** | [**SetKillResultRequest**](SetKillResultRequest.md)|  | [optional]
 
 ### Return type
 
@@ -290,7 +294,89 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_process_logs**
+> str set_process_logs(process_id, version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    process_id = "z" # str | Run ID, example: 1234. It may be taken from /next-task API method
+    version = "1" # str | 
+    token = "f" # str | 
+    channel = "channel_example" # str | WS channel to send reply (optional)
+    set_process_logs_request = SetProcessLogsRequest(
+        logs="",
+    ) # SetProcessLogsRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_process_logs(process_id, version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_process_logs: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_process_logs(process_id, version, token, channel=channel, set_process_logs_request=set_process_logs_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_process_logs: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **process_id** | **str**| Run ID, example: 1234. It may be taken from /next-task API method |
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **channel** | **str**| WS channel to send reply | [optional]
+ **set_process_logs_request** | [**SetProcessLogsRequest**](SetProcessLogsRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 

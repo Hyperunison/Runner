@@ -2,10 +2,13 @@ import logging
 import sys
 
 
-def configure_logs(config):
+def configure_logs(config, message: str = ''):
     level = int(config['log']['level'])
-    logging.basicConfig(level=level, format='%(asctime)s [%(levelname)s] %(message)s')
+    logging.basicConfig(level=level, format='%(asctime)s [%(levelname)s] [{}] %(message)s'.format(message))
     logging.getLogger().setLevel(level)
+
+    for handler in logging.getLogger().handlers:
+        handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] [{}] %(message)s'.format(message)))
 
     logging.basicConfig()
     logging.getLogger().setLevel(level)

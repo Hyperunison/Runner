@@ -41,6 +41,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_kill_result(self):
+        """Test case for set_kill_result
+
+        """
+        pass
+
     def test_set_process_logs(self):
         """Test case for set_process_logs
 

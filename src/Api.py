@@ -1,8 +1,10 @@
 import logging
 
 from src.auto.auto_api_client.api.agent_api import AgentApi
-from src.auto.auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+from src.auto.auto_api_client.model.runner_message import RunnerMessage
+from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
+from auto_api_client.model.set_kill_result_request import SetKillResultRequest
 
 
 class Api:
@@ -22,7 +24,23 @@ class Api:
         logging.info("Change status of run={} to {}".format(id, status))
         self.api_instance.set_run_status(id=id, status=status, version=self.version, token=self.token)
 
+    def set_process_logs(self, process_id: str, logs: str, channel: str):
+        self.api_instance.set_process_logs(
+            process_id=process_id,
+            version=self.version,
+            channel=channel,
+            token=self.token,
+            set_process_logs_request=SetProcessLogsRequest(logs=logs)
+        )
+
+    def set_kill_result(self, run_id: int, channel: str):
+        self.api_instance.set_kill_result(
+            id=int(run_id),
+            set_kill_result_request=SetKillResultRequest(channel=channel),
+            token=self.token,
+            version=self.version
+        )
+
     def add_log_chunk(self, id: int, chunk: str):
         logging.info("Adding logs to run={}, len={}".format(id, len(chunk)))
-        print(chunk);
         self.api_instance.add_run_log_chunk(id=id, add_run_log_chunk_request=AddRunLogChunkRequest(chunk=chunk), token=self.token, version=self.version)

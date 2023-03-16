@@ -86,6 +86,9 @@ class NextflowRun(ModelNormal):
             'run_id': (int,),  # noqa: E501
             'nextflow_code': (str,),  # noqa: E501
             'dataset_id': (int,),  # noqa: E501
+            'aws_id': (str,),  # noqa: E501
+            'aws_key': (str,),  # noqa: E501
+            's3_path': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -99,6 +102,9 @@ class NextflowRun(ModelNormal):
         'run_id': 'runId',  # noqa: E501
         'nextflow_code': 'nextflowCode',  # noqa: E501
         'dataset_id': 'datasetId',  # noqa: E501
+        'aws_id': 'awsId',  # noqa: E501
+        'aws_key': 'awsKey',  # noqa: E501
+        's3_path': 's3Path',  # noqa: E501
     }
 
     read_only_vars = {
@@ -147,6 +153,9 @@ class NextflowRun(ModelNormal):
             run_id (int): [optional]  # noqa: E501
             nextflow_code (str): [optional]  # noqa: E501
             dataset_id (int): [optional]  # noqa: E501
+            aws_id (str): [optional]  # noqa: E501
+            aws_key (str): [optional]  # noqa: E501
+            s3_path (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -237,6 +246,9 @@ class NextflowRun(ModelNormal):
             run_id (int): [optional]  # noqa: E501
             nextflow_code (str): [optional]  # noqa: E501
             dataset_id (int): [optional]  # noqa: E501
+            aws_id (str): [optional]  # noqa: E501
+            aws_key (str): [optional]  # noqa: E501
+            s3_path (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

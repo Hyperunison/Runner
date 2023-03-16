@@ -52,6 +52,8 @@ from pprint import pprint
 from auto_api_client.api import agent_api
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.runner_message import RunnerMessage
+from auto_api_client.model.set_kill_result_request import SetKillResultRequest
+from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.types_map import TypesMap
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
@@ -88,7 +90,8 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/next-task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
-*AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/run/{id}/process/logs | 
+*AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
+*AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 *AgentApi* | [**set_run_status**](docs/AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
 *AgentApi* | [**update_process_item**](docs/AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
@@ -99,6 +102,8 @@ Class | Method | HTTP request | Description
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [NextflowRun](docs/NextflowRun.md)
  - [RunnerMessage](docs/RunnerMessage.md)
+ - [SetKillResultRequest](docs/SetKillResultRequest.md)
+ - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
  - [TypesMap](docs/TypesMap.md)
 
 

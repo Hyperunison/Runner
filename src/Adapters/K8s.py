@@ -10,6 +10,8 @@ import time
 
 from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
+from src.Message import KillJob
+from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
 
 sendLogsPeriod = 3
@@ -33,6 +35,8 @@ class K8s(BaseAdapter):
     def process_nextflow_run(self, message: NextflowRun) -> bool:
         # create folder
         # upload data.json and main.nf
+
+        self.api_client.set_run_status(message.run_id, 'process')
 
         folder = message.dir
         if folder == "" or folder is None:
@@ -60,8 +64,6 @@ class K8s(BaseAdapter):
         logging.info("Executing command: {}".format(cmd))
         p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        self.api_client.set_run_status(message.run_id, 'process')
-
         last_send = time.perf_counter()
         buffer = ''
         while line := p.stdout.readline().decode("utf-8"):
@@ -88,6 +90,30 @@ class K8s(BaseAdapter):
 
         return True
 
+    def process_get_process_logs(self, message: GetProcessLogs) -> bool:
+        cmd = "kubectl logs --tail {} --namespace={} {}".format(int(message.lines_limit), self.namespace, message.process_id)
+        logging.info("Executing command: {}".format(cmd))
+        args = shlex.split(cmd)
+        p = subprocess.run(args, capture_output=True)
+
+        if p.returncode == 0:
+            logs = str(p.stdout.decode('utf-8'))
+        else:
+            logs = "Can't get logs"
+            logging.error("Can't get logs, stdout={}, error={}".format(p.stdout.decode('utf-8'), p.stderr.decode('utf-8')))
+
+        self.api_client.set_process_logs(message.process_id, logs, message.reply_channel)
+
+        return True
+
+    def process_kill_job(self, message: KillJob) -> bool:
+        cmd = 'ps -Af|grep " nextflow-run-{} "|grep -v grep|grep -oP "^\\w+\\s+\\d+"|grep -oP "\\s\\d+$"|xargs -I PID kill PID'.format(int(message.run_id))
+        self._exec_cmd_remote(cmd)
+
+        self.api_client.set_kill_result(message.run_id, message.channel)
+
+        return True
+
     def get_kube_exec_cmd(self, cmd) -> str:
         return 'kubectl --namespace={} exec {} -- bash -c {}'.format(self.namespace, self.master_pod, pipes.quote(cmd))
 
@@ -108,7 +134,7 @@ class K8s(BaseAdapter):
         cmd = 'kubectl --namespace={} cp {} {}:{}'.format(self.namespace, tmp.name, self.master_pod, filename)
         args = shlex.split(cmd)
         logging.info("Executing command: {}".format(cmd))
-        p = subprocess.run(args)
+        p = subprocess.run(args, capture_output=True)
         if p.returncode > 0:
             logging.critical("Can't upload file {}, stdout={}, error={}".format(filename, p.stdout, p.stderr))
 
@@ -127,7 +153,7 @@ class K8s(BaseAdapter):
         cmd_wrapped = self.get_kube_exec_cmd(cmd)
         logging.info("Executing command: {}".format(cmd))
         args = shlex.split(cmd_wrapped)
-        p = subprocess.run(args)
+        p = subprocess.run(args, capture_output=True)
         code = p.returncode
         output = p.stdout
         err = p.stderr

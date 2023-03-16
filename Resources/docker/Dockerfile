@@ -20,5 +20,16 @@ RUN unzip awscliv2.zip
 RUN sudo ./aws/install
 RUN rm -rf awscliv2.zip aws
 
+RUN pip install "click==8.1.3"
+RUN pip install "certifi>=14.5.14"
+RUN pip install "frozendict~=2.3.4"
+RUN pip install "python-dateutil~=2.7.0"
+RUN pip install "setuptools>=21.0.0"
+RUN pip install "typing_extensions~=4.3.0"
+RUN pip install "urllib3~=1.26.7"
+RUN pip install "pyyaml==6.0"
 
+RUN apt-get install psmisc
+
+# ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
 ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; done
