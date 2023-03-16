@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import setproctitle
 
 import auto_api_client
 from auto_api_client.api import agent_api
@@ -36,6 +37,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
 
                 if pid == 0:
                     configure_logs(config, "child={}".format(os.getpid()))
+                    setproctitle.setproctitle('python main.py for run_id {}'.format(message.run_id))
                     logging.info("Forked, run nextflow in fork, pid={}".format(os.getpid()))
                     adapter.process_nextflow_run(message)
                     logging.info("Exiting child")

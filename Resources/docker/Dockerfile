@@ -28,6 +28,7 @@ RUN pip install "setuptools>=21.0.0"
 RUN pip install "typing_extensions~=4.3.0"
 RUN pip install "urllib3~=1.26.7"
 RUN pip install "pyyaml==6.0"
+RUN pip install "setproctitle==1.3.2"
 
 RUN apt-get install psmisc
 
