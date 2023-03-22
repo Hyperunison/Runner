@@ -23,8 +23,20 @@ class TestAgentApi(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_accept_task(self):
+        """Test case for accept_task
+
+        """
+        pass
+
     def test_add_run_log_chunk(self):
         """Test case for add_run_log_chunk
+
+        """
+        pass
+
+    def test_get_app_agent_updateprocessitem(self):
+        """Test case for get_app_agent_updateprocessitem
 
         """
         pass

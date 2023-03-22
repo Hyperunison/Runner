@@ -40,6 +40,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
                     setproctitle.setproctitle('python main.py for run_id {}'.format(message.run_id))
                     logging.info("Forked, run nextflow in fork, pid={}".format(os.getpid()))
                     adapter.process_nextflow_run(message)
+                    api.accept_task(response.id)
                     logging.info("Exiting child")
                     sys.exit(0)
 
@@ -51,6 +52,9 @@ with auto_api_client.ApiClient(configuration) as api_client:
                 logging.debug("idle, do nothing")
             else:
                 logging.error("Unknown message type {}".format(type(message)))
+
+            if message is not None:
+                api.accept_task(response.id)
 
             time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:

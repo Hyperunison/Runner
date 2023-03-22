@@ -52,7 +52,6 @@ from pprint import pprint
 from auto_api_client.api import agent_api
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.runner_message import RunnerMessage
-from auto_api_client.model.set_kill_result_request import SetKillResultRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.types_map import TypesMap
 # Defining the host is optional and defaults to http://localhost
@@ -67,18 +66,15 @@ configuration = auto_api_client.Configuration(
 with auto_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
-    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
-    add_run_log_chunk_request = AddRunLogChunkRequest(
-        chunk="",
-    ) # AddRunLogChunkRequest |  (optional)
+    id = "id_example" # str | 
 
     try:
-        api_response = api_instance.add_run_log_chunk(id, version, token, add_run_log_chunk_request=add_run_log_chunk_request)
+        api_response = api_instance.accept_task(version, token, id)
         pprint(api_response)
     except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->add_run_log_chunk: %s\n" % e)
+        print("Exception when calling AgentApi->accept_task: %s\n" % e)
 ```
 
 ## Documentation for API Endpoints
@@ -87,8 +83,10 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*AgentApi* | [**accept_task**](docs/AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
-*AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/next-task | 
+*AgentApi* | [**get_app_agent_updateprocessitem**](docs/AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
+*AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
@@ -102,7 +100,6 @@ Class | Method | HTTP request | Description
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [NextflowRun](docs/NextflowRun.md)
  - [RunnerMessage](docs/RunnerMessage.md)
- - [SetKillResultRequest](docs/SetKillResultRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
  - [TypesMap](docs/TypesMap.md)
 

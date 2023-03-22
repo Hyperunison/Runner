@@ -4,14 +4,85 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**accept_task**](AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 [**add_run_log_chunk**](AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
-[**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/next-task | 
+[**get_app_agent_updateprocessitem**](AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
+[**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
 [**update_process_item**](AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
+
+# **accept_task**
+> RunnerMessage accept_task(version, token, id)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.runner_message import RunnerMessage
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    id = "id_example" # str | 
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.accept_task(version, token, id)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->accept_task: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **id** | **str**|  |
+
+### Return type
+
+[**RunnerMessage**](RunnerMessage.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Mark task as completed, not showing it again next time |  -  |
+**204** | No tasks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **add_run_log_chunk**
 > str add_run_log_chunk(id, version, token)
@@ -82,6 +153,73 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_app_agent_updateprocessitem**
+> str get_app_agent_updateprocessitem(id, version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
+    version = "1" # str | 
+    token = "f" # str | 
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.get_app_agent_updateprocessitem(id, version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->get_app_agent_updateprocessitem: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
+ **version** | **str**|  |
+ **token** | **str**|  |
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 
@@ -238,7 +376,6 @@ No authorization required
 import time
 import auto_api_client
 from auto_api_client.api import agent_api
-from auto_api_client.model.set_kill_result_request import SetKillResultRequest
 from pprint import pprint
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
@@ -254,9 +391,7 @@ with auto_api_client.ApiClient() as api_client:
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "f" # str | 
-    set_kill_result_request = SetKillResultRequest(
-        channel="channel_example",
-    ) # SetKillResultRequest |  (optional)
+    channel = "channel_example" # str | WS channel to send reply (optional)
 
     # example passing only required values which don't have defaults set
     try:
@@ -268,7 +403,7 @@ with auto_api_client.ApiClient() as api_client:
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.set_kill_result(id, version, token, set_kill_result_request=set_kill_result_request)
+        api_response = api_instance.set_kill_result(id, version, token, channel=channel)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->set_kill_result: %s\n" % e)
@@ -282,7 +417,7 @@ Name | Type | Description  | Notes
  **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
  **version** | **str**|  |
  **token** | **str**|  |
- **set_kill_result_request** | [**SetKillResultRequest**](SetKillResultRequest.md)|  | [optional]
+ **channel** | **str**| WS channel to send reply | [optional]
 
 ### Return type
 
@@ -294,7 +429,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 

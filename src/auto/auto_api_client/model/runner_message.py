@@ -84,6 +84,8 @@ class RunnerMessage(ModelNormal):
             'id': (int,),  # noqa: E501
             'runner_agent_id': (int,),  # noqa: E501
             'type': (str,),  # noqa: E501
+            'read_count': (int,),  # noqa: E501
+            'completed': (bool,),  # noqa: E501
             'data': ({str: (bool, date, datetime, dict, float, int, list, str, none_type)},),  # noqa: E501
         }
 
@@ -96,6 +98,8 @@ class RunnerMessage(ModelNormal):
         'id': 'id',  # noqa: E501
         'runner_agent_id': 'runnerAgentId',  # noqa: E501
         'type': 'type',  # noqa: E501
+        'read_count': 'readCount',  # noqa: E501
+        'completed': 'completed',  # noqa: E501
         'data': 'data',  # noqa: E501
     }
 
@@ -143,6 +147,8 @@ class RunnerMessage(ModelNormal):
             id (int): [optional]  # noqa: E501
             runner_agent_id (int): [optional]  # noqa: E501
             type (str): [optional]  # noqa: E501
+            read_count (int): [optional]  # noqa: E501
+            completed (bool): [optional]  # noqa: E501
             data ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
         """
 
@@ -232,6 +238,8 @@ class RunnerMessage(ModelNormal):
             id (int): [optional]  # noqa: E501
             runner_agent_id (int): [optional]  # noqa: E501
             type (str): [optional]  # noqa: E501
+            read_count (int): [optional]  # noqa: E501
+            completed (bool): [optional]  # noqa: E501
             data ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
         """
 

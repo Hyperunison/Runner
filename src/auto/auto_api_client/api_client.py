@@ -804,10 +804,10 @@ class Endpoint(object):
         Example:
 
         api_instance = AgentApi()
-        api_instance.add_run_log_chunk  # this is an instance of the class Endpoint
-        api_instance.add_run_log_chunk()  # this invokes api_instance.add_run_log_chunk.__call__()
+        api_instance.accept_task  # this is an instance of the class Endpoint
+        api_instance.accept_task()  # this invokes api_instance.accept_task.__call__()
         which then invokes the callable functions stored in that endpoint at
-        api_instance.add_run_log_chunk.callable or self.callable in this class
+        api_instance.accept_task.callable or self.callable in this class
 
         """
         return self.callable(self, *args, **kwargs)

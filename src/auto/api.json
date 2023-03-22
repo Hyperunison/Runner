@@ -6,7 +6,7 @@
         "version": "1.0.0"
     },
     "paths": {
-        "\/api\/agent\/v{version}\/{token}\/next-task": {
+        "\/api\/agent\/v{version}\/{token}\/task": {
             "get": {
                 "tags": [
                     "Agent"
@@ -35,6 +35,64 @@
                 "responses": {
                     "200": {
                         "description": "Get next task for runner agent",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "$ref": "#\/components\/schemas\/RunnerMessage"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No tasks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/task\/{id}": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "acceptTask",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mark task as completed, not showing it again next time",
                         "content": {
                             "application\/json": {
                                 "schema": {
@@ -240,6 +298,17 @@
                         }
                     },
                     {
+                        "name": "channel",
+                        "in": "query",
+                        "description": "WS channel to send reply",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": null
+                        }
+                    },
+                    {
                         "name": "version",
                         "in": "path",
                         "required": true,
@@ -258,24 +327,6 @@
                         }
                     }
                 ],
-                "requestBody": {
-                    "content": {
-                        "application\/json": {
-                            "schema": {
-                                "required": [
-                                    "channel"
-                                ],
-                                "properties": {
-                                    "channel": {
-                                        "type": "string",
-                                        "default": null
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
                         "description": "List all bricks",
@@ -370,6 +421,53 @@
             }
         },
         "\/api\/agent\/v{version}\/{token}\/run\/{id}\/process": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "get_app_agent_updateprocessitem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "tags": [
                     "Agent"
@@ -431,6 +529,12 @@
                     },
                     "type": {
                         "type": "string"
+                    },
+                    "readCount": {
+                        "type": "integer"
+                    },
+                    "completed": {
+                        "type": "boolean"
                     },
                     "data": {
                         "type": "object",
