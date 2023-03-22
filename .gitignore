@@ -2,3 +2,4 @@
 **/__pycache__
 config.yaml
 test.py
+var/tmp
