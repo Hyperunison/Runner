@@ -1,4 +1,5 @@
 from src.Message.BaseMessage import BaseMessage
+from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.KillJob import KillJob
 from src.Message.NextflowRun import NextflowRun
@@ -13,5 +14,7 @@ class MessageFactory:
             return GetProcessLogs(message)
         elif message.type == 'KillJob':
             return KillJob(message)
+        elif message.type == 'CohortAPIRequest':
+            return CohortAPIRequest(message)
         else:
             return

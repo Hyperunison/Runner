@@ -52,6 +52,7 @@ from pprint import pprint
 from auto_api_client.api import agent_api
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.runner_message import RunnerMessage
+from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.types_map import TypesMap
 # Defining the host is optional and defaults to http://localhost
@@ -88,6 +89,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**get_app_agent_updateprocessitem**](docs/AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
+*AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation | 
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 *AgentApi* | [**set_run_status**](docs/AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
@@ -100,6 +102,7 @@ Class | Method | HTTP request | Description
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [NextflowRun](docs/NextflowRun.md)
  - [RunnerMessage](docs/RunnerMessage.md)
+ - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
  - [TypesMap](docs/TypesMap.md)
 

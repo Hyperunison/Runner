@@ -53,6 +53,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_cohort_definition_aggregation(self):
+        """Test case for set_cohort_definition_aggregation
+
+        """
+        pass
+
     def test_set_kill_result(self):
         """Test case for set_kill_result
 

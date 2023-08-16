@@ -13,5 +13,6 @@ from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkReques
 from auto_api_client.model.get_process_logs import GetProcessLogs
 from auto_api_client.model.nextflow_run import NextflowRun
 from auto_api_client.model.runner_message import RunnerMessage
+from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.types_map import TypesMap

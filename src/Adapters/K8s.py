@@ -146,7 +146,7 @@ class K8s(BaseAdapter):
               'cp {} {}'.format(folder, remote_file_name, s3_path)
         [code, output, err] = self._exec_cmd_remote(cmd)
         if code > 0:
-            logging.error("Cant upload file to s3, error={}".format(err))
+            logging.error("Cant upload file to s3, error={}, output={}".format(err, output))
 
 
     def _exec_cmd_remote(self, cmd: str) -> [int, str]:

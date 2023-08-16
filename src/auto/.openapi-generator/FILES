@@ -15,6 +15,7 @@ auto_api_client/model/add_run_log_chunk_request.py
 auto_api_client/model/get_process_logs.py
 auto_api_client/model/nextflow_run.py
 auto_api_client/model/runner_message.py
+auto_api_client/model/set_cohort_definition_aggregation_request.py
 auto_api_client/model/set_process_logs_request.py
 auto_api_client/model/types_map.py
 auto_api_client/model_utils.py
@@ -25,6 +26,7 @@ docs/AgentApi.md
 docs/GetProcessLogs.md
 docs/NextflowRun.md
 docs/RunnerMessage.md
+docs/SetCohortDefinitionAggregationRequest.md
 docs/SetProcessLogsRequest.md
 docs/TypesMap.md
 git_push.sh
@@ -38,6 +40,7 @@ test/test_agent_api.py
 test/test_get_process_logs.py
 test/test_nextflow_run.py
 test/test_runner_message.py
+test/test_set_cohort_definition_aggregation_request.py
 test/test_set_process_logs_request.py
 test/test_types_map.py
 tox.ini

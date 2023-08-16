@@ -29,6 +29,8 @@ RUN pip install "typing_extensions~=4.3.0"
 RUN pip install "urllib3~=1.26.7"
 RUN pip install "pyyaml==6.0"
 RUN pip install "setproctitle==1.3.2"
+RUN pip install "sqlalchemy>=2.0.0"
+RUN pip install "psycopg2"
 
 RUN apt-get install psmisc
 

@@ -1,9 +1,12 @@
+import json
 import logging
 
 from src.auto.auto_api_client.api.agent_api import AgentApi
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from src.auto.auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
+
+from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 
 class Api:
     api_instance: AgentApi = None
@@ -37,6 +40,17 @@ class Api:
             channel=channel,
             token=self.token,
             version=self.version
+        )
+
+    def set_cohort_definition_aggregation(self, data: any, sql: str, channel: str):
+        self.api_instance.set_cohort_definition_aggregation(
+            set_cohort_definition_aggregation_request=SetCohortDefinitionAggregationRequest(
+                result=json.dumps(data),
+                sql=sql
+            ),
+            channel=channel,
+            version=self.version,
+            token=self.token,
         )
 
     def add_log_chunk(self, id: int, chunk: str):

@@ -10,3 +10,7 @@ log:
 k8s:
   namespace: "dev"
   master_pod: "nextflow-dev"
+
+phenoenotypicDb:
+  dsn: postgresql+psycopg2://usechannel:cai9baisaicofootohch9booNuphi9th@3.70.13.186:5434/omop
+  schema: src.UPDM.Schema.CustomGenomicsEngland

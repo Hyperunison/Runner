@@ -221,6 +221,80 @@
                 }
             }
         },
+        "\/api\/agent\/v{version}\/{token}\/cohort\/aggregation": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setCohortDefinitionAggregation",
+                "parameters": [
+                    {
+                        "name": "channel",
+                        "in": "query",
+                        "description": "WS channel to send reply",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": null
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "result",
+                                    "sql"
+                                ],
+                                "properties": {
+                                    "result": {
+                                        "type": "string",
+                                        "default": ""
+                                    },
+                                    "sql": {
+                                        "type": "string",
+                                        "default": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Just OK",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "\/api\/agent\/v{version}\/{token}\/run\/{id}\/status": {
             "post": {
                 "tags": [
