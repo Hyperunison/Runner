@@ -103,9 +103,9 @@ class CustomGenomicsEngland(BaseSchema):
         for j in query.joins:
             sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
 
-        sql += "WHERE {}".format(where) + \
+        sql += "WHERE {}\n".format(where) + \
                "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-               "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
+               "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         try:
             result = self.engine.execute(text(sql)).mappings().all()
