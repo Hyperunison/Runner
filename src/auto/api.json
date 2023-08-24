@@ -221,7 +221,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/cohort\/aggregation": {
+        "\/api\/agent\/v{version}\/{token}\/cohort\/aggregation\/{key}": {
             "post": {
                 "tags": [
                     "Agent"
@@ -255,6 +255,14 @@
                         "schema": {
                             "type": "string",
                             "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],

@@ -72,6 +72,7 @@ class CustomGenomicsEngland(BaseSchema):
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         where = cohort_definition.cohort_definition['where']
         export = cohort_definition.cohort_definition['export']
+        key = cohort_definition.cohort_definition['key']
         logging.info("Where definition got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()
@@ -111,14 +112,15 @@ class CustomGenomicsEngland(BaseSchema):
             result = self.engine.execute(text(sql)).mappings().all()
             result = [dict(row) for row in result]
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel)
+            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key)
             logging.info("Generated SQL query: \n{}".format(sql))
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
             api.set_cohort_definition_aggregation(
                 {},
                 "/*\n{}*/\n\n{}\n".format(e.orig, sql),
-                cohort_definition.reply_channel
+                cohort_definition.reply_channel,
+                key
             )
 
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:

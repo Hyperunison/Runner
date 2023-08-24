@@ -412,7 +412,7 @@ class AgentApi(object):
             settings={
                 'response_type': (str,),
                 'auth': [],
-                'endpoint_path': '/api/agent/v{version}/{token}/cohort/aggregation',
+                'endpoint_path': '/api/agent/v{version}/{token}/cohort/aggregation/{key}',
                 'operation_id': 'set_cohort_definition_aggregation',
                 'http_method': 'POST',
                 'servers': None,
@@ -421,12 +421,14 @@ class AgentApi(object):
                 'all': [
                     'version',
                     'token',
+                    'key',
                     'channel',
                     'set_cohort_definition_aggregation_request',
                 ],
                 'required': [
                     'version',
                     'token',
+                    'key',
                 ],
                 'nullable': [
                 ],
@@ -459,6 +461,8 @@ class AgentApi(object):
                         (str,),
                     'token':
                         (str,),
+                    'key':
+                        (str,),
                     'channel':
                         (str,),
                     'set_cohort_definition_aggregation_request':
@@ -467,11 +471,13 @@ class AgentApi(object):
                 'attribute_map': {
                     'version': 'version',
                     'token': 'token',
+                    'key': 'key',
                     'channel': 'channel',
                 },
                 'location_map': {
                     'version': 'path',
                     'token': 'path',
+                    'key': 'path',
                     'channel': 'query',
                     'set_cohort_definition_aggregation_request': 'body',
                 },
@@ -1264,6 +1270,7 @@ class AgentApi(object):
         self,
         version,
         token,
+        key,
         **kwargs
     ):
         """set_cohort_definition_aggregation  # noqa: E501
@@ -1271,12 +1278,13 @@ class AgentApi(object):
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
 
-        >>> thread = api.set_cohort_definition_aggregation(version, token, async_req=True)
+        >>> thread = api.set_cohort_definition_aggregation(version, token, key, async_req=True)
         >>> result = thread.get()
 
         Args:
             version (str):
             token (str):
+            key (str):
 
         Keyword Args:
             channel (str): WS channel to send reply. [optional]
@@ -1346,6 +1354,8 @@ class AgentApi(object):
             version
         kwargs['token'] = \
             token
+        kwargs['key'] = \
+            key
         return self.set_cohort_definition_aggregation_endpoint.call_with_http_info(**kwargs)
 
     def set_kill_result(

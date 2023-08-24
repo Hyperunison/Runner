@@ -9,7 +9,7 @@ Method | HTTP request | Description
 [**get_app_agent_updateprocessitem**](AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 [**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
-[**set_cohort_definition_aggregation**](AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation | 
+[**set_cohort_definition_aggregation**](AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
@@ -366,7 +366,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **set_cohort_definition_aggregation**
-> str set_cohort_definition_aggregation(version, token)
+> str set_cohort_definition_aggregation(version, token, key)
 
 
 
@@ -392,6 +392,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
     token = "f" # str | 
+    key = "key_example" # str | 
     channel = "channel_example" # str | WS channel to send reply (optional)
     set_cohort_definition_aggregation_request = SetCohortDefinitionAggregationRequest(
         result="",
@@ -400,7 +401,7 @@ with auto_api_client.ApiClient() as api_client:
 
     # example passing only required values which don't have defaults set
     try:
-        api_response = api_instance.set_cohort_definition_aggregation(version, token)
+        api_response = api_instance.set_cohort_definition_aggregation(version, token, key)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->set_cohort_definition_aggregation: %s\n" % e)
@@ -408,7 +409,7 @@ with auto_api_client.ApiClient() as api_client:
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.set_cohort_definition_aggregation(version, token, channel=channel, set_cohort_definition_aggregation_request=set_cohort_definition_aggregation_request)
+        api_response = api_instance.set_cohort_definition_aggregation(version, token, key, channel=channel, set_cohort_definition_aggregation_request=set_cohort_definition_aggregation_request)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->set_cohort_definition_aggregation: %s\n" % e)
@@ -421,6 +422,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **version** | **str**|  |
  **token** | **str**|  |
+ **key** | **str**|  |
  **channel** | **str**| WS channel to send reply | [optional]
  **set_cohort_definition_aggregation_request** | [**SetCohortDefinitionAggregationRequest**](SetCohortDefinitionAggregationRequest.md)|  | [optional]
 
