@@ -14,4 +14,4 @@ k8s:
 phenoenotypicDb:
   dsn: postgresql+psycopg2://***:***@***:***/***
   schema: Omop
-  minCount: 3
+  min_count: 3

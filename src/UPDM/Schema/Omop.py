@@ -122,7 +122,7 @@ class Omop(BaseSchema):
 
         sql += "WHERE\n{}\n".format(where) + \
                "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array)+1)))) + \
-               "HAVING COUNT(*) > {}\n".format(self.min_count) + \
+               "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
                "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array)+1))))
 
         try:
