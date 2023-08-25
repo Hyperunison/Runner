@@ -64,9 +64,12 @@ class VariableMapper:
         self.map[updm] = local
 
 
-class CustomGenomicsEngland(BaseSchema):
-    def __init__(self, dsn: str):
+class Omop2(BaseSchema):
+    min_count: int = 0
+    dst: str = ""
+    def __init__(self, dsn: str, min_count: int):
         self.engine = create_engine(dsn).connect()
+        self.min_count = min_count
         super().__init__()
 
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
@@ -106,6 +109,7 @@ class CustomGenomicsEngland(BaseSchema):
 
         sql += "WHERE {}\n".format(where) + \
                "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
+               "HAVING COUNT(*) > {}\n".format(self.min_count) + \
                "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         try:

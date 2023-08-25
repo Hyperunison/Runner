@@ -13,4 +13,5 @@ k8s:
 
 phenoenotypicDb:
   dsn: postgresql+psycopg2://***:***@***:***/***
-  schema: src.UPDM.Schema.CustomGenomicsEngland
+  schema: Omop
+  minCount: 3
