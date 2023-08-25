@@ -12,5 +12,5 @@ k8s:
   master_pod: "nextflow-dev"
 
 phenoenotypicDb:
-  dsn: postgresql+psycopg2://usechannel:cai9baisaicofootohch9booNuphi9th@3.70.13.186:5434/omop
+  dsn: postgresql+psycopg2://***:***@***:***/***
   schema: src.UPDM.Schema.CustomGenomicsEngland
