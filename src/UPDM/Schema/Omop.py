@@ -205,7 +205,7 @@ class Omop(BaseSchema):
                 ))
                 mapper.declare_var(alias+'.name', alias+'.concept_code')
                 mapper.declare_var(alias+'.date', tmp_alias+'.measurement_date')
-                mapper.declare_var(alias+'.value', tmp_alias+'.value_as_number')
+                mapper.declare_var(alias+'.value', tmp_alias+'.measurement_source_value')
                 arr = list[str]()
 
                 if len(statement['where']) == 0:
