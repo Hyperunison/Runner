@@ -6,7 +6,6 @@ import setproctitle
 import auto_api_client
 from auto_api_client.api import agent_api
 import yaml
-import time
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
 from src.LogConfigurator import configure_logs
