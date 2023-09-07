@@ -190,9 +190,59 @@ class Omop2(BaseSchema):
                     alias,
                     "{}.concept_id={}.measurement_concept_id".format(alias, tmp_alias, alias)
                 ))
-                mapper.declare_var(alias+'.name', alias+'.concept_code')
+                mapper.declare_var(alias+'.name', alias+'.concept_name')
                 mapper.declare_var(alias+'.date', tmp_alias+'.measurement_date')
                 mapper.declare_var(alias+'.value', tmp_alias+'.measurement_source_value')
+                arr = list[str]()
+
+                if len(statement['where']) == 0:
+                    return 'true'
+                for stmt in statement['where']:
+                    arr.append(self.build_sql_expression(stmt, query, mapper))
+
+                return "(" + ") AND (".join(arr) + ")"
+
+            if statement['event'] == 'procedure':
+                alias = statement['alias']
+                tmp_alias = rand_alias_name("procedure_")
+                query.joins.append(SQLJoin(
+                    'procedure_occurrence',
+                    tmp_alias,
+                    '{}.person_id=patient.person_id'.format(tmp_alias),
+                ))
+                query.joins.append(SQLJoin(
+                    'concept',
+                    alias,
+                    "{}.concept_id={}.procedure_concept_id".format(alias, tmp_alias, alias)
+                ))
+                mapper.declare_var(alias+'.name', alias+'.concept_code')
+                mapper.declare_var(alias+'.date', tmp_alias+'.procedure_date')
+                mapper.declare_var(alias+'.value', tmp_alias+'.procedure_source_value')
+                arr = list[str]()
+
+                if len(statement['where']) == 0:
+                    return 'true'
+                for stmt in statement['where']:
+                    arr.append(self.build_sql_expression(stmt, query, mapper))
+
+                return "(" + ") AND (".join(arr) + ")"
+
+            if statement['event'] == 'drug':
+                alias = statement['alias']
+                tmp_alias = rand_alias_name("drug_era_")
+                query.joins.append(SQLJoin(
+                    'drug_era',
+                    tmp_alias,
+                    '{}.person_id=patient.person_id'.format(tmp_alias),
+                ))
+                query.joins.append(SQLJoin(
+                    'concept',
+                    alias,
+                    "{}.concept_id={}.drug_concept_id".format(alias, tmp_alias, alias)
+                ))
+                mapper.declare_var(alias+'.name', alias+'.concept_name')
+                mapper.declare_var(alias+'.start_date', tmp_alias+'.drug_era_start_date')
+                mapper.declare_var(alias+'.end_date', tmp_alias+'.drug_era_end_date')
                 arr = list[str]()
 
                 if len(statement['where']) == 0:
