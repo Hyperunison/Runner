@@ -143,6 +143,17 @@ class Omop2(BaseSchema):
 
         if statement['type'] == 'binary':
             operator = statement['operator']
+
+            if operator == 'in' or operator == 'not in':
+                constants = []
+                for const in statement['right']['constants']:
+                    constants.append(self.build_sql_expression(const, query, mapper))
+                return "{} {} ({})".format(
+                    self.add_staples_around_statement(statement['left'], query, mapper),
+                    operator.upper(),
+                    ','.join(constants)
+                )
+
             if operator == "==":
                 operator = "="
 
