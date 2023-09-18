@@ -146,7 +146,7 @@ class Omop2(BaseSchema):
 
             if operator == 'in' or operator == 'not in':
                 constants = []
-                for const in statement['right']['constants']:
+                for const in statement['right']['nodes']:
                     constants.append(self.build_sql_expression(const, query, mapper))
                 return "{} {} ({})".format(
                     self.add_staples_around_statement(statement['left'], query, mapper),
