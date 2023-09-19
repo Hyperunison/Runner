@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest
-from src.UPDM.Schema.BaseSchema import BaseSchema
+from src.UCDM.Schema.BaseSchema import BaseSchema
 
 Base = declarative_base()
 
@@ -60,8 +60,8 @@ class VariableMapper:
 
         return self.map[var]
 
-    def declare_var(self, updm: str, local: str):
-        self.map[updm] = local
+    def declare_var(self, ucdm: str, local: str):
+        self.map[ucdm] = local
 
 
 class Omop2(BaseSchema):

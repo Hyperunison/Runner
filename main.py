@@ -14,7 +14,7 @@ from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
 from src.MessageFactory import MessageFactory
-from src.UPDM.Factory import create_schema_by_config
+from src.UCDM.Factory import create_schema_by_config
 
 config = yaml.safe_load(open("config.yaml", "r"))
 
