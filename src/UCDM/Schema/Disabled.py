@@ -1,5 +1,5 @@
 import logging
-from src.UPDM.Schema.BaseSchema import BaseSchema
+from src.UCDM.Schema.BaseSchema import BaseSchema
 
 
 class Disabled(BaseSchema):
