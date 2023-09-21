@@ -240,6 +240,17 @@
                         }
                     },
                     {
+                        "name": "rawOnly",
+                        "in": "query",
+                        "description": "Is raw only, converting to UPDM will be skipped",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": null
+                        }
+                    },
+                    {
                         "name": "version",
                         "in": "path",
                         "required": true,

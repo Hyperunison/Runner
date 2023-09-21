@@ -42,7 +42,7 @@ class Api:
             version=self.version
         )
 
-    def set_cohort_definition_aggregation(self, data: any, sql: str, channel: str, key: str):
+    def set_cohort_definition_aggregation(self, data: any, sql: str, channel: str, key: str, raw_only: bool):
         self.api_instance.set_cohort_definition_aggregation(
             set_cohort_definition_aggregation_request=SetCohortDefinitionAggregationRequest(
                 result=json.dumps(data),
@@ -52,6 +52,7 @@ class Api:
             version=self.version,
             token=self.token,
             key=key,
+            raw_only="1" if raw_only else "0"
         )
 
     def add_log_chunk(self, id: int, chunk: str):

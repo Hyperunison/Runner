@@ -423,6 +423,7 @@ class AgentApi(object):
                     'token',
                     'key',
                     'channel',
+                    'raw_only',
                     'set_cohort_definition_aggregation_request',
                 ],
                 'required': [
@@ -465,6 +466,8 @@ class AgentApi(object):
                         (str,),
                     'channel':
                         (str,),
+                    'raw_only':
+                        (str,),
                     'set_cohort_definition_aggregation_request':
                         (SetCohortDefinitionAggregationRequest,),
                 },
@@ -473,12 +476,14 @@ class AgentApi(object):
                     'token': 'token',
                     'key': 'key',
                     'channel': 'channel',
+                    'raw_only': 'rawOnly',
                 },
                 'location_map': {
                     'version': 'path',
                     'token': 'path',
                     'key': 'path',
                     'channel': 'query',
+                    'raw_only': 'query',
                     'set_cohort_definition_aggregation_request': 'body',
                 },
                 'collection_format_map': {
@@ -1288,6 +1293,7 @@ class AgentApi(object):
 
         Keyword Args:
             channel (str): WS channel to send reply. [optional]
+            raw_only (str): Is raw only, converting to UPDM will be skipped. [optional]
             set_cohort_definition_aggregation_request (SetCohortDefinitionAggregationRequest): [optional]
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.

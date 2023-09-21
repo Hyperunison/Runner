@@ -77,7 +77,7 @@ class Omop(BaseSchema):
         where = cohort_definition.cohort_definition['where']
         export = cohort_definition.cohort_definition['export']
         key = cohort_definition.cohort_definition['key']
-        logging.info("Where definition got: {}".format(json.dumps(where)))
+        logging.info("Cohort request got: {}".format(json.dumps(cohort_definition)))
         query = SQLQuery()
         mapper = VariableMapper()
 
@@ -130,14 +130,15 @@ class Omop(BaseSchema):
             result = self.engine.execute(text(sql)).mappings().all()
             result = [dict(row) for row in result]
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key)
+            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
             api.set_cohort_definition_aggregation(
                 {},
                 "/*\n{}*/\n\n{}\n".format(e.orig, sql),
                 cohort_definition.reply_channel,
-                key
+                key,
+                cohort_definition.raw_only
             )
 
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
@@ -213,7 +214,7 @@ class Omop(BaseSchema):
                     alias,
                     "{}.concept_id={}.measurement_concept_id".format(alias, tmp_alias, alias)
                 ))
-                mapper.declare_var(alias+'.name', alias+'.concept_code')
+                mapper.declare_var(alias+'.name', alias+'.concept_name')
                 mapper.declare_var(alias+'.date', tmp_alias+'.measurement_date')
                 mapper.declare_var(alias+'.value', tmp_alias+'.measurement_source_value')
                 arr = list[str]()
@@ -238,7 +239,7 @@ class Omop(BaseSchema):
                     alias,
                     "{}.concept_id={}.procedure_concept_id".format(alias, tmp_alias, alias)
                 ))
-                mapper.declare_var(alias+'.name', alias+'.concept_code')
+                mapper.declare_var(alias+'.name', alias+'.concept_name')
                 mapper.declare_var(alias+'.date', tmp_alias+'.procedure_date')
                 mapper.declare_var(alias+'.value', tmp_alias+'.procedure_source_value')
                 arr = list[str]()

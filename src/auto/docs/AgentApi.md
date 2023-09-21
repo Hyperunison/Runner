@@ -394,6 +394,7 @@ with auto_api_client.ApiClient() as api_client:
     token = "f" # str | 
     key = "key_example" # str | 
     channel = "channel_example" # str | WS channel to send reply (optional)
+    raw_only = "rawOnly_example" # str | Is raw only, converting to UPDM will be skipped (optional)
     set_cohort_definition_aggregation_request = SetCohortDefinitionAggregationRequest(
         result="",
         sql="",
@@ -409,7 +410,7 @@ with auto_api_client.ApiClient() as api_client:
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.set_cohort_definition_aggregation(version, token, key, channel=channel, set_cohort_definition_aggregation_request=set_cohort_definition_aggregation_request)
+        api_response = api_instance.set_cohort_definition_aggregation(version, token, key, channel=channel, raw_only=raw_only, set_cohort_definition_aggregation_request=set_cohort_definition_aggregation_request)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->set_cohort_definition_aggregation: %s\n" % e)
@@ -424,6 +425,7 @@ Name | Type | Description  | Notes
  **token** | **str**|  |
  **key** | **str**|  |
  **channel** | **str**| WS channel to send reply | [optional]
+ **raw_only** | **str**| Is raw only, converting to UPDM will be skipped | [optional]
  **set_cohort_definition_aggregation_request** | [**SetCohortDefinitionAggregationRequest**](SetCohortDefinitionAggregationRequest.md)|  | [optional]
 
 ### Return type

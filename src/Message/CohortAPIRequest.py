@@ -12,4 +12,5 @@ class CohortAPIRequest(BaseMessage):
         self.cohort_definition = message.data['cohortDefinition']
         self.reply_channel = message.data['replyChannel']
         self.biobank_id = message.data['biobankId']
+        self.raw_only = message.data['rawOnly']
 
