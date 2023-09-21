@@ -77,7 +77,7 @@ class Omop(BaseSchema):
         where = cohort_definition.cohort_definition['where']
         export = cohort_definition.cohort_definition['export']
         key = cohort_definition.cohort_definition['key']
-        logging.info("Cohort request got: {}".format(json.dumps(cohort_definition)))
+        logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()
 
