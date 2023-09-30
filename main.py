@@ -1,11 +1,10 @@
 import logging
-import os
-import sys
-import setproctitle
-
-import auto_api_client
-from auto_api_client.api import agent_api
+import sentry_sdk
 import yaml
+import time
+import auto_api_client
+
+from auto_api_client.api import agent_api
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
 from src.LogConfigurator import configure_logs
@@ -21,6 +20,11 @@ config = yaml.safe_load(open("config.yaml", "r"))
 configure_logs(config, "main")
 configuration = auto_api_client.Configuration(host=config['api_url'])
 
+if 'sentry_dsn' in config:
+    sentry_sdk.init(
+        dsn= config['sentry_dsn'],
+    )
+
 with auto_api_client.ApiClient(configuration) as api_client:
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
@@ -28,6 +32,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
     schema = create_schema_by_config(config['phenoenotypicDb'])
     while True:
         try:
+            adapter.check_runs_statuses()
             response = api.next_task()
             message = MessageFactory().create_message_object_from_response(message=response)
             if not message is None:
@@ -36,17 +41,8 @@ with auto_api_client.ApiClient(configuration) as api_client:
             if type(message) is NextflowRun:
                 api_instance.api_client.close()
                 api_instance.api_client.rest_client.pool_manager.clear()
-                pid = os.fork()
-
-                if pid == 0:
-                    configure_logs(config, "child={}".format(os.getpid()))
-                    setproctitle.setproctitle('python main.py for run_id {}'.format(message.run_id))
-                    logging.info("Forked, run nextflow in fork, pid={}".format(os.getpid()))
-                    adapter.process_nextflow_run(message)
-                    api.accept_task(response.id)
-                    logging.info("Exiting child")
-                    sys.exit(0)
-
+                adapter.process_nextflow_run(message)
+                api.accept_task(response.id)
             elif type(message) is GetProcessLogs:
                 adapter.process_get_process_logs(message)
             elif type(message) is KillJob:
@@ -62,7 +58,6 @@ with auto_api_client.ApiClient(configuration) as api_client:
             if message is not None:
                 api.accept_task(response.id)
 
-            break
             time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:
             logging.critical("Exception when calling AgentApi: %s\n" % e)
