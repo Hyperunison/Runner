@@ -64,3 +64,9 @@ $ docker-compose up -d
 ```
 $ bash update-api.sh
 ```
+
+## Local env setup
+```
+$ make up
+$ make sh
+```
