@@ -15,3 +15,6 @@ class BaseAdapter:
 
     def type(self):
         pass
+
+    def check_runs_statuses(self):
+        pass
