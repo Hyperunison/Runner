@@ -25,6 +25,7 @@ sendLogsPeriod = 3
 class K8s(BaseAdapter):
     namespace: str = None
     pod_prefix: str = None
+    volume: str = None
     master_pod: str = None
     work_dir: str = None
     api_client: Api = None
@@ -34,6 +35,7 @@ class K8s(BaseAdapter):
     def __init__(self, api_client: Api, work_dir: str, config, full_config):
         self.namespace = config['namespace']
         self.pod_prefix = config['pod_prefix']
+        self.volume = config['volume']
         self.master_pod = config['master_pod']
         self.api_client = api_client
         self.work_dir = work_dir
@@ -64,7 +66,7 @@ class K8s(BaseAdapter):
             logging.critical("Can't create pod, stdout={}, error={}".format(cmd, p.stdout, p.stderr))
             return False
         logging.debug("stdout={}, err={}".format(p.stdout, p.stderr))
-
+        time.sleep(60)
         # todo: send folder name to server
         self._create_folder_remote(folder)
 
@@ -187,7 +189,7 @@ class K8s(BaseAdapter):
             image = '311239890978.dkr.ecr.eu-central-1.amazonaws.com/base:nextflow-dev-latest',
             container_hash = container_hash,
             run_remote_dir= '/var/run/secrets/kubernetes.io/serviceaccount',
-            claim_name= 'ebs-claim4',
+            claim_name= self.volume,
             cmd =  cmd
         )
         with open(podfile_name, 'w') as file:

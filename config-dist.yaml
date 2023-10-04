@@ -11,6 +11,8 @@ log:
 k8s:
   namespace: "dev"
   master_pod: "nextflow-dev"
+  pod_prefix: "unison-worker"
+  volume: "ebs-claim-prod-10"
 
 phenoenotypicDb:
   dsn: postgresql+psycopg2://***:***@***:***/***
