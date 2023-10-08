@@ -21,4 +21,4 @@ spec:
   volumes:
   - name: data
     persistentVolumeClaim:
-      claimName: ebs-claim4
+      claimName: {claim_name}
