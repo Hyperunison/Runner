@@ -100,11 +100,18 @@ class K8s(BaseAdapter):
         return True
 
     def process_kill_job(self, message: KillJob) -> bool:
-        cmd = 'ps -Af|grep " nextflow-run-{} "|grep -v grep|grep -oP "^\\w+\\s+\\d+"|grep -oP "\\s\\d+$"|xargs -I PID kill PID'.format(int(message.run_id))
-        self._exec_cmd_remote(cmd)
-
+        cmd = "kubectl --namespace={} get pods --selector=type={} --selector=run_id={} -o json".format(self.namespace, self.pod_prefix, message.run_id)
+        args = shlex.split(cmd)
+        p = subprocess.run(args, capture_output=True)
+        if p.returncode > 0:
+            logging.critical("Can't find pod, output={}, stderr: {}".format(p.stdout, p.stderr))
+            return
+        data = json.loads(str(p.stdout.decode('utf-8')))
+        logging.critical("{}".format(data))
+        if data['items'][0]:
+            pod_name = data['items'][0]['metadata']['name']
+            self.delete_pod(pod_name)
         self.api_client.set_kill_result(message.run_id, message.channel)
-
         return True
 
     def process_send_pod_logs(self, pod_name: string, run_id: int):
@@ -144,7 +151,7 @@ class K8s(BaseAdapter):
         args = shlex.split(cmd)
         p = subprocess.run(args, capture_output=True)
         if p.returncode > 0:
-            logging.critical("Can't check pods statuses, output={}, stderr: {}".format(p.output, p.stderr))
+            logging.critical("Can't check pods statuses, output={}, stderr: {}".format(p.stdout, p.stderr))
             return
         data = json.loads(str(p.stdout.decode('utf-8')))
         for pod in data['items']:
@@ -169,7 +176,7 @@ class K8s(BaseAdapter):
         p = subprocess.run(args, capture_output=True)
 
         if p.returncode > 0:
-            logging.critical("Can't delete pod {}, output={}, stderr: {}".format(pod_name, output, err))
+            logging.critical("Can't delete pod {}, output={}, stderr: {}".format(pod_name, p.stdout, p.stderr))
             return  False
         return True
 
