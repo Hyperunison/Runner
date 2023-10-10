@@ -1,6 +1,6 @@
 #!/bin/bash
 
-list=$(docker exec -ti unison-agent bash -c "ps -Af|grep 'python main.py for run_id'|grep -v grep")
+list=$(docker-compose exec -T unison-agent bash -c "ps -Af|grep 'python main.py for run_id'|grep -v grep")
 
 if [ ! "$list" == "" ]; then
   echo "ERROR: can't update, nextflow process in progress:"
@@ -21,7 +21,7 @@ if [ ! "$1" == "--force" ]; then
 fi
 
 docker-compose build
-docker-compose down
+docker-compose down --remove-orphans
 docker-compose up -d
 
 echo "OK"

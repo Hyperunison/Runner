@@ -35,6 +35,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_block_task(self):
+        """Test case for block_task
+
+        """
+        pass
+
     def test_get_app_agent_updateprocessitem(self):
         """Test case for get_app_agent_updateprocessitem
 

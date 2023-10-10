@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: Resources/docker/Dockerfile
-    container_name: unison-agent
     entrypoint: tail -f /dev/null
     volumes:
       - ./:/app:delegated
