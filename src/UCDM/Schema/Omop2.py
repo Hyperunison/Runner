@@ -41,8 +41,8 @@ def escape_string(s: str) -> str:
 
 
 def rand_alias_name(prefix: str) -> str:
-    prefix = str(1+random.random()).replace(".", "")
-    return "{}{}".format(prefix, prefix)
+    rnd = str(1+random.random()).replace(".", "")
+    return "{}{}".format(prefix, rnd)
 
 
 class VariableMapper:
