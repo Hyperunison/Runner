@@ -56,6 +56,63 @@
                 }
             }
         },
+        "\/api\/agent\/v{version}\/{token}\/task\/{id}\/block": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "blockTask",
+                "parameters": [
+                    {
+                        "name": "runner_instance",
+                        "in": "query",
+                        "description": "uid of runner instance",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": ""
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result",
+                        "content": {
+                            "application\/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "\/api\/agent\/v{version}\/{token}\/task\/{id}": {
             "post": {
                 "tags": [
@@ -632,6 +689,12 @@
                     "data": {
                         "type": "object",
                         "additionalProperties": true
+                    },
+                    "status": {
+                        "type": "integer"
+                    },
+                    "runnerInstance": {
+                        "type": "string"
                     }
                 },
                 "type": "object"

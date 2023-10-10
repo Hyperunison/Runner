@@ -86,6 +86,7 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *AgentApi* | [**accept_task**](docs/AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
+*AgentApi* | [**block_task**](docs/AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
 *AgentApi* | [**get_app_agent_updateprocessitem**](docs/AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
@@ -107,9 +108,11 @@ Class | Method | HTTP request | Description
  - [TypesMap](docs/TypesMap.md)
 
 
+<a id="documentation-for-authorization"></a>
 ## Documentation For Authorization
 
- All endpoints do not require authorization.
+Endpoints do not require authorization.
+
 
 ## Author
 

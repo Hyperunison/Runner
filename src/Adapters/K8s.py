@@ -20,6 +20,7 @@ from src.LogConfigurator import configure_logs
 
 
 sendLogsPeriod = 3
+updateLabelPeriod = 30
 
 
 class K8s(BaseAdapter):
@@ -28,11 +29,12 @@ class K8s(BaseAdapter):
     volume: str = None
     master_pod: str = None
     work_dir: str = None
+    hostname: str = None
     api_client: Api = None
-    observed_runs: [] = []
+    observed_runs: {} = {}
     config: [] = None
 
-    def __init__(self, api_client: Api, work_dir: str, config, full_config):
+    def __init__(self, api_client: Api, work_dir: str, runner_instance_id:str, config, full_config):
         self.namespace = config['namespace']
         self.pod_prefix = config['pod_prefix']
         self.volume = config['volume']
@@ -40,6 +42,7 @@ class K8s(BaseAdapter):
         self.api_client = api_client
         self.work_dir = work_dir
         self.config = full_config
+        self.hostname = runner_instance_id
 
     def type(self):
         return 'k8s'
@@ -57,7 +60,7 @@ class K8s(BaseAdapter):
         upload_log_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, ".nextflow.log", message.aws_s3_path+"/basic/")
         upload_trace_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, "trace-*.txt", message.aws_s3_path+"/basic/")
 
-        cmd = self.get_kube_create_cmd('sleep 120; cd {}; {}; {}; {}'.format(self.work_dir + '/' + folder, message.command, upload_log_cmd, upload_trace_cmd), message.run_id)
+        cmd = self.get_kube_create_cmd('sleep 120; cd {}; {}; {}; {};'.format(self.work_dir + '/' + folder, message.command, upload_log_cmd, upload_trace_cmd), message.run_id)
         args = shlex.split(cmd)
         logging.info("Executing command: {}".format(cmd))
         p = subprocess.run(args, capture_output=True)
@@ -65,7 +68,7 @@ class K8s(BaseAdapter):
         if p.returncode > 0:
             logging.critical("Can't create pod, stdout={}, error={}".format(cmd, p.stdout, p.stderr))
             return False
-        logging.debug("stdout={}, err={}".format(p.stdout, p.stderr))
+        self.process_send_pod_logs(self.master_pod, int(message.run_id))
         time.sleep(60)
         # todo: send folder name to server
         self._create_folder_remote(folder)
@@ -78,7 +81,6 @@ class K8s(BaseAdapter):
             "[default]\naws_access_key_id={}\naws_secret_access_key={}\n".format(message.aws_id, message.aws_key),
             folder+"/aws_credentials"
         )
-        self.process_send_pod_logs(self.master_pod, int(message.run_id))
         # hack
         # cmd = 'bash -c "for i in {1..3}; do sleep 1; echo test; done"'
         return True
@@ -100,28 +102,25 @@ class K8s(BaseAdapter):
         return True
 
     def process_kill_job(self, message: KillJob) -> bool:
-        cmd = "kubectl --namespace={} get pods --selector=type={} --selector=run_id={} -o json".format(self.namespace, self.pod_prefix, message.run_id)
+        cmd = "kubectl --namespace={} get pods --selector=type={} --selector=run_id={} -o json".format(self.namespace, self.pod_prefix, int(message.run_id))
         args = shlex.split(cmd)
         p = subprocess.run(args, capture_output=True)
         if p.returncode > 0:
             logging.critical("Can't find pod, output={}, stderr: {}".format(p.stdout, p.stderr))
             return
         data = json.loads(str(p.stdout.decode('utf-8')))
-        logging.critical("{}".format(data))
-        if data['items'][0]:
+        if data['items'] and data['items'][0]:
             pod_name = data['items'][0]['metadata']['name']
             self.delete_pod(pod_name)
         self.api_client.set_kill_result(message.run_id, message.channel)
         return True
 
     def process_send_pod_logs(self, pod_name: string, run_id: int):
-        logging.debug("observed: {}; current: {}".format(self.observed_runs, run_id))
-        self.observed_runs.append(run_id)
-        logging.debug("observed: {}; current: {}".format(self.observed_runs, run_id))
         pid = os.fork()
         if pid == 0:
             logging.info("Forked, run in fork, pid={}".format(os.getpid()))
             configure_logs(self.config, "child={}".format(os.getpid()))
+
             cmd = "kubectl logs {} -c {} -f".format(pod_name, pod_name)
             args = shlex.split(cmd)
             logging.info("Executing command: {}".format(cmd))
@@ -145,9 +144,20 @@ class K8s(BaseAdapter):
             logging.info("Exit code={}".format(p.returncode))
             logging.info("Exiting child")
             sys.exit(0)
+        self.observed_runs[run_id] = pid
+
+    def add_label_to_pod(self, pod_name: str, label: str, override = False):
+        cmd = "kubectl label pods -n {} {} {} {}".format(self.namespace, pod_name, label, ('--overwrite' if override else ''))
+        args = shlex.split(cmd)
+        p = subprocess.run(args, capture_output=True)
+        if p.returncode > 0:
+            logging.critical("Can't add label to pod, output={}, stderr: {}".format(p.stdout, p.stderr))
+            return False
+        return True
+
 
     def check_runs_statuses(self):
-        cmd = "kubectl --namespace={} get pods --selector=type={} -o json".format(self.namespace, self.pod_prefix)
+        cmd = "kubectl --namespace={} get pods --selector='type={}' -o json".format(self.namespace, self.pod_prefix)
         args = shlex.split(cmd)
         p = subprocess.run(args, capture_output=True)
         if p.returncode > 0:
@@ -155,20 +165,40 @@ class K8s(BaseAdapter):
             return
         data = json.loads(str(p.stdout.decode('utf-8')))
         for pod in data['items']:
+            pod_name = pod['metadata']['name']
             run_id = int(pod['metadata']['labels']['run_id'])
             status = pod['status']['phase']
-            pod_name = pod['metadata']['name']
-            logging.debug("{} - {} - {} ".format(pod_name, run_id, status))
+            last_connect = float(pod['metadata']['labels']['last_connect'] if pod['metadata']['labels']['last_connect'] else None )
+            instance = str(pod['metadata']['labels']['instance'] if pod['metadata']['labels']['instance'] else None )
+
+            logging.debug("{} - {} - {} - {} sec ago from {}".format(pod_name, run_id, status, time.time() - last_connect, instance))
             if status == 'Succeeded':
                 self.api_client.set_run_status(run_id, 'success')
                 self.delete_pod(pod_name)
-                if run_id in self.observed_runs: self.observed_runs.remove(run_id)
+                if run_id in self.observed_runs:
+                    del self.observed_runs[run_id]
             elif status == 'Failed':
                 self.api_client.set_run_status(run_id, 'error')
                 self.delete_pod(pod_name)
-                if run_id in self.observed_runs: self.observed_runs.remove(run_id)
-            elif status == 'Running' and run_id not in self.observed_runs:
-                self.process_send_pod_logs(pod_name, int(run_id))
+                if run_id in self.observed_runs:
+                    del self.observed_runs[run_id]
+            elif status == 'Running':
+                if instance and instance == self.hostname:
+                    if run_id in self.observed_runs:
+                        pid = self.observed_runs[run_id]
+                        logging.debug("pid {} - state {}".format(pid, self._check_pid(pid)))
+                        if not self._check_pid(pid):
+                            del self.observed_runs[run_id]
+                        if not last_connect or time.time() - last_connect >= updateLabelPeriod:
+                            self.add_label_to_pod(pod_name, "last_connect='{}'".format(time.time()), True)
+                            continue
+                elif instance and last_connect and time.time() - last_connect < updateLabelPeriod * 4:
+                    continue
+
+                if run_id not in self.observed_runs:
+                    self.add_label_to_pod(pod_name, "instance={}".format(self.hostname), True)
+                    self.add_label_to_pod(pod_name, "last_connect='{}'".format(time.time()), True)
+                    self.process_send_pod_logs(pod_name, int(run_id))
 
     def delete_pod(self, pod_name) -> bool:
         cmd = "kubectl --namespace={} delete pod {}".format(self.namespace, pod_name)
@@ -195,8 +225,10 @@ class K8s(BaseAdapter):
             run_id = run_id,
             image = '311239890978.dkr.ecr.eu-central-1.amazonaws.com/base:nextflow-dev-latest',
             container_hash = container_hash,
-            run_remote_dir= '/var/run/secrets/kubernetes.io/serviceaccount',
-            claim_name= self.volume,
+            run_remote_dir = '/var/run/secrets/kubernetes.io/serviceaccount',
+            claim_name = self.volume,
+            instance_name = self.hostname,
+            last_connect = time.time(),
             cmd =  cmd
         )
         with open(podfile_name, 'w') as file:
@@ -256,3 +288,12 @@ class K8s(BaseAdapter):
     def _random_word(self, length: int):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
+
+    def _check_pid(self, pid: int):
+        """ Check For the existence of a unix pid. """
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
