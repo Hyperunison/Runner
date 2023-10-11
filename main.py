@@ -32,9 +32,13 @@ with auto_api_client.ApiClient(configuration) as api_client:
     api = Api(api_instance, config['api_version'], config['agent_token'])
     adapter = create_by_config(api, config, runner_instance_id)
     schema = create_schema_by_config(config['phenoenotypicDb'])
+    check_interval = config['check_runs_status_interval']
+    last_check = None
     while True:
         try:
-            adapter.check_runs_statuses()
+            if not last_check or time.time() - last_check > check_interval:
+                adapter.check_runs_statuses()
+                last_check = time.time()
             response = api.next_task()
             message = MessageFactory().create_message_object_from_response(message=response)
             if not message is None:
