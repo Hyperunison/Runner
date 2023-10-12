@@ -77,3 +77,6 @@ class Api:
     def block_task(self, id: int, runner_instance: str):
         logging.info("Blocking task id={}".format(id))
         return self.api_instance.block_task(id=str(id), token=self.token, version=self.version, runner_instance=runner_instance)
+
+    def get_agent_id(self):
+        return self.api_instance.get_agent_id(token=self.token, version=self.version)

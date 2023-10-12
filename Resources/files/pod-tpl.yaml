@@ -8,6 +8,7 @@ metadata:
     run_id: '{run_id}'
     instance: {instance_name}
     last_connect: '{last_connect}'
+    agent_id: '{agent_id}'
 
 spec:
   restartPolicy: Never

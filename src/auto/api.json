@@ -56,6 +56,46 @@
                 }
             }
         },
+        "\/api\/agent\/v{version}\/{token}\/agent-id": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "getAgentId",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get agent_id",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "\/api\/agent\/v{version}\/{token}\/task\/{id}\/block": {
             "post": {
                 "tags": [

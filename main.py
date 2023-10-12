@@ -76,4 +76,3 @@ with auto_api_client.ApiClient(configuration) as api_client:
         except auto_api_client.ApiException as e:
             logging.critical("Exception when calling AgentApi: %s\n" % e)
             break
-        break

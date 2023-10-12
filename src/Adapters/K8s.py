@@ -33,6 +33,7 @@ class K8s(BaseAdapter):
     api_client: Api = None
     observed_runs: {} = {}
     config: [] = None
+    agent_id: int = None
 
     def __init__(self, api_client: Api, work_dir: str, runner_instance_id:str, config, full_config):
         self.namespace = config['namespace']
@@ -43,6 +44,7 @@ class K8s(BaseAdapter):
         self.work_dir = work_dir
         self.config = full_config
         self.hostname = runner_instance_id
+        self.agent_id = self.api_client.get_agent_id()
 
     def type(self):
         return 'k8s'
@@ -56,6 +58,7 @@ class K8s(BaseAdapter):
         folder = message.dir
         if folder == "" or folder is None:
             folder = 'tmp_' + self._random_word(16)
+        folder = folder.replace(self.work_dir, "")
 
         upload_log_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, ".nextflow.log", message.aws_s3_path+"/basic/")
         upload_trace_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, "trace-*.txt", message.aws_s3_path+"/basic/")
@@ -184,35 +187,35 @@ class K8s(BaseAdapter):
         for pod in data['items']:
             pod_name = pod['metadata']['name']
             run_id = int(pod['metadata']['labels']['run_id'])
+            agent_id = int(pod['metadata']['labels']['agent_id']) if 'agent_id' in pod['metadata']['labels'] else None
             status = pod['status']['phase']
             last_connect = int(float((pod['metadata']['labels']['last_connect']))) if pod['metadata']['labels']['last_connect'] else None
             instance = str(pod['metadata']['labels']['instance']) if pod['metadata']['labels']['instance'] else None
 
             logging.debug("{} - {} - {} - {} sec ago from {}".format(pod_name, run_id, status, int(float(time.time() - last_connect)), instance))
-            if status == 'Succeeded':
-                self.api_client.set_run_status(run_id, 'success')
-                self.delete_pod(pod_name)
-                if run_id in self.observed_runs:
-                    del self.observed_runs[run_id]
-            elif status == 'Failed':
-                self.api_client.set_run_status(run_id, 'error')
-                #self.delete_pod(pod_name)
+            if status == 'Succeeded' or status == 'Failed':
+                if ((instance and instance == self.hostname)
+                        or (agent_id == self.agent_id and int(float(time.time())) - last_connect >= updateLabelPeriod * 6)):
+                    state = 'success' if status == 'Succeeded' else 'error'
+                    self.api_client.set_run_status(run_id, state)
+                    self.delete_pod(pod_name)
+
                 if run_id in self.observed_runs:
                     del self.observed_runs[run_id]
             elif status == 'Running':
                 if instance and instance == self.hostname:
                     if run_id in self.observed_runs:
                         pid = self.observed_runs[run_id]
-                        logging.debug("pid {} - state {}".format(pid, self._check_pid(pid)))
+                        logging.info("pid {} - state {}".format(pid, self._check_pid(pid)))
                         if not self._check_pid(pid):
                             del self.observed_runs[run_id]
                         if not last_connect or time.time() - last_connect >= updateLabelPeriod:
                             self.add_label_to_pod(pod_name, "last_connect='{}'".format(int(float(time.time()))), True)
-                            continue
-                elif instance and last_connect and int(float(time.time())) - last_connect < updateLabelPeriod * 4:
+                    continue
+                elif instance and last_connect and int(float(time.time())) - last_connect < updateLabelPeriod * 6:
                     continue
 
-                if run_id not in self.observed_runs:
+                if agent_id == self.agent_id and run_id not in self.observed_runs:
                     self.add_label_to_pod(pod_name, "instance={}".format(self.hostname), True)
                     self.add_label_to_pod(pod_name, "last_connect='{}'".format(int(float(time.time()))), True)
                     self.process_send_pod_logs(pod_name, int(run_id))
@@ -246,6 +249,7 @@ class K8s(BaseAdapter):
             claim_name = self.volume,
             instance_name = self.hostname,
             last_connect = int(float(time.time())),
+            agent_id = self.agent_id,
             cmd =  cmd
         )
         with open(podfile_name, 'w') as file:
