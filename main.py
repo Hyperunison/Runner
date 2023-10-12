@@ -3,11 +3,8 @@ import sentry_sdk
 import yaml
 import time
 import auto_api_client
-<<<<<<< HEAD
 from typing import List, Dict
-=======
 import socket
->>>>>>> origin/main
 
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
