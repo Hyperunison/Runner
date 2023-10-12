@@ -10,7 +10,9 @@
 # sys.setrecursionlimit(n)
 
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.get_process_logs import GetProcessLogs
+from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.nextflow_run import NextflowRun
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest

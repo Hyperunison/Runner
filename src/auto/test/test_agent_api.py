@@ -41,6 +41,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_get_mappings(self):
+        """Test case for get_mappings
+
+        """
+        pass
+
     def test_get_next_task(self):
         """Test case for get_next_task
 

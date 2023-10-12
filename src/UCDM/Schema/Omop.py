@@ -74,10 +74,7 @@ class Omop(BaseSchema):
         self.min_count = min_count
         super().__init__()
 
-    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
-        where = cohort_definition.cohort_definition['where']
-        export = cohort_definition.cohort_definition['export']
-        key = cohort_definition.cohort_definition['key']
+    def resolve_cohort_definition_sql_query(self, where, export) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()
@@ -122,14 +119,27 @@ class Omop(BaseSchema):
             sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
 
         sql += "WHERE\n{}\n".format(where) + \
-               "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array)+1)))) + \
+               "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
                "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
-               "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array)+1))))
+               "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
+        logging.info("Generated SQL query: \n{}".format(sql))
+
+        return sql
+
+    def resolve_cohort_definition(self, sql: str):
+        result = self.engine.execute(text(sql)).mappings().all()
+        result = [dict(row) for row in result]
+
+        return result
+    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
+        key = cohort_definition.cohort_definition['key']
+        sql = self.resolve_cohort_definition_sql_query(
+            cohort_definition.cohort_definition['where'],
+            cohort_definition.cohort_definition['export']
+        )
         try:
-            logging.info("Generated SQL query: \n{}".format(sql))
-            result = self.engine.execute(text(sql)).mappings().all()
-            result = [dict(row) for row in result]
+            result = self.resolve_cohort_definition(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
         except ProgrammingError as e:

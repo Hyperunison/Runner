@@ -3,8 +3,9 @@ import sentry_sdk
 import yaml
 import time
 import auto_api_client
+from typing import List, Dict
 
-from auto_api_client.api import agent_api
+from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
 from src.LogConfigurator import configure_logs
@@ -12,7 +13,9 @@ from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
+from src.Message.StartMLTrain import StartMLTrain
 from src.MessageFactory import MessageFactory
+from src.Service.MlTrain import MlTrain
 from src.UCDM.Factory import create_schema_by_config
 
 config = yaml.safe_load(open("config.yaml", "r"))
@@ -30,6 +33,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
     api = Api(api_instance, config['api_version'], config['agent_token'])
     adapter = create_by_config(api, config)
     schema = create_schema_by_config(config['phenoenotypicDb'])
+    model_trainer = MlTrain(api, adapter, schema)
     while True:
         try:
             adapter.check_runs_statuses()
@@ -49,6 +53,8 @@ with auto_api_client.ApiClient(configuration) as api_client:
                 adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
                 schema.execute_cohort_definition(message, api)
+            elif type(message) is StartMLTrain:
+                model_trainer.start_model_train(message)
             elif message is None:
                 if False:
                     logging.debug("idle, do nothing")
@@ -62,3 +68,4 @@ with auto_api_client.ApiClient(configuration) as api_client:
         except auto_api_client.ApiException as e:
             logging.critical("Exception when calling AgentApi: %s\n" % e)
             break
+        break

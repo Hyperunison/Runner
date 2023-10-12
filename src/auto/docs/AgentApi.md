@@ -7,6 +7,7 @@ Method | HTTP request | Description
 [**accept_task**](AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 [**add_run_log_chunk**](AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 [**get_app_agent_updateprocessitem**](AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
+[**get_mappings**](AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
 [**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
 [**set_cohort_definition_aggregation**](AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
@@ -221,6 +222,87 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_mappings**
+> [MappingResolveResponse] get_mappings(version, token, key)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.get_mappings_request import GetMappingsRequest
+from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    key = "key_example" # str | 
+    get_mappings_request = GetMappingsRequest(
+        input="",
+    ) # GetMappingsRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.get_mappings(version, token, key)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->get_mappings: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.get_mappings(version, token, key, get_mappings_request=get_mappings_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->get_mappings: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **key** | **str**|  |
+ **get_mappings_request** | [**GetMappingsRequest**](GetMappingsRequest.md)|  | [optional]
+
+### Return type
+
+[**[MappingResolveResponse]**](MappingResolveResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 

@@ -1,12 +1,16 @@
 import json
 import logging
+from typing import List, Dict
 
 from src.auto.auto_api_client.api.agent_api import AgentApi
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+
+from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from src.auto.auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
+from auto_api_client.model.get_mappings_request import GetMappingsRequest
 
 class Api:
     api_instance: AgentApi = None
@@ -62,3 +66,8 @@ class Api:
     def accept_task(self, id: int):
         logging.info("Accepting task id={}".format(id))
         self.api_instance.accept_task(id=str(id), token=self.token, version=self.version)
+
+    def resolve_mapping(self, key: str, request: Dict[str, List[str]]) -> List[MappingResolveResponse]:
+        logging.info("Resolving mapping for key={}, request={}".format(key, json.dumps(request)))
+        res = self.api_instance.get_mappings(token=self.token, version=self.version, key=key, get_mappings_request=GetMappingsRequest(input=json.dumps(request)))
+        return res

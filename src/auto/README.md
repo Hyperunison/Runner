@@ -51,6 +51,8 @@ import auto_api_client
 from pprint import pprint
 from auto_api_client.api import agent_api
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+from auto_api_client.model.get_mappings_request import GetMappingsRequest
+from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
@@ -87,6 +89,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**accept_task**](docs/AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**get_app_agent_updateprocessitem**](docs/AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
+*AgentApi* | [**get_mappings**](docs/AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
 *AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
@@ -99,7 +102,9 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AddRunLogChunkRequest](docs/AddRunLogChunkRequest.md)
+ - [GetMappingsRequest](docs/GetMappingsRequest.md)
  - [GetProcessLogs](docs/GetProcessLogs.md)
+ - [MappingResolveResponse](docs/MappingResolveResponse.md)
  - [NextflowRun](docs/NextflowRun.md)
  - [RunnerMessage](docs/RunnerMessage.md)
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)

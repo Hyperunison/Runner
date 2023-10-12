@@ -513,6 +513,75 @@
                 }
             }
         },
+        "\/api\/agent\/v{version}\/{token}\/mapping\/resolve\/{key}": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "getMappings",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "input"
+                                ],
+                                "properties": {
+                                    "input": {
+                                        "type": "string",
+                                        "default": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "List all bricks",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#\/components\/schemas\/MappingResolveResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "\/api\/agent\/v{version}\/{token}\/run\/{id}\/process": {
             "get": {
                 "tags": [
@@ -643,6 +712,20 @@
                     },
                     "nextflowRun": {
                         "$ref": "#\/components\/schemas\/NextflowRun"
+                    }
+                },
+                "type": "object"
+            },
+            "MappingResolveResponse": {
+                "properties": {
+                    "varName": {
+                        "type": "string"
+                    },
+                    "bioBankValue": {
+                        "type": "string"
+                    },
+                    "ucdmValue": {
+                        "type": "string"
                     }
                 },
                 "type": "object"
