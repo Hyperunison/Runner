@@ -61,7 +61,10 @@ class Api:
 
     def add_log_chunk(self, id: int, chunk: str):
         logging.info("Adding logs to run={}, len={}".format(id, len(chunk)))
-        self.api_instance.add_run_log_chunk(id=id, add_run_log_chunk_request=AddRunLogChunkRequest(chunk=chunk), token=self.token, version=self.version)
+        try:
+            self.api_instance.add_run_log_chunk(id=id, add_run_log_chunk_request=AddRunLogChunkRequest(chunk=chunk), token=self.token, version=self.version)
+        except Exception as e:
+            logging.error("Cannot add logs to run={}, len={}".format(id, str(e)))
 
     def accept_task(self, id: int):
         logging.info("Accepting task id={}".format(id))
@@ -71,3 +74,6 @@ class Api:
         logging.info("Resolving mapping for key={}, request={}".format(key, json.dumps(request)))
         res = self.api_instance.get_mappings(token=self.token, version=self.version, key=key, get_mappings_request=GetMappingsRequest(input=json.dumps(request)))
         return res
+    def block_task(self, id: int, runner_instance: str):
+        logging.info("Blocking task id={}".format(id))
+        return self.api_instance.block_task(id=str(id), token=self.token, version=self.version, runner_instance=runner_instance)

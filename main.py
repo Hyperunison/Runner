@@ -3,7 +3,11 @@ import sentry_sdk
 import yaml
 import time
 import auto_api_client
+<<<<<<< HEAD
 from typing import List, Dict
+=======
+import socket
+>>>>>>> origin/main
 
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
@@ -29,19 +33,26 @@ if 'sentry_dsn' in config:
     )
 
 with auto_api_client.ApiClient(configuration) as api_client:
+    runner_instance_id = socket.gethostname()
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
-    adapter = create_by_config(api, config)
+    adapter = create_by_config(api, config, runner_instance_id)
     schema = create_schema_by_config(config['phenoenotypicDb'])
     model_trainer = MlTrain(api, adapter, schema)
+    check_interval = config['check_runs_status_interval']
+    last_check = None
     while True:
         try:
-            adapter.check_runs_statuses()
+            if not last_check or time.time() - last_check > check_interval:
+                adapter.check_runs_statuses()
+                last_check = time.time()
             response = api.next_task()
             message = MessageFactory().create_message_object_from_response(message=response)
             if not message is None:
                 logging.info("Received message {}".format(response.type))
-
+                result = api.block_task(response.id, runner_instance_id)
+                if not result['ok']:
+                    continue
             if type(message) is NextflowRun:
                 api_instance.api_client.close()
                 api_instance.api_client.rest_client.pool_manager.clear()
