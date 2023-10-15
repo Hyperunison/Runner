@@ -4,11 +4,13 @@ import sys
 
 def configure_logs(config, message: str = ''):
     level = int(config['log']['level'])
-    logging.basicConfig(level=level, format='%(asctime)s [%(levelname)s] [{}] %(message)s'.format(message))
+    format = "{'time':'%(asctime)s', 'name': '%(name)s', 'level': '%(levelname)s', 'message': '%(message)s'}"
+    file_formatter=logging.Formatter(format)
+    logging.basicConfig(level=level, format=format)
     logging.getLogger().setLevel(level)
 
     for handler in logging.getLogger().handlers:
-        handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] [{}] %(message)s'.format(message)))
+        handler.setFormatter(file_formatter)
 
     logging.basicConfig()
     logging.getLogger().setLevel(level)
