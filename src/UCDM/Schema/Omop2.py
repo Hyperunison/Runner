@@ -31,8 +31,9 @@ class Omop2(Omop):
 
         select_array: list[str] = []
         for exp in export:
-            query.select[exp['name']] = self.build_sql_expression(exp, query, mapper)
-            select_array.append('{} as "{}"'.format(query.select[exp['name']], exp['name']))
+            alias = exp['as'] if 'as' in exp else  query.select[exp['name']]
+            query.select[alias] = self.build_sql_expression(exp, query, mapper)
+            select_array.append('{} as "{}"'.format(query.select[alias], alias))
 
         select_string = ", ".join(select_array)
 
