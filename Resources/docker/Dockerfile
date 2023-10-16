@@ -32,6 +32,7 @@ RUN pip install "setproctitle==1.3.2"
 RUN pip install "sqlalchemy>=2.0.0"
 RUN pip install "psycopg2"
 RUN pip install "sentry-sdk"
+RUN pip install "labkey"
 
 RUN apt-get install psmisc
 

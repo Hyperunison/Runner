@@ -63,8 +63,7 @@ class K8s(BaseAdapter):
         upload_log_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, ".nextflow.log", message.aws_s3_path+"/basic/")
         upload_trace_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, "trace-*.txt", message.aws_s3_path+"/basic/")
         cmd_text = '''
-        sleep 120; 
-        cd {workdir}; 
+        mkdir -p {workdir} && cd {workdir}; 
         {nextflow_cmd}; 
         exit_code=$?;
         {upload_log_cmd}; 
@@ -87,7 +86,6 @@ class K8s(BaseAdapter):
         if p.returncode > 0:
             logging.critical("Can't create pod, stdout={}, error={}".format(cmd, p.stdout, p.stderr))
             return False
-        time.sleep(60)
 
         # todo: send folder name to server
         self._create_folder_remote(folder)

@@ -30,7 +30,7 @@ class MlTrain:
 
         try:
             result = self.schema.resolve_cohort_definition(sql)
-            result_without_count = [{k: v for k, v in d.items() if k != 'count'} for d in result]
+            result_without_count = [{k: str(v) for k, v in d.items() if k != 'count'} for d in result]
 
             logging.info("SQL result: {}".format(json.dumps(result_without_count)))
             mapping = self.resolve_mapping(result_without_count, message)
@@ -78,9 +78,9 @@ class MlTrain:
     def convert_row(self, mapping_index: Dict[str, Dict[str, str]], row: Dict[str, str]) -> Optional[Dict[str, str]]:
         converted: Dict[str, str] = {}
         for field, value in row.items():
-            if not field in mapping_index or not value in mapping_index[field]:
+            if not str(value) in mapping_index[field]:
                 logging.info("Cant find in mapping field={}, value={}".format(field, value))
                 return None
-            converted[field] = mapping_index[field][value]
+            converted[field] = mapping_index[field][str(value)]
 
         return converted

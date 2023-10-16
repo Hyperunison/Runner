@@ -2,11 +2,9 @@ import json
 import logging
 import random
 from typing import List, Dict
-
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.UCDM.Schema.BaseSchema import BaseSchema
