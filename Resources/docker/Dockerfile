@@ -32,8 +32,14 @@ RUN pip install "setproctitle==1.3.2"
 RUN pip install "sqlalchemy>=2.0.0"
 RUN pip install "psycopg2"
 RUN pip install "sentry-sdk"
+RUN pip install "labkey"
 
 RUN apt-get install psmisc
+
+RUN echo 'machine labkey.hyperunison.com' >> /root/.netrc
+RUN echo 'login artem@hyperunison.com' >> /root/.netrc
+RUN echo 'password EiphoSaeWie2roo9' >> /root/.netrc
+RUN chmod 400 /root/.netrc
 
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
 ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; done
