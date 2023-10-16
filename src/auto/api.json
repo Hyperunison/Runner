@@ -792,15 +792,12 @@
                     "readCount": {
                         "type": "integer"
                     },
-                    "completed": {
-                        "type": "boolean"
-                    },
                     "data": {
                         "type": "object",
                         "additionalProperties": true
                     },
                     "status": {
-                        "type": "integer"
+                        "type": "string"
                     },
                     "runnerInstance": {
                         "type": "string"
