@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Resources/docker/Dockerfile
+    container_name: ${CONTAINER_NAME:-unison-agent}
     volumes:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube
