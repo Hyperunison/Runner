@@ -17,6 +17,6 @@ class BaseSchema:
         logging.info('SQL query got: %s'.format(json.dumps(sql)))
         pass
 
-    def resolve_cohort_definition_sql_query(self, where, export) -> str:
+    def build_cohort_definition_sql_query(self, where, export, distribution: bool) -> str:
         logging.info('Where got: %s, export got: %s'.format(json.dumps(where), json.dumps(export)))
         return ''

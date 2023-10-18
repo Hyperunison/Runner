@@ -13,7 +13,7 @@ metadata:
 spec:
   restartPolicy: Never
   containers:
-  - command: ["sh", "-c"]
+  - command: ["bash", "-c"]
     args: [ "{cmd}"]
     image: {image}
     imagePullPolicy: Always

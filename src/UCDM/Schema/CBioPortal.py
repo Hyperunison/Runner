@@ -33,6 +33,7 @@ def rand_alias_name(prefix: str) -> str:
 
 class VariableMapper:
     map: Dict[str, str] = {
+        "patient_id": '"patient"."patient_id" as participant_id',
         "race": "patient.race",
         "ethnicity": "patient.ethnicity",
         "gender": "patient.sex",
@@ -62,10 +63,7 @@ class CBioPortal(BaseSchema):
         self.table = table
         super().__init__()
 
-    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
-        where = cohort_definition.cohort_definition['where']
-        export = cohort_definition.cohort_definition['export']
-        key = cohort_definition.cohort_definition['key']
+    def build_cohort_definition_sql_query(self, where, export, distribution: bool) -> str:
         logging.info("Where definition got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()
@@ -74,9 +72,9 @@ class CBioPortal(BaseSchema):
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
 
         if len(query.conditions) > 0:
-            where = "(" + (")\nAND (".join(query.conditions)) + ")"
+            sql_where = "(" + (")\nAND (".join(query.conditions)) + ")"
         else:
-            where = "true"
+            sql_where = "true"
 
         select_array: list[str] = []
         for exp in export:
@@ -86,12 +84,27 @@ class CBioPortal(BaseSchema):
 
         select_string = ", ".join(select_array)
 
-        sql = "SELECT {}, count(distinct patient.patient_id) as count FROM {} as patient\n".format(select_string, self.table)
+        if distribution:
+            additional_field = "count(distinct patient.patient_id) as count"
+        else:
+            additional_field = mapper.convert_var_name("patient_id")
 
-        sql += "WHERE {}\n".format(where) + \
-               "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-               "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
-               "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
+        sql = "SELECT {}, {} FROM {} as patient\n".format(select_string, additional_field, self.table)
+
+        sql += "WHERE {}\n".format(sql_where)
+
+        if distribution:
+            sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
+                   "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
+                   "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
+
+        return sql
+    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
+        key = cohort_definition.cohort_definition['key']
+        sql = self.build_cohort_definition_sql_query(
+            cohort_definition.cohort_definition['where'],
+            cohort_definition.cohort_definition['export']
+        )
 
         try:
             result = self.engine.execute(text(sql)).mappings().all()

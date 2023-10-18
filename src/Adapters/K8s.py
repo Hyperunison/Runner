@@ -10,6 +10,7 @@ import time
 import hashlib
 import os
 import sys
+from typing import Optional, Dict, List
 
 from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
@@ -50,57 +51,80 @@ class K8s(BaseAdapter):
         return 'k8s'
 
     def process_nextflow_run(self, message: NextflowRun) -> bool:
-        # create folder
-        # upload data.json and main.nf
+        input_files: Dict[str, str] = {
+            'main.nf': message.nextflow_code,
+            'data.json': json.dumps(message.input_data),
+             'aws_config': "[default]\nregion = eu-central-1\n",
+             'aws_credentials': "[default]\n" +
+                                "aws_access_key_id={}\n".format(message.aws_id) +
+                                "aws_secret_access_key={}\n".format(message.aws_key)}
 
-        self.api_client.set_run_status(message.run_id, 'process')
+        output_file_masks: Dict[str, str] = {
+            ".nextflow.log": "/basic/",
+            "trace-*.txt": "/basic/",
+        }
 
-        folder = message.dir
+        return self.run_nextflow_run_abstract(
+            message.run_id,
+            message.command,
+            message.dir,
+            message.aws_s3_path,
+            input_files,
+            output_file_masks
+        )
+
+    def run_nextflow_run_abstract(
+        self, run_id: int, nextflow_command: str, workdir: Optional[str], aws_s3_path: str, input_files: Dict[str, str], output_file_masks: Dict[str, str]
+    ) -> bool:
+        self.api_client.set_run_status(run_id, 'process')
+
+        folder = workdir
         if folder == "" or folder is None:
             folder = 'tmp_' + self._random_word(16)
         folder = folder.replace(self.work_dir, "")
-
-        upload_log_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, ".nextflow.log", message.aws_s3_path+"/basic/")
-        upload_trace_cmd = self._get_upload_file_to_s3_cmd(self.work_dir+"/"+folder, "trace-*.txt", message.aws_s3_path+"/basic/")
-        cmd_text = '''
-        mkdir -p {workdir} && cd {workdir}; 
-        {nextflow_cmd}; 
-        exit_code=$?;
-        {upload_log_cmd}; 
-        exit_code_upload_log=$?;
-        {upload_trace_cmd};
-        exit_code_upload_trace=$?;
-        exit $exit_code && $exit_code_upload_log && $exit_code_upload_trace;
-        '''.format(
-            workdir = self.work_dir + '/' + folder,
-            nextflow_cmd = message.command,
-            upload_log_cmd = upload_log_cmd,
-            upload_trace_cmd = upload_trace_cmd,
-        )
-        logging.info("RAW command: {}".format(cmd_text))
-        cmd = self.get_kube_create_cmd(cmd_text, message.run_id)
-        args = shlex.split(cmd)
-        logging.info("Executing command: {}".format(cmd))
-        p = subprocess.run(args, capture_output=True)
-
-        if p.returncode > 0:
-            logging.critical("Can't create pod, stdout={}, error={}".format(cmd, p.stdout, p.stderr))
-            return False
 
         # todo: send folder name to server
         self._create_folder_remote(folder)
 
         # upload aws credentials
-        self._upload_file(message.nextflow_code, folder + '/main.nf')
-        self._upload_file(json.dumps(message.input_data), folder + '/data.json')
-        self._upload_file("[default]\nregion = eu-central-1\n", folder+"/aws_config")
-        self._upload_file(
-            "[default]\naws_access_key_id={}\naws_secret_access_key={}\n".format(message.aws_id, message.aws_key),
-            folder+"/aws_credentials"
+        for name, content in input_files.items():
+            self._upload_file(content, folder + '/' + name)
+
+        upload_results_cmd = ''
+        for file_mask, s3_folder in output_file_masks.items():
+            upload_results_cmd += self._get_upload_file_to_s3_cmd(
+                self.work_dir + "/" + folder,
+                file_mask,
+                aws_s3_path + s3_folder
+            )+";\ncode=$?;\n let exit_code_sum=exit_code_sum+code;\n"
+
+        cmd_text = '''
+        cd {workdir}; 
+        {nextflow_cmd}; 
+        exit_code_sum=$?;
+        {upload_results_cmd}
+        echo Exit code: $exit_code_sum;
+        exit $exit_code_sum;
+        '''.format(
+            workdir = self.work_dir + '/' + folder,
+            nextflow_cmd = nextflow_command,
+            upload_results_cmd = upload_results_cmd,
         )
+        logging.info("RAW command: {}".format(cmd_text))
+        [cmd, pod_name] = self.kube_create_prepare_pod_creation(cmd_text, run_id)
+        args = shlex.split(cmd)
+        logging.info("Executing command: {}".format(cmd))
+        p = subprocess.run(args, capture_output=True)
+
+        if p.returncode > 0:
+            logging.critical("Can't create pod, stdout={}, error={}, return_code={}".format(cmd, p.stdout, p.stderr, p.returncode))
+            return False
+
         # hack
         # cmd = 'bash -c "for i in {1..3}; do sleep 1; echo test; done"'
-        self.process_send_pod_logs(self.master_pod, int(message.run_id))
+        # Here we should wait until pod will start
+        time.sleep(3)
+        self.process_send_pod_logs(pod_name, int(run_id))
         return True
 
     def process_get_process_logs(self, message: GetProcessLogs) -> bool:
@@ -231,13 +255,13 @@ class K8s(BaseAdapter):
     def get_kube_exec_cmd(self, cmd) -> str:
         return 'kubectl --namespace={} exec {} -- bash -c {}'.format(self.namespace, self.master_pod, pipes.quote(cmd))
 
-    def get_kube_create_cmd(self, cmd, run_id) -> str:
+    def kube_create_prepare_pod_creation(self, cmd, run_id) -> str:
         container_hash = hashlib.md5(cmd.encode('utf-8')).hexdigest()
         podfile_name = os.path.dirname(__file__)+"/../../Resources/files/pod-{}.yaml".format(container_hash)
         with open(os.path.dirname(__file__)+"/../../Resources/files/pod-tpl.yaml", "r") as file:
             tpl = file.read()
 
-        res =  tpl.format(
+        res = tpl.format(
             namespace = self.namespace,
             pod_prefix = self.pod_prefix,
             run_id = run_id,
@@ -254,8 +278,8 @@ class K8s(BaseAdapter):
             file.write(res)
 
         cmd = "kubectl create -f {}".format(podfile_name)
-        self.master_pod = "{}-{}".format(self.pod_prefix, container_hash)
-        return cmd
+        pod_name = "{}-{}".format(self.pod_prefix, container_hash)
+        return [cmd, pod_name]
 
     def _create_folder_remote(self, folder: str):
         folder = self.work_dir + '/' + folder
@@ -281,8 +305,14 @@ class K8s(BaseAdapter):
         logging.debug("stdout={}, err={}".format(p.stdout, p.stderr))
 
     def _get_upload_file_to_s3_cmd(self, folder: string, remote_file_name: string, s3_path: string) -> string:
+
+        if remote_file_name[-1] == "/":
+            aws_action = "sync"
+        else:
+            aws_action = "cp"
+
         cmd = 'cd {}; export AWS_CONFIG_FILE=aws_config; export AWS_SHARED_CREDENTIALS_FILE=aws_credentials; aws s3 ' \
-              'cp {} {}'.format(folder, remote_file_name, s3_path)
+              '{} {} {}'.format(folder, aws_action, remote_file_name, s3_path)
         return cmd
 
     def _upload_file_to_s3(self, folder: string, remote_file_name: string, s3_path: string):
@@ -295,7 +325,7 @@ class K8s(BaseAdapter):
 
     def _exec_cmd_remote(self, cmd: str) -> [int, str]:
         cmd_wrapped = self.get_kube_exec_cmd(cmd)
-        logging.info("Executing command: {}".format(cmd))
+        logging.info("Executing command: {}".format(cmd_wrapped))
         args = shlex.split(cmd_wrapped)
         p = subprocess.run(args, capture_output=True)
         code = p.returncode

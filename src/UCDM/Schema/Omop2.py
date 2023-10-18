@@ -16,7 +16,7 @@ class Omop2(Omop):
 
         return result
 
-    def resolve_cohort_definition_sql_query(self, where, export) -> str:
+    def build_cohort_definition_sql_query(self, where, export) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()

@@ -5,6 +5,7 @@ import time
 import auto_api_client
 import socket
 
+from src.Service.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
@@ -13,9 +14,9 @@ from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
+from src.Message.StartWorkflow import StartWorkflow
 from src.Message.StartMLTrain import StartMLTrain
 from src.MessageFactory import MessageFactory
-from src.Service.MlTrain import MlTrain
 from src.UCDM.Factory import create_schema_by_config
 
 config = yaml.safe_load(open("config.yaml", "r"))
@@ -34,7 +35,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
     api = Api(api_instance, config['api_version'], config['agent_token'])
     adapter = create_by_config(api, config, runner_instance_id)
     schema = create_schema_by_config(config['phenoenotypicDb'])
-    model_trainer = MlTrain(api, adapter, schema)
+    workflow_executor = NextflowCohortWorkflowExecutor(api, adapter, schema)
     check_interval = config['check_runs_status_interval']
     last_check = None
     while True:
@@ -60,8 +61,8 @@ with auto_api_client.ApiClient(configuration) as api_client:
                 adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
                 schema.execute_cohort_definition(message, api)
-            elif type(message) is StartMLTrain:
-                model_trainer.start_model_train(message)
+            elif type(message) is StartWorkflow:
+                workflow_executor.execute_workflow(message)
             elif message is None:
                 if False:
                     logging.debug("idle, do nothing")

@@ -45,6 +45,7 @@ def rand_alias_name(prefix: str) -> str:
 
 class VariableMapper:
     map: Dict[str, str] = {
+        "patient_id": '"patient"."person_id" as participant_id',
         "race": '"patient"."race"',
         "ethnicity": '"patient"."ethnicity"',
         "gender": '"patient"."gender"',
@@ -72,7 +73,7 @@ class Omop(BaseSchema):
         self.min_count = min_count
         super().__init__()
 
-    def resolve_cohort_definition_sql_query(self, where, export) -> str:
+    def build_cohort_definition_sql_query(self, where, export, distribution: bool) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()
@@ -80,9 +81,9 @@ class Omop(BaseSchema):
         for exp in where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
         if len(query.conditions) > 0:
-            where = "    (" + (")\nAND\n    (".join(query.conditions)) + ")"
+            sql_where = "    (" + (")\nAND\n    (".join(query.conditions)) + ")"
         else:
-            where = "true"
+            sql_where = "true"
 
         select_array: list[str] = []
         for exp in export:
@@ -93,10 +94,14 @@ class Omop(BaseSchema):
 
         select_string = ", ".join(select_array)
 
-        sql = "SELECT\n" + \
-              "    {},\n".format(select_string) + \
-              "    count(distinct patient.person_id) as count\n" + \
-              "FROM(\n" + \
+        sql = "SELECT\n    {},\n".format(select_string)
+
+        if distribution:
+            sql += "    count(distinct patient.person_id) as count\n"
+        else:
+            sql += mapper.convert_var_name("patient_id")+"\n"
+
+        sql +="FROM(\n" + \
               "    SELECT person_id, year_of_birth, birth_datetime, \n" + \
               "    (\n" + \
               "        SELECT concept.concept_code\n" + \
@@ -118,10 +123,11 @@ class Omop(BaseSchema):
         for j in query.joins:
             sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
 
-        sql += "WHERE\n{}\n".format(where) + \
-               "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-               "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
-               "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
+        sql += "WHERE\n{}\n".format(sql_where)
+        if distribution:
+            sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
+                   "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
+                   "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         logging.info("Generated SQL query: \n{}".format(sql))
 
@@ -134,9 +140,10 @@ class Omop(BaseSchema):
         return result
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
-        sql = self.resolve_cohort_definition_sql_query(
+        sql = self.build_cohort_definition_sql_query(
             cohort_definition.cohort_definition['where'],
-            cohort_definition.cohort_definition['export']
+            cohort_definition.cohort_definition['export'],
+            True
         )
         try:
             result = self.resolve_cohort_definition(sql)

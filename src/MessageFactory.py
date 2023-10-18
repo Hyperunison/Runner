@@ -4,6 +4,7 @@ from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.KillJob import KillJob
 from src.Message.NextflowRun import NextflowRun
 from src.Message.StartMLTrain import StartMLTrain
+from src.Message.StartWorkflow import StartWorkflow
 from src.auto.auto_api_client.model.runner_message import RunnerMessage
 
 
@@ -19,5 +20,7 @@ class MessageFactory:
             return CohortAPIRequest(message)
         elif message.type == 'StartMlTrain':
             return StartMLTrain(message)
+        elif message.type == 'StartNextflowCohortWorkflow':
+            return StartWorkflow(message)
         else:
             return
