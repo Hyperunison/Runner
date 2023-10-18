@@ -99,6 +99,13 @@ class CBioPortal(BaseSchema):
                    "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         return sql
+
+    def resolve_cohort_definition(self, sql: str):
+        result = self.engine.execute(text(sql)).mappings().all()
+        result = [dict(row) for row in result]
+
+        return result
+
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
         sql = self.build_cohort_definition_sql_query(
@@ -108,8 +115,7 @@ class CBioPortal(BaseSchema):
         )
 
         try:
-            result = self.engine.execute(text(sql)).mappings().all()
-            result = [dict(row) for row in result]
+            result = self.resolve_cohort_definition(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key,
                                                   cohort_definition.raw_only)
