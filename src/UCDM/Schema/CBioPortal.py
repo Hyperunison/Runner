@@ -103,7 +103,8 @@ class CBioPortal(BaseSchema):
         key = cohort_definition.cohort_definition['key']
         sql = self.build_cohort_definition_sql_query(
             cohort_definition.cohort_definition['where'],
-            cohort_definition.cohort_definition['export']
+            cohort_definition.cohort_definition['export'],
+            True
         )
 
         try:
