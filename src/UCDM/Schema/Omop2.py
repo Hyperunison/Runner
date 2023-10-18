@@ -16,7 +16,7 @@ class Omop2(Omop):
 
         return result
 
-    def build_cohort_definition_sql_query(self, where, export) -> str:
+    def build_cohort_definition_sql_query(self, where, export, distribution: bool) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
         mapper = VariableMapper()
@@ -37,8 +37,14 @@ class Omop2(Omop):
 
         select_string = ", ".join(select_array)
 
-        sql = "SELECT {}, count(distinct patient.person_id) as count\n".format(select_string) + \
-              "FROM(\n" + \
+        sql = "SELECT {}, ".format(select_string)
+
+        if distribution:
+            sql += " count(distinct patient.person_id) as count\n"
+        else:
+            sql += mapper.convert_var_name("patient_id")+"\n"
+
+        sql +="FROM(\n" + \
               "   SELECT person_id, year_of_birth, birth_datetime, \n" + \
               "   (SELECT concept.concept_code FROM concept WHERE concept_id = gender_concept_id) AS gender,\n" + \
               "   (SELECT concept.concept_code FROM concept WHERE concept_id = ethnicity_concept_id) AS ethnicity,\n" + \
@@ -49,8 +55,10 @@ class Omop2(Omop):
         for j in query.joins:
             sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
 
-        sql += "WHERE {}\n".format(where) + \
-               "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
+        sql += "WHERE {}\n".format(where)
+
+        if distribution:
+            sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
                "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
                "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
 

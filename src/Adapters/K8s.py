@@ -54,8 +54,8 @@ class K8s(BaseAdapter):
         input_files: Dict[str, str] = {
             'main.nf': message.nextflow_code,
             'data.json': json.dumps(message.input_data),
-             'aws_config': "[default]\nregion = eu-central-1\n",
-             'aws_credentials': "[default]\n" +
+            'aws_config': "[default]\nregion = eu-central-1\n",
+            'aws_credentials': "[default]\n" +
                                 "aws_access_key_id={}\n".format(message.aws_id) +
                                 "aws_secret_access_key={}\n".format(message.aws_key)}
 

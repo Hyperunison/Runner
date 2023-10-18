@@ -27,7 +27,11 @@ class GwasFederated(WorkflowBase):
             message.s3_path,
             {
                 "phenotype.txt": csv_content,
-                "nextflow.config": nextflow_config
+                "nextflow.config": nextflow_config,
+                'aws_config': "[default]\nregion = eu-central-1\n",
+                'aws_credentials': "[default]\n" +
+                                   "aws_access_key_id={}\n".format(message.aws_id) +
+                                   "aws_secret_access_key={}\n".format(message.aws_key),
             },
             {
                 ".nextflow.log": "/basic/",

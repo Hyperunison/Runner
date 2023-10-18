@@ -25,5 +25,7 @@ class StartWorkflow(BaseMessage):
         self.parameters = message.data['parameters']
         self.run_name = message.data['runName']
         self.weblog_url = message.data['weblogUrl']
+        self.aws_id = message.data['awsId']
+        self.aws_key = message.data['awsKey']
 
 
