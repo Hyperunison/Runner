@@ -192,7 +192,8 @@ class Ukbb(BaseSchema):
                     '{}.patient_id=patient.id'.format(tmp_alias),
                 ))
                 mapper.declare_var(alias+'.icd10', tmp_alias+'.icd10')
-                mapper.declare_var(alias+'.date_start', tmp_alias+'.date_start')
+                mapper.declare_var(alias+'.start_date', tmp_alias+'.date_start')
+                mapper.declare_var(alias+'.end_date', tmp_alias+'.date_end')
                 arr = list[str]()
 
                 if len(statement['where']) == 0:
