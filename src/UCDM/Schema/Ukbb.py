@@ -101,12 +101,7 @@ class Ukbb(BaseSchema):
         else:
             sql += mapper.convert_var_name("patient_id")+"\n"
 
-        sql +="FROM(\n" + \
-              "    SELECT id, year_of_birth, date_of_birth, \n" + \
-              "    gender,\n" + \
-              "    ethnicity,\n" + \
-              "    race\n" + \
-              "FROM patient) as patient\n"
+        sql +="FROM patient\n"
 
         for j in query.joins:
             sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
@@ -204,6 +199,10 @@ class Ukbb(BaseSchema):
                 return "(" + ") AND (".join(arr) + ")"
             if statement['event'] == 'measurement':
                 alias = statement['alias']
+                logging.info(statement)
+
+
+
                 tmp_alias = rand_alias_name("measurement_")
                 query.joins.append(SQLJoin(
                     'measurement',
