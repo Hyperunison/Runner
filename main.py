@@ -4,6 +4,7 @@ import yaml
 import time
 import auto_api_client
 import socket
+import sys
 
 from src.Service.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.auto.auto_api_client.api import agent_api
@@ -75,6 +76,6 @@ with auto_api_client.ApiClient(configuration) as api_client:
             time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:
             logging.critical("Exception when calling AgentApi: %s\n" % e)
-        except e:
+        except Exception as e:
             logging.critical("Unknown exception: %s\n" % e)
-            process.exit(1)
+            sys.exit(1)

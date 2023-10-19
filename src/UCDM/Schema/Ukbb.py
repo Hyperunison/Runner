@@ -45,13 +45,13 @@ def rand_alias_name(prefix: str) -> str:
 
 class VariableMapper:
     map: Dict[str, str] = {
-        "patient_id": '"patient"."person_id" as participant_id',
+        "patient_id": '"patient"."id" as participant_id',
         "race": '"patient"."race"',
         "ethnicity": '"patient"."ethnicity"',
         "gender": '"patient"."gender"',
         "age": 'year(NOW())-"patient"."year_of_birth"',
         "year_of_birth": '"patient"."year_of_birth"',
-        "date_of_birth": '"patient"."birth_datetime"',
+        "date_of_birth": '"patient"."date_of_birth"',
     }
 
     def convert_var_name(self, var: str) -> str:
@@ -103,22 +103,10 @@ class Ukbb(BaseSchema):
 
         sql +="FROM(\n" + \
               "    SELECT id, year_of_birth, date_of_birth, \n" + \
-              "    (\n" + \
-              "        SELECT concept.concept_code\n" + \
-              "        FROM concept\n" + \
-              "        WHERE concept_id = gender_concept_id\n" + \
-              "    ) AS gender,\n" + \
-              "    (\n" + \
-              "        SELECT concept.concept_code\n" + \
-              "        FROM concept\n" + \
-              "        WHERE concept_id = ethnicity_concept_id\n" + \
-              "    ) AS ethnicity,\n" + \
-              "    (\n" + \
-              "        SELECT concept.concept_code\n" + \
-              "        FROM concept\n" + \
-              "        WHERE concept_id = race_concept_id\n" + \
-              "    ) AS race\n" + \
-              "FROM person) as patient\n"
+              "    gender,\n" + \
+              "    ethnicity,\n" + \
+              "    race\n" + \
+              "FROM patient) as patient\n"
 
         for j in query.joins:
             sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
@@ -199,18 +187,12 @@ class Ukbb(BaseSchema):
                 alias = statement['alias']
                 tmp_alias = rand_alias_name("diagnoses_")
                 query.joins.append(SQLJoin(
-                    'condition_occurrence',
+                    'diagnosis',
                     tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
+                    '{}.patient_id=patient.id'.format(tmp_alias),
                 ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    '{}.concept_id={}.condition_concept_id'.format(alias, tmp_alias)
-                ))
-                mapper.declare_var(alias+'.icd10', alias+'.concept_name')
-                mapper.declare_var(alias+'.start_date', tmp_alias+'.condition_start_date')
-                mapper.declare_var(alias+'.stop_reason', tmp_alias+'.stop_reason')
+                mapper.declare_var(alias+'.icd10', tmp_alias+'.icd10')
+                mapper.declare_var(alias+'.date_start', tmp_alias+'.date_start')
                 arr = list[str]()
 
                 if len(statement['where']) == 0:
@@ -225,16 +207,11 @@ class Ukbb(BaseSchema):
                 query.joins.append(SQLJoin(
                     'measurement',
                     tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
+                    '{}.patient_id=patient.id'.format(tmp_alias),
                 ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    "{}.concept_id={}.measurement_concept_id".format(alias, tmp_alias, alias)
-                ))
-                mapper.declare_var(alias+'.name', alias+'.concept_name')
-                mapper.declare_var(alias+'.date', tmp_alias+'.measurement_date')
-                mapper.declare_var(alias+'.value', tmp_alias+'.measurement_source_value')
+                mapper.declare_var(alias+'.name', tmp_alias+'.name')
+                mapper.declare_var(alias+'.date', tmp_alias+'.date')
+                mapper.declare_var(alias+'.value', tmp_alias+'.value')
                 arr = list[str]()
 
                 if len(statement['where']) == 0:
@@ -244,55 +221,6 @@ class Ukbb(BaseSchema):
 
                 return "(" + ") AND (".join(arr) + ")"
 
-            if statement['event'] == 'procedure':
-                alias = statement['alias']
-                tmp_alias = rand_alias_name("procedure_")
-                query.joins.append(SQLJoin(
-                    'procedure_occurrence',
-                    tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
-                ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    "{}.concept_id={}.procedure_concept_id".format(alias, tmp_alias, alias)
-                ))
-                mapper.declare_var(alias+'.name', alias+'.concept_name')
-                mapper.declare_var(alias+'.date', tmp_alias+'.procedure_date')
-                mapper.declare_var(alias+'.value', tmp_alias+'.procedure_source_value')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-
-            if statement['event'] == 'drug':
-                alias = statement['alias']
-                tmp_alias = rand_alias_name("drug_era_")
-                query.joins.append(SQLJoin(
-                    'drug_era',
-                    tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
-                ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    "{}.concept_id={}.drug_concept_id".format(alias, tmp_alias, alias)
-                ))
-                mapper.declare_var(alias+'.name', alias+'.concept_name')
-                mapper.declare_var(alias+'.start_date', tmp_alias+'.drug_era_start_date')
-                mapper.declare_var(alias+'.end_date', tmp_alias+'.drug_era_end_date')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
 
             raise ValueError("Unknown event type got: {}".format(statement['event']))
 
