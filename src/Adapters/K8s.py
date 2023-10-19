@@ -100,6 +100,7 @@ class K8s(BaseAdapter):
 
         cmd_text = '''
         cd {workdir}; 
+        stty cols 500;
         {nextflow_cmd}; 
         exit_code_sum=$?;
         {upload_results_cmd}

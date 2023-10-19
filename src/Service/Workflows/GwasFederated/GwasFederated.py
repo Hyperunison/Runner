@@ -11,11 +11,14 @@ class GwasFederated(WorkflowBase):
     def execute(self, message: StartWorkflow):
         logging.info("Workflow execution task")
         logging.info(message)
+        logging.info("Parameters: {}".format(message.parameters))
+
+        variables: List[str] = message.parameters['variables']
 
         resolver = UCDMResolver(self.api, self.schema)
         ucdm = resolver.get_ucdm_result(message.cohort_definition)
-        csv_content = self.build_phenotype(ucdm)
-        nextflow_config = self.get_nextflow_config(ucdm)
+        csv_content = self.build_phenotype(ucdm, variables)
+        nextflow_config = self.get_nextflow_config(variables, bool(message.parameters['isBinary']))
 
         self.adapter.run_nextflow_run_abstract(
             message.run_id,
@@ -35,21 +38,20 @@ class GwasFederated(WorkflowBase):
             },
             {
                 ".nextflow.log": "/basic/",
+                "nextflow.config": "/",
                 "trace-*.txt": "/basic/",
                 "output/": "/output/",
             }
         )
 
-    def build_phenotype(self, ucdm: List[Dict[str, str]]) -> str:
+    def build_phenotype(self, ucdm: List[Dict[str, str]], variables: List[str]) -> str:
         if len(ucdm) == 0:
             return ''
-        keys = [key for key, value in ucdm[0].items() if key != "participant_id"]
-
-        content = "FID IID " + (" ".join(keys)) + "\n"
+        content = "FID IID " + (" ".join(variables)) + "\n"
         i = 1
         for row in ucdm:
             content += "{} {}".format(i, i)
-            for key in keys:
+            for key in variables:
                 content += " " + self.convert_value(row[key])
             content += "\n"
             i += 1
@@ -62,17 +64,21 @@ class GwasFederated(WorkflowBase):
 
         return str(variable)
 
-    def get_nextflow_config(self, ucdm: List[Dict[str, str]]) -> str:
-        keys = [key for key, value in ucdm[0].items() if key != "participant_id"]
+    def get_nextflow_config(self, variables: List[str], is_binary: bool) -> str:
+        if is_binary:
+            is_binary_str = 'true'
+        else:
+            is_binary_str = 'false'
+
         config =  "params {\n"
-        config += "  project                       = 'Unison_GWAS_VCF_3'\n"
+        config += "  project                       = 'Unison_GWAS'\n"
         config += "  genotypes_prediction          = '/data/nextflow/data/example.{bim,bed,fam}'\n"
         config += "  genotypes_association         = '/data/nextflow/data/example.vcf.gz'\n"
         config += "  genotypes_build               = 'hg19'\n"
         config += "  genotypes_association_format  = 'vcf'\n"
         config += "  phenotypes_filename           = 'phenotype.txt'\n"
-        config += "  phenotypes_columns            = '{}'\n".format(",".join(keys))
-        config += "  phenotypes_binary_trait       = false\n"
+        config += "  phenotypes_columns            = '{}'\n".format(",".join(variables))
+        config += "  phenotypes_binary_trait       = {}\n".format(is_binary_str)
         config += "  regenie_test                  = 'additive'\n"
         config += "  annotation_min_log10p         = 2\n"
         config += "  rsids_filename                = '/data/nextflow/data/rsids.tsv.gz'\n"
