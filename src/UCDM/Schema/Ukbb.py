@@ -99,7 +99,7 @@ class Ukbb(BaseSchema):
         if distribution:
             sql += "    count(distinct patient.id) as count\n"
         else:
-            sql += mapper.convert_var_name("id")+"\n"
+            sql += mapper.convert_var_name("patient_id")+"\n"
 
         sql +="FROM(\n" + \
               "    SELECT id, year_of_birth, date_of_birth, \n" + \

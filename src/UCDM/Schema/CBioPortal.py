@@ -95,7 +95,7 @@ class CBioPortal(BaseSchema):
 
         if distribution:
             sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-                   "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
+                   "HAVING COUNT(distinct patient.patient_id) >= {}\n".format(self.min_count) + \
                    "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         return sql

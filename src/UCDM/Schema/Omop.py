@@ -126,7 +126,7 @@ class Omop(BaseSchema):
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution:
             sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-                   "HAVING COUNT(*) >= {}\n".format(self.min_count) + \
+                   "HAVING COUNT(distinct patient.person_id) >= {}\n".format(self.min_count) + \
                    "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         logging.info("Generated SQL query: \n{}".format(sql))
