@@ -70,3 +70,14 @@ $ bash update-api.sh
 $ make up
 $ make sh
 ```
+
+### Api update
+```
+$ make up-api
+```
+
+
+## Deploy on host
+```
+$ make deploy
+```

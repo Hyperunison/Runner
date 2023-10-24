@@ -6,6 +6,8 @@ services:
       context: .
       dockerfile: Resources/docker/Dockerfile
     container_name: ${CONTAINER_NAME:-unison-agent}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     volumes:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube

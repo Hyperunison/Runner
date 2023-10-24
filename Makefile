@@ -21,3 +21,9 @@ up-api:
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T unison-agent sh -c "pip install -r requirements.txt" ;\
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T unison-agent sh -c "pip install pydevd_pycharm"
 
+deploy:
+	sudo chown -R admin: Resources/.kube/cache ;\
+	git pull -f;\
+	docker-compose build ;\
+    docker-compose down --remove-orphans ;\
+    docker-compose up -d
