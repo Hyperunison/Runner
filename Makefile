@@ -24,6 +24,6 @@ up-api:
 deploy:
 	sudo chown -R admin: Resources/.kube/cache ;\
 	git pull -f;\
-	docker-compose build ;\
-    docker-compose down --remove-orphans ;\
-    docker-compose up -d
+	docker compose build ;\
+    docker compose down --remove-orphans ;\
+    docker compose up -d
