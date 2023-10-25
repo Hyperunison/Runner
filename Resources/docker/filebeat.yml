@@ -9,25 +9,13 @@ filebeat.autodiscover:
       templates:
         - condition:
             contains:
-#              docker.container.labels.unison-filebeat: "true"
-              docker.container.name: '${WORKER_NAME:}' # unison-agent3 #${WORKER_NAME}
+              docker.container.name: '${WORKER_NAME:}'
           config:
             - type: container
               paths:
                 - /var/lib/docker/containers/${data.docker.container.id}/*.log
               include_lines: ['^{']
               exclude_lines: [ "^\\s+[\\-`('.|_]" ]  # drop asciiart lines
-
-
-#filebeat.inputs:
-#  - type: log
-#    enabled: true
-#    paths:
-#      - "/var/lib/docker/containers/*/*.log"
-#    include_lines: ['^{']
-
-#processors:
-#  - add_cloud_metadata: ~
 
 output.elasticsearch:
   allow_older_versions: true

@@ -12,8 +12,6 @@ services:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube
       - ./Resources/.aws:/root/.aws
-#    labels:
-#      unison-filebeat: "true"
 
   filebeat:
     container_name: ${CONTAINER_NAME:-unison-agent}-filebeat
