@@ -12,3 +12,20 @@ services:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube
       - ./Resources/.aws:/root/.aws
+#    labels:
+#      unison-filebeat: "true"
+
+  filebeat:
+    container_name: ${CONTAINER_NAME:-unison-agent}-filebeat
+    image: elastic/filebeat:8.10.3
+    entrypoint: filebeat -e -strict.perms=false
+    user: root
+    environment:
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST}
+      WORKER_NAME: ${CONTAINER_NAME}
+    volumes:
+      - ./Resources/docker/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
