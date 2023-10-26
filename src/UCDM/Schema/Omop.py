@@ -210,6 +210,7 @@ class Omop(BaseSchema):
                 ))
                 mapper.declare_var(alias+'.icd10', alias+'.concept_name')
                 mapper.declare_var(alias+'.start_date', tmp_alias+'.condition_start_date')
+                mapper.declare_var(alias+'.end_date', tmp_alias+'.condition_end_date')
                 mapper.declare_var(alias+'.stop_reason', tmp_alias+'.stop_reason')
                 arr = list[str]()
 
