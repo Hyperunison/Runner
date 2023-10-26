@@ -18,6 +18,15 @@ filebeat.autodiscover:
               include_lines: ['^{']
               exclude_lines: [ "^\\s+[\\-`('.|_]" ]  # drop asciiart lines
 
+processors:
+  - decode_json_fields:
+      fields: ["message", "level"]
+      process_array: true
+      max_depth: 2
+      target: "json"
+      overwrite_keys: true
+      add_error_key: true
+
 output.elasticsearch:
   allow_older_versions: true
   hosts: ['${ELASTICSEARCH_HOST:}']
