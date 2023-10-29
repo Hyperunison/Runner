@@ -200,9 +200,6 @@ class Ukbb(BaseSchema):
             if statement['event'] == 'measurement':
                 alias = statement['alias']
                 logging.info(statement)
-
-
-
                 tmp_alias = rand_alias_name("measurement_")
                 query.joins.append(SQLJoin(
                     'measurement',
@@ -221,8 +218,18 @@ class Ukbb(BaseSchema):
 
                 return "(" + ") AND (".join(arr) + ")"
 
-
             raise ValueError("Unknown event type got: {}".format(statement['event']))
+
+        if statement['type'] == 'conditional':
+            condition = statement['nodes'][0]
+            result1 = statement['nodes'][1]
+            result2 = statement['nodes'][2]
+            return  "\n    CASE \n"+\
+            "    WHEN " + self.build_sql_expression(condition, query, mapper) +" "+\
+            "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+\
+            "    ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+\
+            "    END"
+
 
     def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> str:
         s = self.build_sql_expression(statement, query, mapper)
