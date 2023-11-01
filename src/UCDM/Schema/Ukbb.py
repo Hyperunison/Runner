@@ -230,6 +230,12 @@ class Ukbb(BaseSchema):
                     "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
+            if statement['name'] == 'days':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var
+            if statement['name'] == 'years':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 365
 
 
     def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> str:
