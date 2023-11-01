@@ -38,8 +38,8 @@ class VariableMapper:
         "ethnicity": "patient.ethnicity",
         "gender": "patient.sex",
         "age": "age",
-        "year_of_birth": "date_part('year', form_completion_date)-patient.age",
-        "date_of_birth": "form_completion_date - (patient.age||' years')::interval",
+        "year_of_birth": "(date_part('year', form_completion_date)-patient.age)",
+        "date_of_birth": "(form_completion_date - (patient.age||' years')::interval)::date",
     }
 
     def convert_var_name(self, var: str) -> str:
