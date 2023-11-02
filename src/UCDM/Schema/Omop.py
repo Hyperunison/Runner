@@ -307,9 +307,18 @@ class Omop(BaseSchema):
                     "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
+            if statement['name'] == 'hours':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 60 * 60
             if statement['name'] == 'days':
                 var = json.loads(statement['nodes'][0]['json'])
                 return var * 24 * 60 * 60
+            if statement['name'] == 'weeks':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 7 * 24 * 60 * 60
+            if statement['name'] == 'months':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 30 * 24 * 60 * 60
             if statement['name'] == 'years':
                 var = json.loads(statement['nodes'][0]['json'])
                 return var * 365 * 24 * 60 * 60

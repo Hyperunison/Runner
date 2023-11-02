@@ -218,6 +218,26 @@ class Ukbb(BaseSchema):
 
                 return "(" + ") AND (".join(arr) + ")"
 
+            if statement['event'] == 'drug':
+                alias = statement['alias']
+                tmp_alias = rand_alias_name("drug_")
+                query.joins.append(SQLJoin(
+                    'drug',
+                    tmp_alias,
+                    '{}.patient_id=patient.id'.format(tmp_alias),
+                ))
+                mapper.declare_var(alias+'.name', tmp_alias+'.name')
+                mapper.declare_var(alias+'.start_date', tmp_alias+'.date_start')
+                mapper.declare_var(alias+'.end_date', tmp_alias+'.date_end')
+                arr = list[str]()
+
+                if len(statement['where']) == 0:
+                    return 'true'
+                for stmt in statement['where']:
+                    arr.append(self.build_sql_expression(stmt, query, mapper))
+
+                return "(" + ") AND (".join(arr) + ")"
+
             raise ValueError("Unknown event type got: {}".format(statement['event']))
 
         if statement['type'] == 'function':
@@ -230,9 +250,18 @@ class Ukbb(BaseSchema):
                     "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
+            if statement['name'] == 'hours':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var / 24
             if statement['name'] == 'days':
                 var = json.loads(statement['nodes'][0]['json'])
                 return var
+            if statement['name'] == 'weeks':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 7
+            if statement['name'] == 'months':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 30
             if statement['name'] == 'years':
                 var = json.loads(statement['nodes'][0]['json'])
                 return var * 365

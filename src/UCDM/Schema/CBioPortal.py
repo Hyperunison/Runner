@@ -233,9 +233,18 @@ class CBioPortal(BaseSchema):
                     "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
+            if statement['name'] == 'hours':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var / 24
             if statement['name'] == 'days':
                 var = json.loads(statement['nodes'][0]['json'])
                 return var
+            if statement['name'] == 'weeks':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 7
+            if statement['name'] == 'months':
+                var = json.loads(statement['nodes'][0]['json'])
+                return var * 30
             if statement['name'] == 'years':
                 var = json.loads(statement['nodes'][0]['json'])
                 return var * 365
