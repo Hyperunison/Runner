@@ -194,6 +194,15 @@ class Omop(BaseSchema):
                 self.add_staples_around_statement(statement['right'], query, mapper)
             )
 
+        if statement['type'] == 'unary':
+            operator = statement['operator']
+            node = statement['node']
+
+            return '{} ({})'.format(
+                operator.upper(),
+                self.add_staples_around_statement(node, query, mapper),
+            )
+
         if statement['type'] == 'exists':
             if statement['event'] == 'condition':
                 alias = statement['alias']
