@@ -45,13 +45,6 @@ def rand_alias_name(prefix: str) -> str:
 
 class VariableMapper:
     map: Dict[str, str] = {
-        "patient_id": '"patient"."person_id" as participant_id',
-        "race": '"patient"."race"',
-        "ethnicity": '"patient"."ethnicity"',
-        "gender": '"patient"."gender"',
-        "age": 'year(NOW())-"patient"."year_of_birth"',
-        "year_of_birth": '"patient"."year_of_birth"',
-        "date_of_birth": '"patient"."birth_datetime"',
     }
 
     def convert_var_name(self, var: str) -> str:
@@ -64,7 +57,7 @@ class VariableMapper:
         self.map[ucdm] = local
 
 
-class Omop(BaseSchema):
+class Universal(BaseSchema):
     min_count: int = 0
     dst: str = ""
 
@@ -73,10 +66,18 @@ class Omop(BaseSchema):
         self.min_count = min_count
         super().__init__()
 
-    def build_cohort_definition_sql_query(self, where, export, distribution: bool) -> str:
+    def build_cohort_definition_sql_query(
+            self,
+            mapper,
+            participantTable,
+            participantIdField,
+            joins,
+            where,
+            export,
+            distribution: bool
+    ) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
-        mapper = VariableMapper()
 
         for exp in where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
@@ -97,36 +98,19 @@ class Omop(BaseSchema):
         sql = "SELECT\n    {},\n".format(select_string)
 
         if distribution:
-            sql += "    count(distinct patient.person_id) as count\n"
+            sql += "    count(distinct {}.{}) as count\n".format(participantTable, participantIdField)
         else:
-            sql += mapper.convert_var_name("patient_id")+"\n"
+            sql += mapper.convert_var_name("{}.{}".format(participantTable, participantIdField))+"\n"
 
-        sql +="FROM(\n" + \
-              "    SELECT person_id, year_of_birth, birth_datetime, \n" + \
-              "    (\n" + \
-              "        SELECT concept.concept_code\n" + \
-              "        FROM concept\n" + \
-              "        WHERE concept_id = gender_concept_id\n" + \
-              "    ) AS gender,\n" + \
-              "    (\n" + \
-              "        SELECT concept.concept_code\n" + \
-              "        FROM concept\n" + \
-              "        WHERE concept_id = ethnicity_concept_id\n" + \
-              "    ) AS ethnicity,\n" + \
-              "    (\n" + \
-              "        SELECT concept.concept_code\n" + \
-              "        FROM concept\n" + \
-              "        WHERE concept_id = race_concept_id\n" + \
-              "    ) AS race\n" + \
-              "FROM person) as patient\n"
+        sql +="FROM {}\n".format(participantTable)
 
-        for j in query.joins:
-            sql += "JOIN {} as {} ON {} \n".format(j.table, j.alias, j.condition)
+        for j in joins:
+            sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution:
             sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-                   "HAVING COUNT(distinct patient.person_id) >= {}\n".format(self.min_count) + \
+                   "HAVING COUNT(distinct {}.{}) >= {}\n".format(participantTable, participantIdField, self.min_count) + \
                    "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
 
         logging.info("Generated SQL query: \n{}".format(sql))
@@ -140,7 +124,19 @@ class Omop(BaseSchema):
         return result
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
+        fields = cohort_definition.cohort_definition['fields']
+        participantTable = cohort_definition.cohort_definition['participantTableName']
+        participantIdField = cohort_definition.cohort_definition['participantIdField']
+
+        mapper = VariableMapper()
+        for ucdm in fields.keys():
+            mapper.declare_var(ucdm, fields[ucdm])
+
         sql = self.build_cohort_definition_sql_query(
+            mapper,
+            participantTable,
+            participantIdField,
+            cohort_definition.cohort_definition['join'],
             cohort_definition.cohort_definition['where'],
             cohort_definition.cohort_definition['export'],
             True
@@ -202,109 +198,6 @@ class Omop(BaseSchema):
                 operator.upper(),
                 self.add_staples_around_statement(node, query, mapper),
             )
-
-        if statement['type'] == 'exists':
-            if statement['event'] == 'condition':
-                alias = statement['alias']
-                tmp_alias = rand_alias_name("diagnoses_")
-                query.joins.append(SQLJoin(
-                    'condition_occurrence',
-                    tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
-                ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    '{}.concept_id={}.condition_concept_id'.format(alias, tmp_alias)
-                ))
-                mapper.declare_var(alias+'.icd10', alias+'.concept_name')
-                mapper.declare_var(alias+'.start_date', tmp_alias+'.condition_start_date')
-                mapper.declare_var(alias+'.end_date', tmp_alias+'.condition_end_date')
-                mapper.declare_var(alias+'.stop_reason', tmp_alias+'.stop_reason')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-            if statement['event'] == 'measurement':
-                alias = statement['alias']
-                tmp_alias = rand_alias_name("measurement_")
-                query.joins.append(SQLJoin(
-                    'measurement',
-                    tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
-                ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    "{}.concept_id={}.measurement_concept_id".format(alias, tmp_alias, alias)
-                ))
-                mapper.declare_var(alias+'.name', alias+'.concept_name')
-                mapper.declare_var(alias+'.date', tmp_alias+'.measurement_date')
-                mapper.declare_var(alias+'.value', tmp_alias+'.measurement_source_value')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-
-            if statement['event'] == 'procedure':
-                alias = statement['alias']
-                tmp_alias = rand_alias_name("procedure_")
-                query.joins.append(SQLJoin(
-                    'procedure_occurrence',
-                    tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
-                ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    "{}.concept_id={}.procedure_concept_id".format(alias, tmp_alias, alias)
-                ))
-                mapper.declare_var(alias+'.name', alias+'.concept_name')
-                mapper.declare_var(alias+'.date', tmp_alias+'.procedure_date')
-                mapper.declare_var(alias+'.value', tmp_alias+'.procedure_source_value')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-
-            if statement['event'] == 'drug':
-                alias = statement['alias']
-                tmp_alias = rand_alias_name("drug_era_")
-                query.joins.append(SQLJoin(
-                    'drug_era',
-                    tmp_alias,
-                    '{}.person_id=patient.person_id'.format(tmp_alias),
-                ))
-                query.joins.append(SQLJoin(
-                    'concept',
-                    alias,
-                    "{}.concept_id={}.drug_concept_id".format(alias, tmp_alias, alias)
-                ))
-                mapper.declare_var(alias+'.name', alias+'.concept_name')
-                mapper.declare_var(alias+'.start_date', tmp_alias+'.drug_era_start_date')
-                mapper.declare_var(alias+'.end_date', tmp_alias+'.drug_era_end_date')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-
-            raise ValueError("Unknown event type got: {}".format(statement['event']))
 
         if statement['type'] == 'function':
             if statement['name'] == 'ifelse':
