@@ -1,22 +1,21 @@
 from io import StringIO
 
-from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
-from src.Message.StartMLTrain import StartMLTrain
-from src.UCDM.Schema.BaseSchema import BaseSchema
 import json
 import logging
 from sqlalchemy.exc import ProgrammingError
 from typing import List, Dict
 import csv
 from typing import Optional
+
+from src.UCDM.DataSchema import DataSchema
 from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 
 
 class UCDMResolver:
     api: Api
-    schema: BaseSchema
-    def __init__(self, api: Api, schema: BaseSchema):
+    schema: DataSchema
+    def __init__(self, api: Api, schema: DataSchema):
         self.api = api
         self.schema = schema
 

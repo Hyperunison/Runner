@@ -3,14 +3,14 @@ from src.Api import Api
 from src.Message.StartWorkflow import StartWorkflow
 from src.Service.Workflows.GwasFederated.GwasFederated import GwasFederated
 from src.Service.Workflows.WorkflowBase import WorkflowBase
-from src.UCDM.Schema.BaseSchema import BaseSchema
+from src.UCDM.DataSchema import DataSchema
 
 
 class NextflowCohortWorkflowExecutor:
     api: Api
     adapter: BaseAdapter
-    schema: BaseSchema
-    def __init__(self, api: Api, adapter: BaseAdapter, schema: BaseSchema):
+    schema: DataSchema
+    def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema):
         self.api = api
         self.adapter = adapter
         self.schema = schema

@@ -1,45 +1,41 @@
 import json
 import logging
-import random
 from typing import List, Dict
-
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest
-from src.UCDM.Schema.BaseSchema import BaseSchema
 
 Base = declarative_base()
 
+class SQLJoin:
+    table: str
+    alias: str
+    condition: str
+
+    def __init__(self, _table: str, _alias: str, _condition: str):
+        self.table = _table
+        self.alias = _alias
+        self.condition = _condition
+
 
 class SQLQuery:
+    joins: List[SQLJoin]
     conditions: List[str]
     select: Dict[str, str]
 
     def __init__(self):
         self.conditions = []
+        self.joins = []
         self.select = {}
 
 
 def escape_string(s: str) -> str:
     return s.replace('\\', '\\\\').replace("'", "\\'")
 
-
-def rand_alias_name(prefix: str) -> str:
-    return "{}{}".format(prefix, str(random.random()).replace("0.", ""))
-
-
 class VariableMapper:
     map: Dict[str, str] = {
-        "patient_id": '"patient"."patient_id" as participant_id',
-        "race": "patient.race",
-        "ethnicity": "patient.ethnicity",
-        "gender": "patient.sex",
-        "age": "age",
-        "year_of_birth": "(date_part('year', form_completion_date)-patient.age)",
-        "date_of_birth": "(form_completion_date - (patient.age||' years')::interval)::date",
     }
 
     def convert_var_name(self, var: str) -> str:
@@ -52,27 +48,32 @@ class VariableMapper:
         self.map[ucdm] = local
 
 
-class CBioPortal(BaseSchema):
+class DataSchema:
     min_count: int = 0
     dst: str = ""
-    table: str = ""
 
-    def __init__(self, dsn: str, min_count: int, table: str):
+    def __init__(self, dsn: str, min_count: int):
         self.engine = create_engine(dsn).connect()
         self.min_count = min_count
-        self.table = table
         super().__init__()
 
-    def build_cohort_definition_sql_query(self, where, export, distribution: bool) -> str:
-        logging.info("Where definition got: {}".format(json.dumps(where)))
+    def build_cohort_definition_sql_query(
+            self,
+            mapper,
+            participantTable,
+            participantIdField,
+            joins,
+            where,
+            export,
+            distribution: bool
+    ) -> str:
+        logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
-        mapper = VariableMapper()
 
         for exp in where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
-
         if len(query.conditions) > 0:
-            sql_where = "(" + (")\nAND (".join(query.conditions)) + ")"
+            sql_where = "    (" + (")\nAND\n    (".join(query.conditions)) + ")"
         else:
             sql_where = "true"
 
@@ -82,21 +83,28 @@ class CBioPortal(BaseSchema):
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
 
+
         select_string = ", ".join(select_array)
 
+        sql = "SELECT\n    {},\n".format(select_string)
+
         if distribution:
-            additional_field = "count(distinct patient.patient_id) as count"
+            sql += "    count(distinct {}.{}) as count\n".format(participantTable, participantIdField)
         else:
-            additional_field = mapper.convert_var_name("patient_id")
+            sql += mapper.convert_var_name("{}.{}".format(participantTable, participantIdField))+"\n"
 
-        sql = "SELECT {}, {} FROM {} as patient\n".format(select_string, additional_field, self.table)
+        sql +="FROM {}\n".format(participantTable)
 
-        sql += "WHERE {}\n".format(sql_where)
+        for j in joins:
+            sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
 
+        sql += "WHERE\n{}\n".format(sql_where)
         if distribution:
             sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
-                   "HAVING COUNT(distinct patient.patient_id) >= {}\n".format(self.min_count) + \
-                   "ORDER BY {}\n".format(", ".join(map(str, range(1, len(select_array) + 1))))
+                   "HAVING COUNT(distinct {}.{}) >= {}\n".format(participantTable, participantIdField, self.min_count) + \
+                   "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
+
+        logging.info("Generated SQL query: \n{}".format(sql))
 
         return sql
 
@@ -105,23 +113,33 @@ class CBioPortal(BaseSchema):
         result = [dict(row) for row in result]
 
         return result
-
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
+        fields = cohort_definition.cohort_definition['fields']
+        participantTable = cohort_definition.cohort_definition['participantTableName']
+        participantIdField = cohort_definition.cohort_definition['participantIdField']
+
+        mapper = VariableMapper()
+        for ucdm in fields.keys():
+            mapper.declare_var(ucdm, fields[ucdm])
+
         sql = self.build_cohort_definition_sql_query(
+            mapper,
+            participantTable,
+            participantIdField,
+            cohort_definition.cohort_definition['join'],
             cohort_definition.cohort_definition['where'],
             cohort_definition.cohort_definition['export'],
             True
         )
-
         try:
             result = self.resolve_cohort_definition(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key,
-                                                  cohort_definition.raw_only)
-            logging.info("Generated SQL query: \n{}".format(sql))
+            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
+            # rollback transaction to avoid error state in transaction
+            self.engine.rollback()
             api.set_cohort_definition_aggregation(
                 {},
                 "/*\n{}*/\n\n{}\n".format(e.orig, sql),
@@ -146,7 +164,6 @@ class CBioPortal(BaseSchema):
 
         if statement['type'] == 'binary':
             operator = statement['operator']
-
             if operator == 'in' or operator == 'not in':
                 constants = []
                 for const in statement['right']['nodes']:
@@ -162,7 +179,7 @@ class CBioPortal(BaseSchema):
 
             return '{} {} {}'.format(
                 self.add_staples_around_statement(statement['left'], query, mapper),
-                operator,
+                operator.upper(),
                 self.add_staples_around_statement(statement['right'], query, mapper)
             )
 
@@ -174,63 +191,6 @@ class CBioPortal(BaseSchema):
                 operator.upper(),
                 self.add_staples_around_statement(node, query, mapper),
             )
-
-        if statement['type'] == 'exists':
-            if statement['event'] == 'condition':
-                alias = statement['alias']
-                mapper.declare_var(alias + '.icd10', 'patient.icd_10')
-                mapper.declare_var(alias + '.start_date', 'form_completion_date')
-                mapper.declare_var(alias + '.stop_reason', 'null')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-            if statement['event'] == 'measurement':
-                alias = statement['alias']
-                mapper.declare_var(alias + '.name', 'null')
-                mapper.declare_var(alias + '.date', 'null')
-                mapper.declare_var(alias + '.value', 'null')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-
-            if statement['event'] == 'procedure':
-                alias = statement['alias']
-                mapper.declare_var(alias + '.name', 'null')
-                mapper.declare_var(alias + '.date', 'null')
-                mapper.declare_var(alias + '.value', 'null')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-
-            if statement['event'] == 'drug':
-                alias = statement['alias']
-                mapper.declare_var(alias + '.name', 'null')
-                mapper.declare_var(alias + '.start_date', 'null')
-                mapper.declare_var(alias + '.end_date', 'null')
-                arr = list[str]()
-
-                if len(statement['where']) == 0:
-                    return 'true'
-                for stmt in statement['where']:
-                    arr.append(self.build_sql_expression(stmt, query, mapper))
-
-                return "(" + ") AND (".join(arr) + ")"
-            raise ValueError("Unknown event type got: {}".format(statement['event']))
 
         if statement['type'] == 'function':
             if statement['name'] == 'ifelse':
@@ -244,19 +204,19 @@ class CBioPortal(BaseSchema):
                     "    END"
             if statement['name'] == 'hours':
                 var = json.loads(statement['nodes'][0]['json'])
-                return var / 24
+                return var * 60 * 60
             if statement['name'] == 'days':
                 var = json.loads(statement['nodes'][0]['json'])
-                return var
+                return var * 24 * 60 * 60
             if statement['name'] == 'weeks':
                 var = json.loads(statement['nodes'][0]['json'])
-                return var * 7
+                return var * 7 * 24 * 60 * 60
             if statement['name'] == 'months':
                 var = json.loads(statement['nodes'][0]['json'])
-                return var * 30
+                return var * 30 * 24 * 60 * 60
             if statement['name'] == 'years':
                 var = json.loads(statement['nodes'][0]['json'])
-                return var * 365
+                return var * 365 * 24 * 60 * 60
 
     def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> str:
         s = self.build_sql_expression(statement, query, mapper)
@@ -266,3 +226,5 @@ class CBioPortal(BaseSchema):
             return s
 
         return "({})".format(s)
+
+

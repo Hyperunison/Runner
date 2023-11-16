@@ -7,6 +7,7 @@ import socket
 import sys
 
 from src.Service.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
+from src.UCDM.DataSchema import DataSchema
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
@@ -16,9 +17,7 @@ from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
 from src.Message.StartWorkflow import StartWorkflow
-from src.Message.StartMLTrain import StartMLTrain
 from src.MessageFactory import MessageFactory
-from src.UCDM.Factory import create_schema_by_config
 
 config = yaml.safe_load(open("config.yaml", "r"))
 
@@ -35,7 +34,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
     adapter = create_by_config(api, config, runner_instance_id)
-    schema = create_schema_by_config(config['phenoenotypicDb'])
+    schema = DataSchema(config['phenoenotypicDb']['dsn'], config['phenoenotypicDb']['min_count'])
     workflow_executor = NextflowCohortWorkflowExecutor(api, adapter, schema)
     check_interval = config['check_runs_status_interval']
     last_check = None
