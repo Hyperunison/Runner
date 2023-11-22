@@ -16,6 +16,11 @@ Method | HTTP request | Description
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+[**set_table_column_freequent_values**](AgentApi.md#set_table_column_freequent_values) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values | 
+[**set_table_column_stats**](AgentApi.md#set_table_column_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column} | 
+[**set_table_info**](AgentApi.md#set_table_info) | **PUT** /api/agent/v{version}/{token}/ucdm/tables/{table} | 
+[**set_table_stats**](AgentApi.md#set_table_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns | 
+[**set_tables_list**](AgentApi.md#set_tables_list) | **POST** /api/agent/v{version}/{token}/ucdm/tables | 
 [**update_process_item**](AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
 
@@ -909,6 +914,425 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_table_column_freequent_values**
+> str set_table_column_freequent_values(version, token, table, column)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    table = "z" # str | 
+    column = "z" # str | 
+    set_table_column_freequent_values_request = SetTableColumnFreequentValuesRequest(
+        values=[],
+        counts=[],
+    ) # SetTableColumnFreequentValuesRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_table_column_freequent_values(version, token, table, column)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_column_freequent_values: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_table_column_freequent_values(version, token, table, column, set_table_column_freequent_values_request=set_table_column_freequent_values_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_column_freequent_values: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **table** | **str**|  |
+ **column** | **str**|  |
+ **set_table_column_freequent_values_request** | [**SetTableColumnFreequentValuesRequest**](SetTableColumnFreequentValuesRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Set columns in a table and number of rows |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_table_column_stats**
+> str set_table_column_stats(version, token, table, column)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_table_column_stats_request import SetTableColumnStatsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    table = "z" # str | 
+    column = "z" # str | 
+    set_table_column_stats_request = SetTableColumnStatsRequest(
+        is_private="is_private_example",
+        unique_count="unique_count_example",
+        nulls_count="nulls_count_example",
+        min_value="min_value_example",
+        max_value="max_value_example",
+        avg_value="avg_value_example",
+        median12_value="median12_value_example",
+        median25_value="median25_value_example",
+        median37_value="median37_value_example",
+        median50_value="median50_value_example",
+        median63_value="median63_value_example",
+        median75_value="median75_value_example",
+        median88_value="median88_value_example",
+    ) # SetTableColumnStatsRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_table_column_stats(version, token, table, column)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_column_stats: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_table_column_stats(version, token, table, column, set_table_column_stats_request=set_table_column_stats_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_column_stats: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **table** | **str**|  |
+ **column** | **str**|  |
+ **set_table_column_stats_request** | [**SetTableColumnStatsRequest**](SetTableColumnStatsRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Set columns in a table and number of rows |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_table_info**
+> str set_table_info(version, token, table)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_table_info_request import SetTableInfoRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    table = "z" # str | 
+    set_table_info_request = SetTableInfoRequest(
+        abandoned="abandoned_example",
+    ) # SetTableInfoRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_table_info(version, token, table)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_info: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_table_info(version, token, table, set_table_info_request=set_table_info_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_info: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **table** | **str**|  |
+ **set_table_info_request** | [**SetTableInfoRequest**](SetTableInfoRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Update table info, like abandon status |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_table_stats**
+> str set_table_stats(version, token, table)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_table_stats_request import SetTableStatsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    table = "z" # str | 
+    set_table_stats_request = SetTableStatsRequest(
+        columns=[],
+        types=[],
+        nullable=[],
+        rows_count="rows_count_example",
+    ) # SetTableStatsRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_table_stats(version, token, table)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_stats: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_table_stats(version, token, table, set_table_stats_request=set_table_stats_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_table_stats: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **table** | **str**|  |
+ **set_table_stats_request** | [**SetTableStatsRequest**](SetTableStatsRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Set columns in a table and number of rows |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_tables_list**
+> [BiobankDataTable] set_tables_list(version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_tables_list_request import SetTablesListRequest
+from auto_api_client.model.biobank_data_table import BiobankDataTable
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    set_tables_list_request = SetTablesListRequest(
+        tables=[],
+    ) # SetTablesListRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_tables_list(version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_tables_list: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_tables_list(version, token, set_tables_list_request=set_tables_list_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_tables_list: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **set_tables_list_request** | [**SetTablesListRequest**](SetTablesListRequest.md)|  | [optional]
+
+### Return type
+
+[**[BiobankDataTable]**](BiobankDataTable.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Upsert list of tables available in biobank for cohort API |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

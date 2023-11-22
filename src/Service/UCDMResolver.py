@@ -28,7 +28,7 @@ class UCDMResolver:
         logging.info("Model train task got: {}".format(json.dumps(sql)))
 
         try:
-            result = self.schema.resolve_cohort_definition(sql)
+            result = self.schema.fetch_all(sql)
             result = self.normalize(result)
             result_without_count = [{k: v for k, v in d.items() if k != 'count'} for d in result]
 
@@ -41,7 +41,7 @@ class UCDMResolver:
                 cohort_definition['export'],
                 False
             )
-            result = self.schema.resolve_cohort_definition(sql_final)
+            result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
 
             ucdm_result = self.convert_to_ucdm(result, mapping_index)

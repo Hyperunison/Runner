@@ -774,6 +774,427 @@
                     }
                 }
             }
+        },
+        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setTablesList",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "tables"
+                                ],
+                                "properties": {
+                                    "tables": {
+                                        "type": "array",
+                                        "items": {},
+                                        "default": []
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upsert list of tables available in biobank for cohort API",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#\/components\/schemas\/BiobankDataTable"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}": {
+            "put": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setTableInfo",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w.]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "abandoned"
+                                ],
+                                "properties": {
+                                    "abandoned": {
+                                        "type": "string",
+                                        "default": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update table info, like abandon status",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}\/columns": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setTableStats",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w.]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "columns",
+                                    "types",
+                                    "nullable",
+                                    "rowsCount"
+                                ],
+                                "properties": {
+                                    "columns": {
+                                        "type": "array",
+                                        "items": {},
+                                        "default": []
+                                    },
+                                    "types": {
+                                        "type": "array",
+                                        "items": {},
+                                        "default": []
+                                    },
+                                    "nullable": {
+                                        "type": "array",
+                                        "items": {},
+                                        "default": []
+                                    },
+                                    "rowsCount": {
+                                        "type": "string",
+                                        "default": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Set columns in a table and number of rows",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}\/columns\/{column}": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setTableColumnStats",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w.]+"
+                        }
+                    },
+                    {
+                        "name": "column",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w.]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "isPrivate"
+                                ],
+                                "properties": {
+                                    "isPrivate": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "uniqueCount": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "nullsCount": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "minValue": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "maxValue": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "avgValue": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median12Value": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median25Value": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median37Value": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median50Value": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median63Value": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median75Value": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "median88Value": {
+                                        "type": "string",
+                                        "default": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Set columns in a table and number of rows",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}\/columns\/{column}\/values": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setTableColumnFreequentValues",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "table",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w.]+"
+                        }
+                    },
+                    {
+                        "name": "column",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w.]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "values",
+                                    "counts"
+                                ],
+                                "properties": {
+                                    "values": {
+                                        "type": "array",
+                                        "items": {},
+                                        "default": []
+                                    },
+                                    "counts": {
+                                        "type": "array",
+                                        "items": {},
+                                        "default": []
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Set columns in a table and number of rows",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -826,6 +1247,20 @@
                     },
                     "ucdmValue": {
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "BiobankDataTable": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "biobankId": {
+                        "type": "integer"
+                    },
+                    "rowsCount": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"

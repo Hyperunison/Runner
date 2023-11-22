@@ -12,6 +12,7 @@ auto_api_client/configuration.py
 auto_api_client/exceptions.py
 auto_api_client/model/__init__.py
 auto_api_client/model/add_run_log_chunk_request.py
+auto_api_client/model/biobank_data_table.py
 auto_api_client/model/get_mappings_request.py
 auto_api_client/model/get_process_logs.py
 auto_api_client/model/mapping_resolve_response.py
@@ -19,12 +20,18 @@ auto_api_client/model/nextflow_run.py
 auto_api_client/model/runner_message.py
 auto_api_client/model/set_cohort_definition_aggregation_request.py
 auto_api_client/model/set_process_logs_request.py
+auto_api_client/model/set_table_column_freequent_values_request.py
+auto_api_client/model/set_table_column_stats_request.py
+auto_api_client/model/set_table_info_request.py
+auto_api_client/model/set_table_stats_request.py
+auto_api_client/model/set_tables_list_request.py
 auto_api_client/model/types_map.py
 auto_api_client/model_utils.py
 auto_api_client/models/__init__.py
 auto_api_client/rest.py
 docs/AddRunLogChunkRequest.md
 docs/AgentApi.md
+docs/BiobankDataTable.md
 docs/GetMappingsRequest.md
 docs/GetProcessLogs.md
 docs/MappingResolveResponse.md
@@ -32,6 +39,11 @@ docs/NextflowRun.md
 docs/RunnerMessage.md
 docs/SetCohortDefinitionAggregationRequest.md
 docs/SetProcessLogsRequest.md
+docs/SetTableColumnFreequentValuesRequest.md
+docs/SetTableColumnStatsRequest.md
+docs/SetTableInfoRequest.md
+docs/SetTableStatsRequest.md
+docs/SetTablesListRequest.md
 docs/TypesMap.md
 git_push.sh
 requirements.txt
@@ -41,6 +53,7 @@ test-requirements.txt
 test/__init__.py
 test/test_add_run_log_chunk_request.py
 test/test_agent_api.py
+test/test_biobank_data_table.py
 test/test_get_mappings_request.py
 test/test_get_process_logs.py
 test/test_mapping_resolve_response.py
@@ -48,5 +61,10 @@ test/test_nextflow_run.py
 test/test_runner_message.py
 test/test_set_cohort_definition_aggregation_request.py
 test/test_set_process_logs_request.py
+test/test_set_table_column_freequent_values_request.py
+test/test_set_table_column_stats_request.py
+test/test_set_table_info_request.py
+test/test_set_table_stats_request.py
+test/test_set_tables_list_request.py
 test/test_types_map.py
 tox.ini

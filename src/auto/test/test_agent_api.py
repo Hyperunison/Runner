@@ -95,6 +95,36 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_table_column_freequent_values(self):
+        """Test case for set_table_column_freequent_values
+
+        """
+        pass
+
+    def test_set_table_column_stats(self):
+        """Test case for set_table_column_stats
+
+        """
+        pass
+
+    def test_set_table_info(self):
+        """Test case for set_table_info
+
+        """
+        pass
+
+    def test_set_table_stats(self):
+        """Test case for set_table_stats
+
+        """
+        pass
+
+    def test_set_tables_list(self):
+        """Test case for set_tables_list
+
+        """
+        pass
+
     def test_update_process_item(self):
         """Test case for update_process_item
 

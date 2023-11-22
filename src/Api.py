@@ -12,6 +12,16 @@ from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.get_mappings_request import GetMappingsRequest
 
+from auto_api_client.model.set_tables_list_request import SetTablesListRequest
+
+from auto_api_client.model.set_table_stats_request import SetTableStatsRequest
+
+from auto_api_client.model.set_table_column_stats_request import SetTableColumnStatsRequest
+
+from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
+from auto_api_client.model.set_table_info_request import SetTableInfoRequest
+
+
 class Api:
     api_instance: AgentApi = None
     version: str = None
@@ -69,6 +79,79 @@ class Api:
     def accept_task(self, id: int):
         logging.info("Accepting task id={}".format(id))
         self.api_instance.accept_task(id=str(id), token=self.token, version=self.version)
+
+    def set_tables_list(self, tables: List[str]):
+        logging.info("Sending list tables {}".format(', '.join(tables)))
+        self.api_instance.set_tables_list(set_tables_list_request=SetTablesListRequest(tables=tables), token=self.token, version=self.version)
+
+    def set_table_stats(self, table_name: str, rows_count: int, columns: List[str], types: List[str], nullable_result: List[str]):
+        logging.info("Sending table stats for table {}. rows_count={}, columns: ".format(table_name, rows_count, ', '.join(columns)))
+        self.api_instance.set_table_stats(
+            set_table_stats_request=SetTableStatsRequest(
+                rows_count=str(rows_count),
+                columns=columns,
+                nullable=nullable_result,
+                types=types,
+            ),
+            table=table_name,
+            token=self.token,
+            version=self.version
+        )
+
+
+
+    def set_table_info(self, table_name: str, abandoned: bool):
+        logging.info("Sending table info for table {}".format(table_name))
+        self.api_instance.set_table_info(
+            table=table_name,
+            version=self.version,
+            token=self.token,
+            set_table_info_request=SetTableInfoRequest(
+                abandoned='1' if abandoned == True else '0'
+            )
+        )
+
+    def set_table_column_stats(
+            self, table_name: str, column_name: str, unique_count, nulls_count,
+            min_value, max_value, avg_value, median12_value, median25_value, median37_value,
+            median50_value, median63_value, median75_value, median88_value,
+    ):
+        logging.info("Sending table column stats for table {}.{}".format(table_name, column_name))
+        self.api_instance.set_table_column_stats(
+            set_table_column_stats_request=SetTableColumnStatsRequest(
+                is_private='0',
+                unique_count=str(unique_count) if not unique_count is None else '',
+                nulls_count=str(nulls_count) if not nulls_count is None else '',
+                min_value=str(min_value) if not min_value is None else '',
+                max_value=str(max_value) if not max_value is None else '',
+                avg_value=str(avg_value) if not avg_value is None else '',
+                median12_value=str(median12_value) if not median12_value is None else '',
+                median25_value=str(median25_value) if not median25_value is None else '',
+                median37_value=str(median37_value) if not median37_value is None else '',
+                median50_value=str(median50_value) if not median50_value is None else '',
+                median63_value=str(median63_value) if not median63_value is None else '',
+                median75_value=str(median75_value) if not median75_value is None else '',
+                median88_value=str(median88_value) if not median88_value is None else '',
+            ),
+            table=table_name,
+            column=column_name,
+            token=self.token,
+            version=self.version
+        )
+
+    def set_table_column_values(self, table_name: str, column_name: str, values: List[str], counts: List[int]):
+        res = self.api_instance.set_table_column_freequent_values(
+            table=table_name,
+            column=column_name,
+            token=self.token,
+            version=self.version,
+            set_table_column_freequent_values_request=SetTableColumnFreequentValuesRequest(
+                values=values,
+                counts=counts,
+            )
+        )
+
+        return res
 
     def resolve_mapping(self, key: str, request: Dict[str, List[str]]) -> List[MappingResolveResponse]:
         logging.info("Resolving mapping for key={}, request={}".format(key, json.dumps(request)))

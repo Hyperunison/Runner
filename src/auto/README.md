@@ -51,11 +51,17 @@ import auto_api_client
 from pprint import pprint
 from auto_api_client.api import agent_api
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+from auto_api_client.model.biobank_data_table import BiobankDataTable
 from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
+from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
+from auto_api_client.model.set_table_column_stats_request import SetTableColumnStatsRequest
+from auto_api_client.model.set_table_info_request import SetTableInfoRequest
+from auto_api_client.model.set_table_stats_request import SetTableStatsRequest
+from auto_api_client.model.set_tables_list_request import SetTablesListRequest
 from auto_api_client.model.types_map import TypesMap
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
@@ -98,12 +104,18 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 *AgentApi* | [**set_run_status**](docs/AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+*AgentApi* | [**set_table_column_freequent_values**](docs/AgentApi.md#set_table_column_freequent_values) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values | 
+*AgentApi* | [**set_table_column_stats**](docs/AgentApi.md#set_table_column_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column} | 
+*AgentApi* | [**set_table_info**](docs/AgentApi.md#set_table_info) | **PUT** /api/agent/v{version}/{token}/ucdm/tables/{table} | 
+*AgentApi* | [**set_table_stats**](docs/AgentApi.md#set_table_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns | 
+*AgentApi* | [**set_tables_list**](docs/AgentApi.md#set_tables_list) | **POST** /api/agent/v{version}/{token}/ucdm/tables | 
 *AgentApi* | [**update_process_item**](docs/AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
 
 ## Documentation For Models
 
  - [AddRunLogChunkRequest](docs/AddRunLogChunkRequest.md)
+ - [BiobankDataTable](docs/BiobankDataTable.md)
  - [GetMappingsRequest](docs/GetMappingsRequest.md)
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [MappingResolveResponse](docs/MappingResolveResponse.md)
@@ -111,6 +123,11 @@ Class | Method | HTTP request | Description
  - [RunnerMessage](docs/RunnerMessage.md)
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
+ - [SetTableColumnFreequentValuesRequest](docs/SetTableColumnFreequentValuesRequest.md)
+ - [SetTableColumnStatsRequest](docs/SetTableColumnStatsRequest.md)
+ - [SetTableInfoRequest](docs/SetTableInfoRequest.md)
+ - [SetTableStatsRequest](docs/SetTableStatsRequest.md)
+ - [SetTablesListRequest](docs/SetTablesListRequest.md)
  - [TypesMap](docs/TypesMap.md)
 
 

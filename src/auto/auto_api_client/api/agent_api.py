@@ -22,11 +22,17 @@ from auto_api_client.model_utils import (  # noqa: F401
     validate_and_convert_types
 )
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+from auto_api_client.model.biobank_data_table import BiobankDataTable
 from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
+from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
+from auto_api_client.model.set_table_column_stats_request import SetTableColumnStatsRequest
+from auto_api_client.model.set_table_info_request import SetTableInfoRequest
+from auto_api_client.model.set_table_stats_request import SetTableStatsRequest
+from auto_api_client.model.set_tables_list_request import SetTablesListRequest
 from auto_api_client.model.types_map import TypesMap
 
 
@@ -981,6 +987,459 @@ class AgentApi(object):
                     'application/json'
                 ],
                 'content_type': [],
+            },
+            api_client=api_client
+        )
+        self.set_table_column_freequent_values_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values',
+                'operation_id': 'set_table_column_freequent_values',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'table',
+                    'column',
+                    'set_table_column_freequent_values_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                    'table',
+                    'column',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                    'table',
+                    'column',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                    ('table',): {
+
+                        'regex': {
+                            'pattern': r'[\w.]+',  # noqa: E501
+                        },
+                    },
+                    ('column',): {
+
+                        'regex': {
+                            'pattern': r'[\w.]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'table':
+                        (str,),
+                    'column':
+                        (str,),
+                    'set_table_column_freequent_values_request':
+                        (SetTableColumnFreequentValuesRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                    'table': 'table',
+                    'column': 'column',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'table': 'path',
+                    'column': 'path',
+                    'set_table_column_freequent_values_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_table_column_stats_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}',
+                'operation_id': 'set_table_column_stats',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'table',
+                    'column',
+                    'set_table_column_stats_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                    'table',
+                    'column',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                    'table',
+                    'column',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                    ('table',): {
+
+                        'regex': {
+                            'pattern': r'[\w.]+',  # noqa: E501
+                        },
+                    },
+                    ('column',): {
+
+                        'regex': {
+                            'pattern': r'[\w.]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'table':
+                        (str,),
+                    'column':
+                        (str,),
+                    'set_table_column_stats_request':
+                        (SetTableColumnStatsRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                    'table': 'table',
+                    'column': 'column',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'table': 'path',
+                    'column': 'path',
+                    'set_table_column_stats_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_table_info_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/ucdm/tables/{table}',
+                'operation_id': 'set_table_info',
+                'http_method': 'PUT',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'table',
+                    'set_table_info_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                    'table',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                    'table',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                    ('table',): {
+
+                        'regex': {
+                            'pattern': r'[\w.]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'table':
+                        (str,),
+                    'set_table_info_request':
+                        (SetTableInfoRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                    'table': 'table',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'table': 'path',
+                    'set_table_info_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_table_stats_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/ucdm/tables/{table}/columns',
+                'operation_id': 'set_table_stats',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'table',
+                    'set_table_stats_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                    'table',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                    'table',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                    ('table',): {
+
+                        'regex': {
+                            'pattern': r'[\w.]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'table':
+                        (str,),
+                    'set_table_stats_request':
+                        (SetTableStatsRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                    'table': 'table',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'table': 'path',
+                    'set_table_stats_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_tables_list_endpoint = _Endpoint(
+            settings={
+                'response_type': ([BiobankDataTable],),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/ucdm/tables',
+                'operation_id': 'set_tables_list',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'set_tables_list_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\da-f]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'set_tables_list_request':
+                        (SetTablesListRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'set_tables_list_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
             },
             api_client=api_client
         )
@@ -2137,6 +2596,465 @@ class AgentApi(object):
         kwargs['token'] = \
             token
         return self.set_run_status_endpoint.call_with_http_info(**kwargs)
+
+    def set_table_column_freequent_values(
+        self,
+        version,
+        token,
+        table,
+        column,
+        **kwargs
+    ):
+        """set_table_column_freequent_values  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_table_column_freequent_values(version, token, table, column, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+            table (str):
+            column (str):
+
+        Keyword Args:
+            set_table_column_freequent_values_request (SetTableColumnFreequentValuesRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        kwargs['table'] = \
+            table
+        kwargs['column'] = \
+            column
+        return self.set_table_column_freequent_values_endpoint.call_with_http_info(**kwargs)
+
+    def set_table_column_stats(
+        self,
+        version,
+        token,
+        table,
+        column,
+        **kwargs
+    ):
+        """set_table_column_stats  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_table_column_stats(version, token, table, column, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+            table (str):
+            column (str):
+
+        Keyword Args:
+            set_table_column_stats_request (SetTableColumnStatsRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        kwargs['table'] = \
+            table
+        kwargs['column'] = \
+            column
+        return self.set_table_column_stats_endpoint.call_with_http_info(**kwargs)
+
+    def set_table_info(
+        self,
+        version,
+        token,
+        table,
+        **kwargs
+    ):
+        """set_table_info  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_table_info(version, token, table, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+            table (str):
+
+        Keyword Args:
+            set_table_info_request (SetTableInfoRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        kwargs['table'] = \
+            table
+        return self.set_table_info_endpoint.call_with_http_info(**kwargs)
+
+    def set_table_stats(
+        self,
+        version,
+        token,
+        table,
+        **kwargs
+    ):
+        """set_table_stats  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_table_stats(version, token, table, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+            table (str):
+
+        Keyword Args:
+            set_table_stats_request (SetTableStatsRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        kwargs['table'] = \
+            table
+        return self.set_table_stats_endpoint.call_with_http_info(**kwargs)
+
+    def set_tables_list(
+        self,
+        version,
+        token,
+        **kwargs
+    ):
+        """set_tables_list  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_tables_list(version, token, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+
+        Keyword Args:
+            set_tables_list_request (SetTablesListRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            [BiobankDataTable]
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        return self.set_tables_list_endpoint.call_with_http_info(**kwargs)
 
     def update_process_item(
         self,

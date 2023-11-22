@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Resources/docker/Dockerfile
-    entrypoint: tail -f /dev/null
+    entrypoint: bash -c "cd /app; pip install -r requirements.txt; sleep infinity; echo test"
     volumes:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube

@@ -17,19 +17,22 @@ from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
 from src.Message.StartWorkflow import StartWorkflow
+from src.Message.UpdateTablesList import UpdateTablesList
+from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
+from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
 from src.MessageFactory import MessageFactory
+from src.auto.auto_api_client.configuration import Configuration
+from src.auto.auto_api_client.api_client import ApiClient
 
 config = yaml.safe_load(open("config.yaml", "r"))
 
 configure_logs(config, "main")
-configuration = auto_api_client.Configuration(host=config['api_url'])
+configuration = Configuration(host=config['api_url'])
 
 if 'sentry_dsn' in config:
-    sentry_sdk.init(
-        dsn= config['sentry_dsn'],
-    )
+    sentry_sdk.init(dsn=config['sentry_dsn'])
 
-with auto_api_client.ApiClient(configuration) as api_client:
+with ApiClient(configuration) as api_client:
     runner_instance_id = socket.gethostname()
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
@@ -61,6 +64,12 @@ with auto_api_client.ApiClient(configuration) as api_client:
                 adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
                 schema.execute_cohort_definition(message, api)
+            elif type(message) is UpdateTablesList:
+                schema.update_tables_list(api, config['data_protected']['schemas'], config['data_protected']['tables'])
+            elif type(message) is UpdateTableColumnsList:
+                schema.update_table_columns_list(api, message, config['data_protected']['columns'])
+            elif type(message) is UpdateTableColumnStats:
+                schema.update_table_column_stats(api, message, config['phenoenotypicDb']['min_count'], config['data_protected']['tables'], config['data_protected']['columns'])
             elif type(message) is StartWorkflow:
                 workflow_executor.execute_workflow(message)
             elif message is None:
@@ -77,4 +86,5 @@ with auto_api_client.ApiClient(configuration) as api_client:
             logging.critical("Exception when calling AgentApi: %s\n" % e)
         except Exception as e:
             logging.critical("Unknown exception: %s\n" % e)
-            sys.exit(1)
+            raise e
+
