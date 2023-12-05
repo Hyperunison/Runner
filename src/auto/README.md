@@ -115,6 +115,8 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AddRunLogChunkRequest](docs/AddRunLogChunkRequest.md)
+ - [BiobankDataColumn](docs/BiobankDataColumn.md)
+ - [BiobankDataColumnFrequentValue](docs/BiobankDataColumnFrequentValue.md)
  - [BiobankDataTable](docs/BiobankDataTable.md)
  - [GetMappingsRequest](docs/GetMappingsRequest.md)
  - [GetProcessLogs](docs/GetProcessLogs.md)
@@ -131,9 +133,11 @@ Class | Method | HTTP request | Description
  - [TypesMap](docs/TypesMap.md)
 
 
+<a id="documentation-for-authorization"></a>
 ## Documentation For Authorization
 
- All endpoints do not require authorization.
+Endpoints do not require authorization.
+
 
 ## Author
 

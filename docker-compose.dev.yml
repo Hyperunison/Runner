@@ -2,6 +2,7 @@ version: '3'
 
 services:
   unison-agent:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Resources/docker/Dockerfile

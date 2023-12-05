@@ -12,6 +12,8 @@ auto_api_client/configuration.py
 auto_api_client/exceptions.py
 auto_api_client/model/__init__.py
 auto_api_client/model/add_run_log_chunk_request.py
+auto_api_client/model/biobank_data_column.py
+auto_api_client/model/biobank_data_column_frequent_value.py
 auto_api_client/model/biobank_data_table.py
 auto_api_client/model/get_mappings_request.py
 auto_api_client/model/get_process_logs.py
@@ -31,6 +33,8 @@ auto_api_client/models/__init__.py
 auto_api_client/rest.py
 docs/AddRunLogChunkRequest.md
 docs/AgentApi.md
+docs/BiobankDataColumn.md
+docs/BiobankDataColumnFrequentValue.md
 docs/BiobankDataTable.md
 docs/GetMappingsRequest.md
 docs/GetProcessLogs.md
@@ -53,6 +57,8 @@ test-requirements.txt
 test/__init__.py
 test/test_add_run_log_chunk_request.py
 test/test_agent_api.py
+test/test_biobank_data_column.py
+test/test_biobank_data_column_frequent_value.py
 test/test_biobank_data_table.py
 test/test_get_mappings_request.py
 test/test_get_process_logs.py

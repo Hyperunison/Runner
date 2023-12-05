@@ -1,16 +1,13 @@
 import json
 import logging
 from typing import List, Dict, Tuple
-from sqlalchemy.exc import ProgrammingError
-from sqlalchemy import create_engine, text
-from sqlalchemy.ext.declarative import declarative_base
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
 from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
-from psycopg2.errors import UndefinedFunction, UndefinedTable
-
-Base = declarative_base()
+from src.UCDM.Schema.Labkey import Labkey
+from src.UCDM.Schema.Postgres import Postgres
+from src.UCDM.Schema.BaseSchema import BaseSchema
 
 class SQLJoin:
     table: str
@@ -54,11 +51,19 @@ class VariableMapper:
 class DataSchema:
     min_count: int = 0
     dst: str = ""
+    schema: BaseSchema
 
-    def __init__(self, dsn: str, min_count: int):
-        self.engine = create_engine(dsn).connect()
+    def __init__(self, dsn: str, schema:str, min_count: int):
         self.min_count = min_count
+        self.schema = self.create_schema(dsn, schema, min_count)
         super().__init__()
+
+    def create_schema(self, dsn: str, schema: str, min_count: int) -> BaseSchema:
+        if schema == 'labkey':
+            return Labkey(dsn, min_count)
+        if schema == 'postgres':
+            return Postgres(dsn,    min_count)
+        raise Exception("Unknown schema {}".format(schema))
 
     def build_cohort_definition_sql_query(
             self,
@@ -92,7 +97,7 @@ class DataSchema:
         sql = "SELECT\n    {},\n".format(select_string)
 
         if distribution:
-            sql += "    count(distinct {}.{}) as count\n".format(participantTable, participantIdField)
+            sql += "    count(distinct {}.{}) as cnt\n".format(participantTable, participantIdField)
         else:
             sql += mapper.convert_var_name("{}.{}".format(participantTable, participantIdField))+"\n"
 
@@ -111,17 +116,6 @@ class DataSchema:
 
         return sql
 
-    def fetch_all(self, sql: str):
-        result = self.engine.execute(text(sql)).mappings().all()
-        result = [dict(row) for row in result]
-
-        return result
-
-    def fetch_row(self, sql: str) -> Dict:
-        result = self.engine.execute(text(sql)).mappings().all()
-        result = [dict(row) for row in result]
-
-        return result[0]
 
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
@@ -143,160 +137,20 @@ class DataSchema:
             True
         )
         try:
-            result = self.fetch_all(sql)
+            result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
-        except ProgrammingError as e:
-            logging.error("SQL query error: {}".format(e.orig))
+        except Exception as e:
+            logging.error("SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
-            self.engine.rollback()
+            self.schema.rollback()
             api.set_cohort_definition_aggregation(
                 {},
-                "/*\n{}*/\n\n{}\n".format(e.orig, sql),
+                "/*\n{}*/\n\n{}\n".format(e, sql),
                 cohort_definition.reply_channel,
                 key,
                 cohort_definition.raw_only
             )
-
-    def get_tables_list(self) -> List[str]:
-        sql = "SELECT table_schema || '.' || table_name as tbl FROM information_schema.tables WHERE table_type = 'BASE TABLE'" + \
-              "AND table_schema NOT IN ('pg_catalog', 'information_schema');"
-        lst = self.fetch_all(sql)
-        result: List[str] = []
-        for i in lst:
-            result.append(i['tbl'])
-
-        return result
-
-    def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
-        sql = "select count(*) as cnt from {}".format(table_name)
-        count = self.fetch_row(sql)['cnt']
-
-        if '.' in table_name:
-            schema, table = table_name.split('.')
-            sql = "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '{}' and table_schema='{}'".format(table, schema)
-        else:
-            sql = "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '{}'".format(table_name)
-
-        lst = self.fetch_all(sql)
-        columns: List[Dict[str, str]] = []
-        for i in lst:
-            item: Dict[str, str] = {}
-            item['column'] = i['column_name']
-            item['type'] = i['data_type']
-            item['nullable'] = i['is_nullable'] == 'YES'
-            columns.append(item)
-
-        return count, columns
-
-    def update_tables_list(self, api: Api, protected_schemas: List[str], protected_tables: List[str]):
-        logging.info("Update tables list packet got")
-        tables = self.get_tables_list()
-        result: List[str] = []
-        for table in tables:
-            if table in protected_tables or ('.' in table and table.split('.')[1] in protected_tables):
-                logging.debug("Skip table {}, as it's listed in protected_tables".format(table))
-                continue
-            if '.' in table and table.split('.')[0] in protected_schemas:
-                logging.debug("Skip table {}, as it's listed in protected_schemas".format(table))
-                continue
-            result.append(table)
-        api.set_tables_list(result)
-
-    def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protected_columns: List[str]):
-        table_name = message.table_name
-        logging.info("Update tables columns list packet got for table {}".format(table_name))
-        rows_count, columns = self.get_table_columns(table_name)
-        result: List[str] = []
-        types_result: List[str] = []
-        nullable_result: List[str] = []
-        for column in columns:
-            if column in protected_columns:
-                logging.debug("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column))
-                continue
-            result.append(column['column'])
-            types_result.append(column['type'])
-            nullable_result.append(column['nullable'])
-        api.set_table_stats(table_name, rows_count, result, types_result, nullable_result)
-
-    def get_median(self, table: str, column: str, min, max):
-        if min is None or max is None:
-            return None
-        sql = "SELECT PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY {column}) as median FROM {table} WHERE {column} > {min} and {column} < {max}".format(column=column, table=table, min=min, max=max)
-        return self.fetch_row(sql)['median']
-    def update_table_column_stats(self, api: Api, message: UpdateTableColumnStats, min_count, protected_tables: List[str], protected_columns: List[str]):
-        table_name = message.table_name
-        column_name = message.column_name
-        logging.info("Update table column stats packet got for column {}.{}".format(table_name, column_name))
-
-        if table_name in protected_tables or ('.' in table_name and table_name.split('.')[1] in protected_tables):
-            logging.error("Skip column {}.{}, as it's listed in protected_tables".format(table_name, column_name))
-            return
-
-        if table_name+"."+column_name in protected_columns:
-            logging.error("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column_name))
-            return
-
-        sql = "SELECT count(distinct \"{v}\") as unique_count from {table}".format(v=column_name, table=table_name)
-        try:
-            row = self.fetch_row(sql)
-        except ProgrammingError as e:
-            self.engine.rollback()
-            if isinstance(e.orig, UndefinedTable):
-                logging.error("Table {} not exists, mark is as abandoned".format(table_name))
-                api.set_table_info(table_name, abandoned=True)
-                api.set_table_column_stats(table_name, column_name, '', '',
-                                           '', '', '', '', '',
-                                           '', '', '', '', '')
-                return
-            else:
-                raise e
-
-
-        unique_count = row['unique_count']
-
-        try:
-            sql = "SELECT min(\"{v}\") as min_value, max(\"{v}\") as max_value, avg(\"{v}\") as avg_value from {table}".format(v=column_name, table=table_name)
-            row = self.fetch_row(sql)
-
-            min_value = row['min_value']
-            max_value = row['max_value']
-            avg_value = row['avg_value']
-            median50_value = self.get_median(table_name, column_name, min_value, max_value)
-            median25_value = self.get_median(table_name, column_name, min_value, median50_value)
-            median12_value = self.get_median(table_name, column_name, min_value, median25_value)
-            median37_value = self.get_median(table_name, column_name, median25_value, median50_value)
-            median75_value = self.get_median(table_name, column_name, median50_value, max_value)
-            median63_value = self.get_median(table_name, column_name, median50_value, median75_value)
-            median88_value = self.get_median(table_name, column_name, median75_value, max_value)
-        except ProgrammingError as e:
-            self.engine.rollback()
-            if not isinstance(e.orig, UndefinedFunction):
-                raise e
-            min_value=None
-            max_value=None
-            avg_value=None
-            median50_value=None
-            median25_value=None
-            median12_value=None
-            median37_value=None
-            median75_value=None
-            median63_value=None
-            median88_value=None
-
-            sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY 1 HAVING COUNT(*) > {} ORDER BY 1 DESC LIMIT 10".format(column_name, table_name, column_name, min_count)
-            rows = self.fetch_all(sql)
-            values = [d['value'] for d in rows]
-            counts = [d['cnt'] for d in rows]
-            api.set_table_column_values(table_name, column_name, values, counts)
-
-
-        nulls_count = self.fetch_row("SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name))['cnt']
-
-        api.set_table_column_stats(table_name, column_name, unique_count, nulls_count,
-            min_value, max_value, avg_value, median12_value, median25_value, median37_value,
-            median50_value, median63_value, median75_value, median88_value)
-
 
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
         logging.debug("Statement got {}".format(json.dumps(statement)))
@@ -377,4 +231,64 @@ class DataSchema:
 
         return "({})".format(s)
 
+    def fetch_all(self, sql: str):
+        return self.schema.fetch_all(sql)
 
+    def update_tables_list(self, api: Api, protected_schemas: List[str], protected_tables: List[str]):
+        logging.info("Update tables list packet got")
+        tables = self.schema.get_tables_list()
+        result: List[str] = []
+        for table in tables:
+            if table in protected_tables or ('.' in table and table.split('.')[1] in protected_tables):
+                logging.debug("Skip table {}, as it's listed in protected_tables".format(table))
+                continue
+            if '.' in table and table.split('.')[0] in protected_schemas:
+                logging.debug("Skip table {}, as it's listed in protected_schemas".format(table))
+                continue
+            result.append(table)
+        api.set_tables_list(result)
+
+
+    def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protected_columns: List[str]):
+        table_name = message.table_name
+        logging.info("Update tables columns list packet got for table {}".format(table_name))
+        rows_count, columns = self.schema.get_table_columns(table_name)
+        result: List[str] = []
+        types_result: List[str] = []
+        nullable_result: List[str] = []
+        for column in columns:
+            if column in protected_columns:
+                logging.debug("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column))
+                continue
+            result.append(column['column'])
+            types_result.append(column['type'])
+            nullable_result.append(column['nullable'])
+        api.set_table_stats(table_name, rows_count, result, types_result, nullable_result)
+
+    def update_table_column_stats(self, api: Api, message: UpdateTableColumnStats, min_count, protected_tables: List[str], protected_columns: List[str]):
+        table_name = message.table_name
+        column_name = message.column_name
+        logging.info("Update table column stats packet got for column {}.{}".format(table_name, column_name))
+
+        if table_name in protected_tables or ('.' in table_name and table_name.split('.')[1] in protected_tables):
+            logging.error("Skip column {}.{}, as it's listed in protected_tables".format(table_name, column_name))
+            return
+
+        if table_name+"."+column_name in protected_columns:
+            logging.error("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column_name))
+            return
+        stat = self.schema.get_table_column_stats(table_name, column_name)
+
+        api.set_table_info(stat.table_name, stat.abandoned)
+        if stat.abandoned:
+            logging.error("Table {} not exists, mark is as abandoned".format(table_name))
+            return
+        if stat.values:
+            values = [d['value'] for d in stat.values]
+            counts = [d['cnt'] for d in stat.values]
+            api.set_table_column_values(stat.table_name,  stat.column_name,  values, counts)
+        api.set_table_column_stats(stat.table_name, stat.column_name,
+                                   stat.unique_count, stat.nulls_count,
+                                   stat.min_value, stat.max_value, stat.avg_value,
+                                   stat.median12_value,stat.median25_value, stat.median37_value, stat.median50_value,
+                                   stat.median63_value, stat.median75_value, stat.median88_value)

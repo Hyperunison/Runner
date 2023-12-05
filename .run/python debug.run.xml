@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="python debug" type="PyRemoteDebugConfigurationType" factoryName="Python Remote Debug">
+    <option name="PORT" value="55147" />
+    <option name="HOST" value="host.docker.internal" />
+    <PathMappingSettings>
+      <option name="pathMappings">
+        <list>
+          <mapping local-root="$PROJECT_DIR$/../runner" remote-root="/app" />
+        </list>
+      </option>
+    </PathMappingSettings>
+    <option name="REDIRECT_OUTPUT" value="true" />
+    <option name="SUSPEND_AFTER_CONNECT" value="false" />
+    <method v="2" />
+  </configuration>
+</component>

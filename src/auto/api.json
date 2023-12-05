@@ -1029,7 +1029,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\w.]+"
+                            "pattern": "[\\w.-]+"
                         }
                     }
                 ],
@@ -1153,7 +1153,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\w.]+"
+                            "pattern": "[\\w.-]+"
                         }
                     }
                 ],
@@ -1256,8 +1256,20 @@
                     "id": {
                         "type": "integer"
                     },
-                    "biobankId": {
-                        "type": "integer"
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/BiobankDataColumn"
+                        }
+                    },
+                    "tableName": {
+                        "type": "string"
+                    },
+                    "userDescription": {
+                        "type": "string"
+                    },
+                    "onboardingStatus": {
+                        "type": "string"
                     },
                     "rowsCount": {
                         "type": "integer"
@@ -1304,6 +1316,104 @@
                     },
                     "s3Path": {
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "BiobankDataColumn": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "biobankDataTableId": {
+                        "type": "integer"
+                    },
+                    "foreignKey": {
+                        "$ref": "#\/components\/schemas\/BiobankDataColumn"
+                    },
+                    "foreignKeyId": {
+                        "type": "integer"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/BiobankDataColumnFrequentValue"
+                        }
+                    },
+                    "columnName": {
+                        "type": "string"
+                    },
+                    "columnType": {
+                        "type": "string"
+                    },
+                    "userDescription": {
+                        "type": "string"
+                    },
+                    "isPrivate": {
+                        "type": "boolean"
+                    },
+                    "uniqueCount": {
+                        "type": "integer"
+                    },
+                    "nullable": {
+                        "type": "boolean"
+                    },
+                    "nullsCount": {
+                        "type": "integer"
+                    },
+                    "minValue": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "maxValue": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "avgValue": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median12Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median25Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median37Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median50Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median63Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median75Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "median88Value": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "updateStatus": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "BiobankDataColumnFrequentValue": {
+                "properties": {
+                    "value": {
+                        "type": "string"
+                    },
+                    "rowsCount": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"

@@ -10,6 +10,8 @@
 # sys.setrecursionlimit(n)
 
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
+from auto_api_client.model.biobank_data_column import BiobankDataColumn
+from auto_api_client.model.biobank_data_column_frequent_value import BiobankDataColumnFrequentValue
 from auto_api_client.model.biobank_data_table import BiobankDataTable
 from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.get_process_logs import GetProcessLogs
