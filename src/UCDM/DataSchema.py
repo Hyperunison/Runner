@@ -1,5 +1,6 @@
 import json
 import logging
+import datetime
 from typing import List, Dict, Tuple
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine, text
@@ -114,6 +115,11 @@ class DataSchema:
     def fetch_all(self, sql: str):
         result = self.engine.execute(text(sql)).mappings().all()
         result = [dict(row) for row in result]
+
+        for item in result:
+            for key, value in item.items():
+                if isinstance(value, datetime.date):
+                    item[key] = value.strftime('%Y-%m-%d')
 
         return result
 
