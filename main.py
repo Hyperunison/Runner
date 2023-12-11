@@ -87,8 +87,8 @@ with ApiClient(configuration) as api_client:
 
             if message is not None:
                 api.accept_task(response.id)
-
-            time.sleep(config['idle_delay'])
+            else:
+                time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:
             logging.critical("Exception when calling AgentApi: %s\n" % e)
         except Exception as e:
