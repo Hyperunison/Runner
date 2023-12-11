@@ -1047,7 +1047,7 @@ class AgentApi(object):
                     ('column',): {
 
                         'regex': {
-                            'pattern': r'[\w.]+',  # noqa: E501
+                            'pattern': r'[\w.-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1148,7 +1148,7 @@ class AgentApi(object):
                     ('column',): {
 
                         'regex': {
-                            'pattern': r'[\w.]+',  # noqa: E501
+                            'pattern': r'[\w.-]+',  # noqa: E501
                         },
                     },
                 },

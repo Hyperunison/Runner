@@ -24,6 +24,13 @@ from src.MessageFactory import MessageFactory
 from src.auto.auto_api_client.configuration import Configuration
 from src.auto.auto_api_client.api_client import ApiClient
 
+try:
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
+except:
+    pass
+
+
 config = yaml.safe_load(open("config.yaml", "r"))
 
 configure_logs(config, "main")
@@ -37,7 +44,7 @@ with ApiClient(configuration) as api_client:
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
     adapter = create_by_config(api, config, runner_instance_id)
-    schema = DataSchema(config['phenoenotypicDb']['dsn'], config['phenoenotypicDb']['min_count'])
+    schema = DataSchema(config['phenoenotypicDb']['dsn'], config['phenoenotypicDb']['schema'], config['phenoenotypicDb']['min_count'])
     workflow_executor = NextflowCohortWorkflowExecutor(api, adapter, schema)
     check_interval = config['check_runs_status_interval']
     last_check = None

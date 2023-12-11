@@ -945,7 +945,7 @@ with auto_api_client.ApiClient() as api_client:
     version = "1" # str | 
     token = "f" # str | 
     table = "z" # str | 
-    column = "z" # str | 
+    column = "2" # str | 
     set_table_column_freequent_values_request = SetTableColumnFreequentValuesRequest(
         values=[],
         counts=[],
@@ -1028,7 +1028,7 @@ with auto_api_client.ApiClient() as api_client:
     version = "1" # str | 
     token = "f" # str | 
     table = "z" # str | 
-    column = "z" # str | 
+    column = "2" # str | 
     set_table_column_stats_request = SetTableColumnStatsRequest(
         is_private="is_private_example",
         unique_count="unique_count_example",

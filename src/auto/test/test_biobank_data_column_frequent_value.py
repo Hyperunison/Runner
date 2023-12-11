@@ -12,13 +12,11 @@ import sys
 import unittest
 
 import auto_api_client
-from auto_api_client.model.biobank_data_column import BiobankDataColumn
-globals()['BiobankDataColumn'] = BiobankDataColumn
-from auto_api_client.model.biobank_data_table import BiobankDataTable
+from auto_api_client.model.biobank_data_column_frequent_value import BiobankDataColumnFrequentValue
 
 
-class TestBiobankDataTable(unittest.TestCase):
-    """BiobankDataTable unit test stubs"""
+class TestBiobankDataColumnFrequentValue(unittest.TestCase):
+    """BiobankDataColumnFrequentValue unit test stubs"""
 
     def setUp(self):
         pass
@@ -26,10 +24,10 @@ class TestBiobankDataTable(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testBiobankDataTable(self):
-        """Test BiobankDataTable"""
+    def testBiobankDataColumnFrequentValue(self):
+        """Test BiobankDataColumnFrequentValue"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = BiobankDataTable()  # noqa: E501
+        # model = BiobankDataColumnFrequentValue()  # noqa: E501
         pass
 
 
