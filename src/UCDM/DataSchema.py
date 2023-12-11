@@ -1,6 +1,5 @@
 import json
 import logging
-import datetime
 from typing import List, Dict, Tuple
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest

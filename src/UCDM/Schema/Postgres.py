@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from psycopg2.errors import UndefinedFunction, UndefinedTable
 from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.TableStat import TableStat
-
+import datetime
 
 Base = declarative_base()
 
@@ -136,8 +136,14 @@ class Postgres(BaseSchema):
         result = self.engine.execute(text(sql)).mappings().all()
         result = [dict(row) for row in result]
 
+        for item in result:
+            for key, value in item.items():
+                if isinstance(value, datetime.date):
+                    item[key] = value.strftime('%Y-%m-%d')
+
         return result
 
     def rollback(self):
         self.engine.rollback()
+
 
