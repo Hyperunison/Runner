@@ -19,10 +19,9 @@ class Labkey (BaseSchema):
         project_name = parsed_dsn.path.split('/')[1]
         user = parsed_dsn.username
         password = parsed_dsn.password
-        if not os.path.exists(self.credentials_path):
-            with open(self.credentials_path, "w+") as f:
-                f.write("machine {}\nlogin {}\npassword {}".format(labkey_server, user, password))
-            os.chmod(self.credentials_path, 0o400)
+        with open(self.credentials_path, "w+") as f:
+            f.write("machine {}\nlogin {}\npassword {}\n".format(labkey_server, user, password))
+        os.chmod(self.credentials_path, 0o400)
         self.engine = APIWrapper(labkey_server, project_name, "labkey", use_ssl=True)
         super().__init__(dsn, min_count)
 
@@ -86,7 +85,7 @@ class Labkey (BaseSchema):
             median63_value=None
             median88_value=None
 
-            sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY 1 HAVING COUNT(*) > {} ORDER BY 1 DESC LIMIT 10".format(column_name, table_name, column_name, self.min_count)
+            sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY value HAVING COUNT(*) > {} ORDER BY 1 DESC LIMIT 10".format(column_name, table_name, column_name, self.min_count)
             values_counts = self.fetch_all(sql)
 
         nulls_count = self.fetch_row("SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name))['cnt']
@@ -123,7 +122,7 @@ class Labkey (BaseSchema):
 
     def fetch_all(self, sql: str):
         result = self.engine.query.execute_sql(self.schema, text(sql))
-        result = [dict(row) for row in result]
+        result = [dict(row) for row in result['rows']]
         return result
 
     def rollback(self):

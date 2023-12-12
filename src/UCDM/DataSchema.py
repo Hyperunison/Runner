@@ -86,18 +86,19 @@ class DataSchema:
             sql_where = "true"
 
         select_array: list[str] = []
+        group_array: list[str] = []
         for exp in export:
             alias = exp['as'] if 'as' in exp else  query.select[exp['name']]
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
-
+            group_array.append(query.select[alias])
 
         select_string = ", ".join(select_array)
 
         sql = "SELECT\n    {},\n".format(select_string)
 
         if distribution:
-            sql += "    count(distinct {}.{}) as cnt\n".format(participantTable, participantIdField)
+            sql += "    count(distinct {}.{}) as count_uniq_participants\n".format(participantTable, participantIdField)
         else:
             sql += mapper.convert_var_name("{}.{}".format(participantTable, participantIdField))+"\n"
 
@@ -108,9 +109,9 @@ class DataSchema:
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution:
-            sql += "GROUP BY {} \n".format(", ".join(map(str, range(1, len(select_array) + 1)))) + \
+            sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.{}) >= {}\n".format(participantTable, participantIdField, self.min_count) + \
-                   "ORDER BY {}".format(", ".join(map(str, range(1, len(select_array) + 1))))
+                   "ORDER BY {}".format(", ".join(map(str, group_array)))
 
         logging.info("Generated SQL query: \n{}".format(sql))
 
