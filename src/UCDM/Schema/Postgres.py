@@ -123,7 +123,7 @@ class Postgres(BaseSchema):
     def get_median(self, table: str, column: str, min, max):
         if min is None or max is None:
             return None
-        sql = "SELECT PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY {column}) as median FROM {table} WHERE {column} > {min} and {column} < {max}".format(column=column, table=table, min=min, max=max)
+        sql = "SELECT PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY {column}) as median FROM {table} WHERE {column} > {min} and {column} < {max}".format(column='"'+column+'"', table=table, min=min, max=max)
         return self.fetch_row(sql)['median']
 
     def fetch_row(self, sql: str) -> Dict:
