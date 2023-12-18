@@ -73,6 +73,7 @@ class DataSchema:
             joins,
             where,
             export,
+            limit: int,
             distribution: bool
     ) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
@@ -112,7 +113,7 @@ class DataSchema:
             sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.{}) >= {}\n".format(participantTable, participantIdField, self.min_count) + \
                    "ORDER BY {}".format(", ".join(map(str, group_array)))
-
+        sql += "\nLIMIT {}".format(limit)
         logging.info("Generated SQL query: \n{}".format(sql))
 
         return sql
@@ -135,6 +136,7 @@ class DataSchema:
             cohort_definition.cohort_definition['join'],
             cohort_definition.cohort_definition['where'],
             cohort_definition.cohort_definition['export'],
+            cohort_definition.cohort_definition['limit'],
             True
         )
         try:
