@@ -99,7 +99,7 @@ class DataSchema:
         sql = "SELECT\n    {},\n".format(select_string)
 
         if distribution:
-            sql += "    count(distinct {}.{}) as count_uniq_participants\n".format(participantTable, participantIdField)
+            sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participantTable, participantIdField)
         else:
             sql += mapper.convert_var_name("{}.{}".format(participantTable, participantIdField))+"\n"
 
@@ -111,7 +111,7 @@ class DataSchema:
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution:
             sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
-                   "HAVING COUNT(distinct {}.{}) >= {}\n".format(participantTable, participantIdField, self.min_count) + \
+                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count) + \
                    "ORDER BY {}".format(", ".join(map(str, group_array)))
         sql += "\nLIMIT {}".format(limit)
         logging.info("Generated SQL query: \n{}".format(sql))
