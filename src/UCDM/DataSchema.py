@@ -1,8 +1,12 @@
 import json
 import logging
+import os
+import time
+import signal
 from typing import List, Dict, Tuple
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest
+from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
 from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
 from src.UCDM.Schema.Labkey import Labkey
@@ -120,6 +124,11 @@ class DataSchema:
 
 
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
+        pid = os.fork()
+        if pid != 0:
+            logging.info("Forked, run in fork, pid={}".format(pid))
+            api.set_car_status(cohort_definition.cohort_api_request_id, "process", pid)
+            return
         key = cohort_definition.cohort_definition['key']
         fields = cohort_definition.cohort_definition['fields']
         participantTable = cohort_definition.cohort_definition['participantTableName']
@@ -154,6 +163,30 @@ class DataSchema:
                 key,
                 cohort_definition.raw_only
             )
+        api.set_car_status(cohort_definition.cohort_api_request_id, "success", pid)
+
+
+    def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
+        try:
+            os.kill(kill_message.pid, signal.SIGKILL)
+            done = False
+            while not done:
+                try:
+                    wpid, status = os.waitpid(kill_message.pid, os.WNOHANG)
+                    if wpid == 0:
+                        time.sleep(1)
+                    else:
+                        done = True
+                except ChildProcessError:
+                    done = True
+            if done:
+                api.set_car_status(kill_message.cohort_api_request_id, "killed")
+                print(f"Process with PID {kill_message.pid} killed successfully.")
+        except OSError as e:
+            print(f"Error while killing PID {kill_message.pid} : {e}")
+            api.set_car_status(kill_message.cohort_api_request_id, "error")
+
+
 
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
         logging.debug("Statement got {}".format(json.dumps(statement)))
