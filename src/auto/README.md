@@ -100,6 +100,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**get_mappings**](docs/AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
+*AgentApi* | [**set_car_status**](docs/AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 *AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 

@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**get_mappings**](AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
 [**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
+[**set_car_status**](AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 [**set_cohort_definition_aggregation**](AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
@@ -593,6 +594,83 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Map of data types |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_car_status**
+> set_car_status(id, version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    id = 1 # int | Cohort API Request ID, example: 1234. It may be taken from /next-task API method
+    version = "1" # str | 
+    token = "f" # str | 
+    pid = "0" # str | New pid (optional) if omitted the server will use the default value of "0"
+    status = "success" # str | New Cohort API Request status (optional) if omitted the server will use the default value of "success"
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_instance.set_car_status(id, version, token)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_car_status: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_instance.set_car_status(id, version, token, pid=pid, status=status)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_car_status: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**| Cohort API Request ID, example: 1234. It may be taken from /next-task API method |
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **pid** | **str**| New pid | [optional] if omitted the server will use the default value of "0"
+ **status** | **str**| New Cohort API Request status | [optional] if omitted the server will use the default value of "success"
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**0** |  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
