@@ -1,6 +1,4 @@
 import logging
-
-
 import sentry_sdk
 import yaml
 import time
@@ -15,7 +13,6 @@ from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
 from src.LogConfigurator import configure_logs
 from src.Message.CohortAPIRequest import CohortAPIRequest
-from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
@@ -57,9 +54,6 @@ with ApiClient(configuration) as api_client:
                 adapter.check_runs_statuses()
                 last_check = time.time()
             response = api.next_task()
-            if response is str:
-                logging.info("Received message {}".format(response))
-                continue
             message = MessageFactory().create_message_object_from_response(message=response)
             if not message is None:
                 logging.info("Received message {}".format(response.type))
@@ -77,8 +71,6 @@ with ApiClient(configuration) as api_client:
                 adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
                 schema.execute_cohort_definition(message, api)
-            elif type(message) is KillCohortAPIRequest:
-                schema.kill_cohort_definition(message, api)
             elif type(message) is UpdateTablesList:
                 schema.update_tables_list(api, config['data_protected']['schemas'], config['data_protected']['tables'])
             elif type(message) is UpdateTableColumnsList:
@@ -92,7 +84,6 @@ with ApiClient(configuration) as api_client:
                     logging.debug("idle, do nothing")
             else:
                 logging.error("Unknown message type {}".format(type(message)))
-                raise Exception("Unknown message type {}".format(type(message)))
 
             if message is not None:
                 api.accept_task(response.id)

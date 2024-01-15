@@ -1,6 +1,5 @@
 from src.Message.BaseMessage import BaseMessage
 from src.Message.CohortAPIRequest import CohortAPIRequest
-from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.KillJob import KillJob
 from src.Message.NextflowRun import NextflowRun
@@ -22,8 +21,6 @@ class MessageFactory:
             return KillJob(message)
         elif message.type == 'CohortAPIRequest':
             return CohortAPIRequest(message)
-        elif message.type == 'KillCohortAPIRequest':
-            return KillCohortAPIRequest(message)
         elif message.type == 'StartMlTrain':
             return StartMLTrain(message)
         elif message.type == 'StartNextflowCohortWorkflow':
