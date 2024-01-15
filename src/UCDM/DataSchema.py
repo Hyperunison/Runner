@@ -38,6 +38,10 @@ class VariableMapper:
     map: Dict[str, str] = {
     }
 
+    def __init__(self, fields):
+        for ucdm in fields.keys():
+            self.declare_var(ucdm, fields[ucdm])
+
     def convert_var_name(self, var: str) -> str:
         if not self.map.__contains__(var):
             raise Exception("Unknown object var {}".format(var))
@@ -101,7 +105,7 @@ class DataSchema:
         if distribution:
             sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participantTable, participantIdField)
         else:
-            sql += mapper.convert_var_name("{}.{}".format(participantTable, participantIdField))+"\n"
+            sql += "{}.{}\n".format(participantTable, participantIdField)
 
         sql +="FROM {}\n".format(participantTable)
 
@@ -121,13 +125,10 @@ class DataSchema:
 
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
-        fields = cohort_definition.cohort_definition['fields']
         participantTable = cohort_definition.cohort_definition['participantTableName']
         participantIdField = cohort_definition.cohort_definition['participantIdField']
 
-        mapper = VariableMapper()
-        for ucdm in fields.keys():
-            mapper.declare_var(ucdm, fields[ucdm])
+        mapper = VariableMapper(cohort_definition.cohort_definition['fields'])
 
         sql = self.build_cohort_definition_sql_query(
             mapper,

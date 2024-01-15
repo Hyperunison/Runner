@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Dict, List, Tuple
 from sqlalchemy.exc import ProgrammingError
@@ -60,6 +61,7 @@ class Labkey (BaseSchema):
 
         try:
             sql = "SELECT min(\"{v}\") as min_value, max(\"{v}\") as max_value, avg(\"{v}\") as avg_value from {table}".format(v=column_name, table=table_name)
+            logging.info(sql)
             result = self.engine.query.execute_sql(self.schema, sql=sql)
 
             min_value = result['rows'][0]['min_value']
@@ -84,9 +86,9 @@ class Labkey (BaseSchema):
             median75_value=None
             median63_value=None
             median88_value=None
-
-            sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY value HAVING COUNT(*) > {} ORDER BY 1 DESC LIMIT 10".format(column_name, table_name, column_name, self.min_count)
+            sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) > {min} ORDER BY 1 DESC LIMIT 100".format(column=column_name, table=table_name, min=self.min_count)
             values_counts = self.fetch_all(sql)
+            pass
 
         nulls_count = self.fetch_row("SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name))['cnt']
 

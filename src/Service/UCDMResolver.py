@@ -8,7 +8,7 @@ from typing import List, Dict
 import csv
 from typing import Optional
 
-from src.UCDM.DataSchema import DataSchema
+from src.UCDM.DataSchema import DataSchema, VariableMapper
 from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 
 
@@ -20,9 +20,16 @@ class UCDMResolver:
         self.schema = schema
 
     def get_ucdm_result(self, cohort_definition) -> List[Dict[str, str]]:
+        mapper = VariableMapper(cohort_definition['fields'])
+
         sql = self.schema.build_cohort_definition_sql_query(
+            mapper,
+            cohort_definition['participantTableName'],
+            cohort_definition['participantIdField'],
+            cohort_definition['join'],
             cohort_definition['where'],
             cohort_definition['export'],
+            1000000000,
             True
         )
         logging.info("Model train task got: {}".format(json.dumps(sql)))
@@ -37,8 +44,13 @@ class UCDMResolver:
             mapping_index = self.build_index(mapping)
 
             sql_final = self.schema.build_cohort_definition_sql_query(
+                mapper,
+                cohort_definition['participantTableName'],
+                cohort_definition['participantIdField'],
+                cohort_definition['join'],
                 cohort_definition['where'],
                 cohort_definition['export'],
+                1000000000,
                 False
             )
             result = self.schema.fetch_all(sql_final)
