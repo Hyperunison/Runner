@@ -192,19 +192,7 @@
                         "description": "Mark task as completed, not showing it again next time",
                         "content": {
                             "application\/json": {
-                                "schema": {
-                                    "$ref": "#\/components\/schemas\/RunnerMessage"
-                                }
-                            }
-                        }
-                    },
-                    "204": {
-                        "description": "No tasks",
-                        "content": {
-                            "application\/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
+                                "schema": {}
                             }
                         }
                     }
@@ -1185,6 +1173,77 @@
                 "responses": {
                     "200": {
                         "description": "Set columns in a table and number of rows",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/api\/agent\/v{version}\/{token}\/car\/{id}\/status": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setCarStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Cohort API Request ID, example: 1234. It may be taken from \/next-task API method",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "pid",
+                        "in": "query",
+                        "description": "New pid",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": ""
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "New Cohort API Request status",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "success"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Set cohort api request status",
                         "content": {
                             "application\/json": {
                                 "schema": {
