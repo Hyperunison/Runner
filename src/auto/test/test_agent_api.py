@@ -71,6 +71,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_car_status(self):
+        """Test case for set_car_status
+
+        """
+        pass
+
     def test_set_cohort_definition_aggregation(self):
         """Test case for set_cohort_definition_aggregation
 
