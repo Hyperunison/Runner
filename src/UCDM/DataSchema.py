@@ -155,18 +155,23 @@ class DataSchema:
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
             api.set_car_status(cohort_definition.cohort_api_request_id, "success", pid)
+            status = "success"
         except Exception as e:
             logging.error("SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
             self.schema.rollback()
-            api.set_cohort_definition_aggregation(
-                {},
-                "/*\n{}*/\n\n{}\n".format(e, sql),
-                cohort_definition.reply_channel,
-                key,
-                cohort_definition.raw_only
-            )
-            api.set_car_status(cohort_definition.cohort_api_request_id, "error", pid)
+            result = {}
+            sql = "/*\n{}*/\n\n{}\n".format(e, sql)
+            status = "error"
+
+        try:
+           api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
+        except Exception as e:
+            logging.error("API query error: {}".format(e))
+            api.set_cohort_definition_aggregation({}, "/*\n{}*/\n\n{}\n".format(e, sql), cohort_definition.reply_channel, key, cohort_definition.raw_only)
+
+        api.set_car_status(cohort_definition.cohort_api_request_id, status, pid)
+
         sys.exit(0)
 
 
