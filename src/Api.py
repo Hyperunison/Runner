@@ -163,6 +163,3 @@ class Api:
 
     def get_agent_id(self):
         return self.api_instance.get_agent_id(token=self.token, version=self.version)
-
-    def set_car_status(self, car_id: int, status: str, pid: int = None):
-        self.api_instance.set_car_status(int(car_id), status=status, pid=str(pid), token=self.token, version=self.version)

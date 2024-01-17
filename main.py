@@ -4,8 +4,8 @@ import yaml
 import time
 import auto_api_client
 import socket
-import signal
-import os
+import sys
+
 from src.Service.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.UCDM.DataSchema import DataSchema
 from src.auto.auto_api_client.api import agent_api
@@ -13,7 +13,6 @@ from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
 from src.LogConfigurator import configure_logs
 from src.Message.CohortAPIRequest import CohortAPIRequest
-from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
@@ -39,17 +38,6 @@ configuration = Configuration(host=config['api_url'])
 
 if 'sentry_dsn' in config:
     sentry_sdk.init(dsn=config['sentry_dsn'])
-
-def child_handler(signum, frame):
-    while True:
-        try:
-            pid, _ = os.waitpid(-1, os.WNOHANG)
-            if pid <= 0:
-                break
-        except OSError:
-            break
-
-signal.signal(signal.SIGCHLD, child_handler)
 
 with ApiClient(configuration) as api_client:
     runner_instance_id = socket.gethostname()
@@ -83,8 +71,6 @@ with ApiClient(configuration) as api_client:
                 adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
                 schema.execute_cohort_definition(message, api)
-            elif type(message) is KillCohortAPIRequest:
-                schema.kill_cohort_definition(message, api)
             elif type(message) is UpdateTablesList:
                 schema.update_tables_list(api, config['data_protected']['schemas'], config['data_protected']['tables'])
             elif type(message) is UpdateTableColumnsList:
