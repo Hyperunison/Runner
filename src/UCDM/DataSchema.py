@@ -153,8 +153,6 @@ class DataSchema:
         try:
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
-            api.set_car_status(cohort_definition.cohort_api_request_id, "success", pid)
             status = "success"
         except Exception as e:
             logging.error("SQL query error: {}".format(e))
