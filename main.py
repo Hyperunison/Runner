@@ -73,17 +73,12 @@ with ApiClient(configuration) as api_client:
                 if result != 'ok':
                     continue
             if type(message) is NextflowRun:
-                api_instance.api_client.close()
-                api_instance.api_client.rest_client.pool_manager.clear()
                 adapter.process_nextflow_run(message)
-                api.accept_task(response.id)
             elif type(message) is GetProcessLogs:
                 adapter.process_get_process_logs(message)
             elif type(message) is KillJob:
                 adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
-                api_instance.api_client.close()
-                api_instance.api_client.rest_client.pool_manager.clear()
                 schema.execute_cohort_definition(message, api)
             elif type(message) is KillCohortAPIRequest:
                 schema.kill_cohort_definition(message, api)

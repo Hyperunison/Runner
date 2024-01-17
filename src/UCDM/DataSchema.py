@@ -134,6 +134,9 @@ class DataSchema:
             logging.info("Forked, run in fork, pid={}".format(pid))
             api.set_car_status(cohort_definition.cohort_api_request_id, "process", pid)
             return
+        api.api_instance.api_client.close()
+        api.api_instance.api_client.rest_client.pool_manager.clear()
+        self.schema.reconnect()
         key = cohort_definition.cohort_definition['key']
         participantTable = cohort_definition.cohort_definition['participantTableName']
         participantIdField = cohort_definition.cohort_definition['participantIdField']
@@ -333,3 +336,6 @@ class DataSchema:
                                    stat.min_value, stat.max_value, stat.avg_value,
                                    stat.median12_value,stat.median25_value, stat.median37_value, stat.median50_value,
                                    stat.median63_value, stat.median75_value, stat.median88_value)
+
+    def reconnect(self):
+        self.schema.reconnect()

@@ -51,6 +51,8 @@ class K8s(BaseAdapter):
         return 'k8s'
 
     def process_nextflow_run(self, message: NextflowRun) -> bool:
+        self.api_client.api_instance.api_client.close()
+        self.api_client.api_instance.api_client.rest_client.pool_manager.clear()
         input_files: Dict[str, str] = {
             'main.nf': message.nextflow_code,
             'data.json': json.dumps(message.input_data),

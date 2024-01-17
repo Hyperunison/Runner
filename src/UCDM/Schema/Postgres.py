@@ -12,8 +12,10 @@ Base = declarative_base()
 
 class Postgres(BaseSchema):
     type = 'postgres'
+    dsn = ''
 
     def __init__(self, dsn: str, min_count: int):
+        self.dsn = dsn
         self.engine = create_engine(dsn).connect()
         super().__init__(dsn, min_count)
 
@@ -146,4 +148,6 @@ class Postgres(BaseSchema):
     def rollback(self):
         self.engine.rollback()
 
-
+    def reconnect(self):
+        self.engine.close()
+        self.engine = create_engine(self.dsn).connect()

@@ -31,3 +31,6 @@ class BaseSchema:
 
     def fetch_row(self, sql: str) -> Dict:
         raise NotImplementedError()
+
+    def reconnect(self):
+        raise NotImplementedError()

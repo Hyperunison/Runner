@@ -129,3 +129,6 @@ class Labkey (BaseSchema):
 
     def rollback(self):
         return
+
+    def reconnect(self):
+        return
