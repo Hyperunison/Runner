@@ -44,7 +44,7 @@ class VariableMapper:
     }
 
     def __init__(self, fields):
-        if fields is Dict:
+        if not fields is List:
             for ucdm in fields.keys():
                 self.declare_var(ucdm, fields[ucdm])
 
@@ -55,6 +55,7 @@ class VariableMapper:
         return self.map[var]
 
     def declare_var(self, ucdm: str, local: str):
+        logging.info("Dealaring var {}: {}".format(ucdm, local))
         self.map[ucdm] = local
 
 
@@ -211,6 +212,8 @@ class DataSchema:
                 return "{}".format(value)
             if isinstance(value, float):
                 return "{}".format(value)
+            if value is None:
+                return "null"
             return "'{}'".format(escape_string(str(value)))
 
         if statement['type'] == 'binary':
