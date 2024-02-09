@@ -1,17 +1,14 @@
 import logging
-import sentry_sdk
 import yaml
 import time
 import auto_api_client
 import socket
-import signal
-import os
+from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.UCDM.DataSchema import DataSchema
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
-from src.LogConfigurator import configure_logs
 from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.KillJob import KillJob
@@ -21,8 +18,8 @@ from src.Message.StartWorkflow import StartWorkflow
 from src.Message.UpdateTablesList import UpdateTablesList
 from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
-from src.MessageFactory import MessageFactory
-from src.auto.auto_api_client.configuration import Configuration
+from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
+from src.Service.MessageFactory import MessageFactory
 from src.auto.auto_api_client.api_client import ApiClient
 
 try:
@@ -31,25 +28,10 @@ try:
 except:
     pass
 
-
 config = yaml.safe_load(open("config.yaml", "r"))
 
-configure_logs(config, "main")
-configuration = Configuration(host=config['api_url'])
-
-if 'sentry_dsn' in config:
-    sentry_sdk.init(dsn=config['sentry_dsn'])
-
-def child_handler(signum, frame):
-    while True:
-        try:
-            pid, _ = os.waitpid(-1, os.WNOHANG)
-            if pid <= 0:
-                break
-        except OSError:
-            break
-
-signal.signal(signal.SIGCHLD, child_handler)
+manager = ConsoleApplicationManager()
+configuration = manager.initialize(config)
 
 with ApiClient(configuration) as api_client:
     runner_instance_id = socket.gethostname()
@@ -69,9 +51,10 @@ with ApiClient(configuration) as api_client:
             message = MessageFactory().create_message_object_from_response(message=response)
             if not message is None:
                 logging.info("Received message {}".format(response.type))
-                result = api.block_task(response.id, runner_instance_id)
-                if result != 'ok':
-                    continue
+                if not manager.args.skip_accept:
+                    result = api.block_task(response.id, runner_instance_id)
+                    if result != 'ok':
+                        continue
             if type(message) is NextflowRun:
                 adapter.process_nextflow_run(message)
             elif type(message) is GetProcessLogs:
@@ -90,6 +73,8 @@ with ApiClient(configuration) as api_client:
                 schema.update_table_column_stats(api, message, config['phenoenotypicDb']['min_count'], config['data_protected']['tables'], config['data_protected']['columns'])
             elif type(message) is StartWorkflow:
                 workflow_executor.execute_workflow(message)
+            elif type(message) is StartOMOPoficationWorkflow:
+                workflow_executor.execute_workflow(message)
             elif message is None:
                 if False:
                     logging.debug("idle, do nothing")
@@ -97,7 +82,8 @@ with ApiClient(configuration) as api_client:
                 logging.error("Unknown message type {}".format(type(message)))
 
             if message is not None:
-                api.accept_task(response.id)
+                if not manager.args.skip_accept:
+                    api.accept_task(response.id)
             else:
                 time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:

@@ -26,7 +26,7 @@ Method | HTTP request | Description
 
 
 # **accept_task**
-> bool, date, datetime, dict, float, int, list, str, none_type accept_task(version, token, id)
+> str accept_task(version, token, id)
 
 
 
@@ -72,7 +72,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**bool, date, datetime, dict, float, int, list, str, none_type**
+**str**
 
 ### Authorization
 
@@ -173,7 +173,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **block_task**
-> bool, date, datetime, dict, float, int, list, str, none_type block_task(version, token, id)
+> str block_task(version, token, id)
 
 
 
@@ -229,7 +229,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**bool, date, datetime, dict, float, int, list, str, none_type**
+**str**
 
 ### Authorization
 
@@ -458,7 +458,7 @@ No authorization required
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | List all bricks |  -  |
+**200** | Resolve all mappings for all variables in single key |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

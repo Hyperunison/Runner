@@ -84,6 +84,7 @@ class MappingResolveResponse(ModelNormal):
             'var_name': (str,),  # noqa: E501
             'bio_bank_value': (str,),  # noqa: E501
             'ucdm_value': (str,),  # noqa: E501
+            'omop_id': (int,),  # noqa: E501
         }
 
     @cached_property
@@ -95,6 +96,7 @@ class MappingResolveResponse(ModelNormal):
         'var_name': 'varName',  # noqa: E501
         'bio_bank_value': 'bioBankValue',  # noqa: E501
         'ucdm_value': 'ucdmValue',  # noqa: E501
+        'omop_id': 'omopId',  # noqa: E501
     }
 
     read_only_vars = {
@@ -141,6 +143,7 @@ class MappingResolveResponse(ModelNormal):
             var_name (str): [optional]  # noqa: E501
             bio_bank_value (str): [optional]  # noqa: E501
             ucdm_value (str): [optional]  # noqa: E501
+            omop_id (int): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -229,6 +232,7 @@ class MappingResolveResponse(ModelNormal):
             var_name (str): [optional]  # noqa: E501
             bio_bank_value (str): [optional]  # noqa: E501
             ucdm_value (str): [optional]  # noqa: E501
+            omop_id (int): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

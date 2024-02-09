@@ -44,8 +44,9 @@ class VariableMapper:
     }
 
     def __init__(self, fields):
-        for ucdm in fields.keys():
-            self.declare_var(ucdm, fields[ucdm])
+        if fields is Dict:
+            for ucdm in fields.keys():
+                self.declare_var(ucdm, fields[ucdm])
 
     def convert_var_name(self, var: str) -> str:
         if not self.map.__contains__(var):
@@ -101,7 +102,9 @@ class DataSchema:
             alias = exp['as'] if 'as' in exp else  query.select[exp['name']]
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
-            group_array.append(query.select[alias])
+            if exp['type'] != 'constant':
+                # Labkey does not support GROUP BY <constant>
+                group_array.append(query.select[alias])
 
         select_string = ", ".join(select_array)
 
