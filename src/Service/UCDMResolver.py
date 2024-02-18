@@ -42,6 +42,7 @@ class UCDMResolver:
             cohort_definition['where'],
             cohort_definition['export'],
             1000000000,
+            cohort_definition['withTables'],
             True
         )
         logging.info("Model train task got: {}".format(json.dumps(sql)))
@@ -63,6 +64,7 @@ class UCDMResolver:
                 cohort_definition['where'],
                 cohort_definition['export'],
                 100,
+                cohort_definition['withTables'],
                 False
             )
             result = self.schema.fetch_all(sql_final)

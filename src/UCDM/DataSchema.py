@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import signal
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from src.Api import Api
 from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
@@ -44,7 +44,7 @@ class VariableMapper:
     }
 
     def __init__(self, fields):
-        if not fields is List:
+        if type(fields).__name__ == "dict":
             for ucdm in fields.keys():
                 self.declare_var(ucdm, fields[ucdm])
 
@@ -76,6 +76,31 @@ class DataSchema:
             return Postgres(dsn,    min_count)
         raise Exception("Unknown schema {}".format(schema))
 
+    def build_with_sql(self, with_tables: Dict) -> str:
+        sql: str = ""
+        for table_name in with_tables:
+            sql += "WITH {} AS (\n".format(table_name)
+            first: bool = True
+            for cohort_definition in with_tables[table_name]:
+              mapper = VariableMapper(cohort_definition['fields'])
+              sql_part = self.build_cohort_definition_sql_query(
+                  mapper,
+                  cohort_definition['participantTableName'],
+                  cohort_definition['participantIdField'],
+                  cohort_definition['join'],
+                  cohort_definition['where'],
+                  cohort_definition['export'],
+                  None,
+                  cohort_definition['withTables'],
+                  False
+              )
+              if not first:
+                  sql += "\nUNION ALL\n"
+              first = False
+              sql += sql_part
+            sql += ")\n"
+        return sql
+
     def build_cohort_definition_sql_query(
             self,
             mapper,
@@ -84,11 +109,18 @@ class DataSchema:
             joins,
             where,
             export,
-            limit: int,
+            limit: Optional[int],
+            with_tables: any,
             distribution: bool
     ) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
+
+
+        if isinstance(with_tables, dict):
+            with_sql = self.build_with_sql(with_tables)
+        else:
+            with_sql = ''
 
         for exp in where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
@@ -109,7 +141,8 @@ class DataSchema:
 
         select_string = ", ".join(select_array)
 
-        sql = "SELECT\n    {},\n".format(select_string)
+        sql = with_sql + "\n\n"
+        sql += "SELECT\n    {},\n".format(select_string)
 
         if distribution:
             sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participantTable, participantIdField)
@@ -126,21 +159,26 @@ class DataSchema:
             sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count) + \
                    "ORDER BY {}".format(", ".join(map(str, group_array)))
-        sql += "\nLIMIT {}".format(limit)
+
+        if not limit is None:
+            sql += "\nLIMIT {}".format(limit)
         logging.info("Generated SQL query: \n{}".format(sql))
 
         return sql
 
-
-    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
+    def fork(self, api: Api, car: int) -> int:
         pid = os.fork()
         if pid != 0:
             logging.info("Forked, run in fork, pid={}".format(pid))
-            api.set_car_status(cohort_definition.cohort_api_request_id, "process", pid)
-            return
+            api.set_car_status(car, "process", pid)
+            return pid
         api.api_instance.api_client.close()
         api.api_instance.api_client.rest_client.pool_manager.clear()
         self.schema.reconnect()
+
+        return pid
+
+    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
         participantTable = cohort_definition.cohort_definition['participantTableName']
         participantIdField = cohort_definition.cohort_definition['participantIdField']
@@ -155,8 +193,12 @@ class DataSchema:
             cohort_definition.cohort_definition['where'],
             cohort_definition.cohort_definition['export'],
             cohort_definition.cohort_definition['limit'],
+            cohort_definition.cohort_definition['withTables'],
             True
         )
+        pid = self.fork(api, cohort_definition.cohort_api_request_id)
+        if pid == 0:
+            return
         try:
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
