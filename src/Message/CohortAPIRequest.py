@@ -3,7 +3,7 @@ from src.auto.auto_api_client.model.runner_message import RunnerMessage
 
 
 class CohortAPIRequest(BaseMessage):
-    cohort_definition: any
+    cohort_definition: any # todo: change any to class with list predefined static fields
     reply_channel: str
     biobank_id: int
     cohort_api_request_id: int

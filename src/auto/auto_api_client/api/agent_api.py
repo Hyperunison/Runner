@@ -49,7 +49,7 @@ class AgentApi(object):
         self.api_client = api_client
         self.accept_task_endpoint = _Endpoint(
             settings={
-                'response_type': (bool, date, datetime, dict, float, int, list, str, none_type,),
+                'response_type': (str,),
                 'auth': [],
                 'endpoint_path': '/api/agent/v{version}/{token}/task/{id}',
                 'operation_id': 'accept_task',
@@ -205,7 +205,7 @@ class AgentApi(object):
         )
         self.block_task_endpoint = _Endpoint(
             settings={
-                'response_type': (bool, date, datetime, dict, float, int, list, str, none_type,),
+                'response_type': (str,),
                 'auth': [],
                 'endpoint_path': '/api/agent/v{version}/{token}/task/{id}/block',
                 'operation_id': 'block_task',
@@ -1657,7 +1657,7 @@ class AgentApi(object):
             async_req (bool): execute request asynchronously
 
         Returns:
-            bool, date, datetime, dict, float, int, list, str, none_type
+            str
                 If the method is called asynchronously, returns the request
                 thread.
         """
@@ -1839,7 +1839,7 @@ class AgentApi(object):
             async_req (bool): execute request asynchronously
 
         Returns:
-            bool, date, datetime, dict, float, int, list, str, none_type
+            str
                 If the method is called asynchronously, returns the request
                 thread.
         """

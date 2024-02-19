@@ -5,7 +5,8 @@
     <PathMappingSettings>
       <option name="pathMappings">
         <list>
-          <mapping local-root="$PROJECT_DIR$/../runner" remote-root="/app" />
+          <mapping local-root="$PROJECT_DIR$" remote-root="/app" />
+          <mapping local-root="/app" remote-root="/Users/entsents/work/gen/agent" />
         </list>
       </option>
     </PathMappingSettings>

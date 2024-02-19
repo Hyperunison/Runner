@@ -146,7 +146,9 @@
                         "description": "Result",
                         "content": {
                             "application\/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
@@ -192,7 +194,9 @@
                         "description": "Mark task as completed, not showing it again next time",
                         "content": {
                             "application\/json": {
-                                "schema": {}
+                                "schema": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
@@ -652,7 +656,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "List all bricks",
+                        "description": "Resolve all mappings for all variables in single key",
                         "content": {
                             "application\/json": {
                                 "schema": {
@@ -1306,6 +1310,9 @@
                     },
                     "ucdmValue": {
                         "type": "string"
+                    },
+                    "omopId": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"

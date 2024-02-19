@@ -32,7 +32,7 @@ RUN pip install "setproctitle==1.3.2"
 RUN pip install "sqlalchemy>=2.0.0"
 RUN pip install "psycopg2"
 RUN pip install "sentry-sdk"
-RUN pip install "labkey"
+RUN pip install "labkey==2.6.1"
 RUN pip install "python-json-logger"
 
 RUN apt-get install psmisc
