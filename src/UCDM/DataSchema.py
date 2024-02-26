@@ -147,7 +147,7 @@ class DataSchema:
         if distribution:
             sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participantTable, participantIdField)
         else:
-            sql += "{}.{}\n".format(participantTable, participantIdField)
+            sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
 
         sql +="FROM {}\n".format(participantTable)
 
