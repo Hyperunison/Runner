@@ -11,7 +11,7 @@ class OMOPoficationCondition(OMOPoficationBase):
                   "condition_type_concept_id",
                   "condition_status_concept_id", "stop_reason", "provider_id", "visit_occurrence_id", "visit_detail_id",
                   "condition_source_value", "condition_source_concept_id", "condition_status_source_value"]
-        filename = self.dir + "/condition.csv"
+        filename = self.dir + "/condition_occurrence.csv"
         with open(filename, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=header)
             writer.writeheader()  # Writes the keys as headers
