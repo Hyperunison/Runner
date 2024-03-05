@@ -20,7 +20,7 @@ class OMOPoficationCondition(OMOPoficationBase):
                 print(row)
                 exit(0)
                 output["condition_occurrence_id"] = ""
-                output["person_id"] = ""
+                output["person_id"] = row['participant_id'].biobank_value
                 output["condition_concept_id"] = ""
                 output["condition_start_date"] = ""
                 output["condition_start_datetime"] = ""
