@@ -20,7 +20,7 @@ class OMOPoficationMeasurement(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["measurement_id"] = ""
-                output["person_id"] = row['participant_id'].biobank_value
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["measurement_concept_id"] = ""
                 output["measurement_date"] = ""
                 output["measurement_datetime"] = ""

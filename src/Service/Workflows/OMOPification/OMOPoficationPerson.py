@@ -17,7 +17,7 @@ class OMOPoficationPerson(OMOPoficationBase):
             writer.writeheader()  # Writes the keys as headers
             for row in ucdm:
                 output = {}
-                output["person_id"] = row['participant_id'].biobank_value
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["gender_concept_id"] = row['gender'].omop_id
                 output["year_of_birth"] = row['year_of_birth'].ucdm_value
                 output["month_of_birth"] = ""                               # todo: calculate

@@ -20,7 +20,7 @@ class OMOPoficationDrugExpose(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["drug_exposure_id"] = ""
-                output["person_id"] = row['participant_id'].biobank_value
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["drug_concept_id"] = ""
                 output["drug_exposure_start_date"] = ""
                 output["drug_exposure_start_datetime"] = ""

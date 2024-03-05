@@ -17,18 +17,16 @@ class OMOPoficationCondition(OMOPoficationBase):
             writer.writeheader()  # Writes the keys as headers
             for row in ucdm:
                 output = {}
-                print(row)
-                exit(0)
                 output["condition_occurrence_id"] = ""
-                output["person_id"] = row['participant_id'].biobank_value
-                output["condition_concept_id"] = ""
-                output["condition_start_date"] = ""
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
+                output["condition_concept_id"] = row['c.icd10'].omop_id
+                output["condition_start_date"] = row['c.start_date'].ucdm_value
                 output["condition_start_datetime"] = ""
-                output["condition_end_date"] = ""
+                output["condition_end_date"] = row['c.end_date'].ucdm_value
                 output["condition_end_datetime"] = ""
                 output["condition_type_concept_id"] = ""
                 output["condition_status_concept_id"] = ""
-                output["stop_reason"] = ""
+                output["stop_reason"] = row['c.stop_reason'].ucdm_value
                 output["provider_id"] = ""
                 output["visit_occurrence_id"] = ""
                 output["visit_detail_id"] = ""

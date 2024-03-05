@@ -18,7 +18,7 @@ class OMOPoficationProcedure(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["procedure_occurrence_id"] = ""
-                output["person_id"] = row['participant_id'].biobank_value
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["procedure_concept_id"] = ""
                 output["procedure_date"] = ""
                 output["procedure_datetime"] = ""

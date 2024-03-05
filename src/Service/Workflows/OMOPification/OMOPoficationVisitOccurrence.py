@@ -19,7 +19,7 @@ class OMOPoficationVisitOccurrence(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["visit_occurrence_id"] = ""
-                output["person_id"] = row['participant_id'].biobank_value
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["visit_concept_id"] = ""
                 output["visit_start_date"] = ""
                 output["visit_start_datetime"] = ""

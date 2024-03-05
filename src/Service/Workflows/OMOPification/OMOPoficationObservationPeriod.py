@@ -16,7 +16,7 @@ class OMOPoficationObservationPeriod(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["observation_period_id"] = ""
-                output["person_id"] = row['participant_id'].biobank_value
+                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["observation_period_start_date"] = ""
                 output["observation_period_end_date"] = ""
                 output["period_type_concept_id"] = ""
