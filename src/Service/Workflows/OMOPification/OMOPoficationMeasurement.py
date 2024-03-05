@@ -21,8 +21,8 @@ class OMOPoficationMeasurement(OMOPoficationBase):
                 output = {}
                 output["measurement_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["measurement_concept_id"] = ""
-                output["measurement_date"] = ""
+                output["measurement_concept_id"] = row['c.name'].omop_id
+                output["measurement_date"] = self.transform_float_to_date(row['c.date'].biobank_value)
                 output["measurement_datetime"] = ""
                 output["measurement_time"] = ""
                 output["measurement_type_concept_id"] = ""
@@ -35,7 +35,7 @@ class OMOPoficationMeasurement(OMOPoficationBase):
                 output["provider_id"] = ""
                 output["visit_occurrence_id"] = ""
                 output["visit_detail_id"] = ""
-                output["measurement_source_value"] = ""
+                output["measurement_source_value"] = row['c.value'].biobank_value
                 output["measurement_source_concept_id"] = ""
                 output["unit_source_value"] = ""
                 output["value_source_value"] = ""

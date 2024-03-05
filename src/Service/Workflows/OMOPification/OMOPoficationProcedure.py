@@ -19,16 +19,16 @@ class OMOPoficationProcedure(OMOPoficationBase):
                 output = {}
                 output["procedure_occurrence_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["procedure_concept_id"] = ""
-                output["procedure_date"] = ""
-                output["procedure_datetime"] = ""
+                output["procedure_concept_id"] = row['c.name'].omop_id
+                output["procedure_date"] = self.transform_float_to_date(row['c.date'].biobank_value)
+                output["procedure_datetime"] = self.transform_float_to_datetime(row['c.date'].biobank_value)
                 output["procedure_type_concept_id"] = ""
                 output["modifier_concept_id"] = ""
                 output["quantity"] = ""
                 output["provider_id"] = ""
                 output["visit_occurrence_id"] = ""
                 output["visit_detail_id"] = ""
-                output["procedure_source_value"] = ""
+                output["procedure_source_value"] = row['c.value'].biobank_value
                 output["procedure_source_concept_id"] = ""
                 output["modifier_source_value"] = ""
                 writer.writerow(output)
