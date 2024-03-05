@@ -17,4 +17,18 @@ class OMOPoficationProcedure(OMOPoficationBase):
             writer.writeheader()  # Writes the keys as headers
             for row in ucdm:
                 output = {}
+                output["procedure_occurrence_id"] = ""
+                output["person_id"] = row['participant_id'].biobank_value
+                output["procedure_concept_id"] = ""
+                output["procedure_date"] = ""
+                output["procedure_datetime"] = ""
+                output["procedure_type_concept_id"] = ""
+                output["modifier_concept_id"] = ""
+                output["quantity"] = ""
+                output["provider_id"] = ""
+                output["visit_occurrence_id"] = ""
+                output["visit_detail_id"] = ""
+                output["procedure_source_value"] = ""
+                output["procedure_source_concept_id"] = ""
+                output["modifier_source_value"] = ""
                 writer.writerow(output)

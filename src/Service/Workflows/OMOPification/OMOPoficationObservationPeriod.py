@@ -15,4 +15,9 @@ class OMOPoficationObservationPeriod(OMOPoficationBase):
             writer.writeheader()  # Writes the keys as headers
             for row in ucdm:
                 output = {}
+                output["observation_period_id"] = ""
+                output["person_id"] = row['participant_id'].biobank_value
+                output["observation_period_start_date"] = ""
+                output["observation_period_end_date"] = ""
+                output["period_type_concept_id"] = ""
                 writer.writerow(output)

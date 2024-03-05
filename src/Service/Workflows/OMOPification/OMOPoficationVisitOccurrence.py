@@ -18,4 +18,21 @@ class OMOPoficationVisitOccurrence(OMOPoficationBase):
             writer.writeheader()  # Writes the keys as headers
             for row in ucdm:
                 output = {}
+                output["visit_occurrence_id"] = ""
+                output["person_id"] = row['participant_id'].biobank_value
+                output["visit_concept_id"] = ""
+                output["visit_start_date"] = ""
+                output["visit_start_datetime"] = ""
+                output["visit_end_date"] = ""
+                output["visit_end_datetime"] = ""
+                output["visit_type_concept_id"] = ""
+                output["provider_id"] = ""
+                output["care_site_id"] = ""
+                output["visit_source_value"] = ""
+                output["visit_source_concept_id"] = ""
+                output["admitting_source_concept_id"] = ""
+                output["admitting_source_value"] = ""
+                output["discharge_to_concept_id"] = ""
+                output["discharge_to_source_value"] = ""
+                output["preceding_visit_occurrence_id"] = ""
                 writer.writerow(output)
