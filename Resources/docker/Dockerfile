@@ -13,7 +13,7 @@ RUN apt-get install -y apt-transport-https gnupg
 RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /bin/kubectl
 RUN chmod +x  /bin/kubectl
 
-#RUN apt-get update
+RUN apt-get update
 #RUN apt-get install -y kubectl
 RUN apt-get install -y sudo
 
