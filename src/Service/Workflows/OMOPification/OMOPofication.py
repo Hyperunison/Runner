@@ -1,4 +1,6 @@
 import logging
+import os
+
 from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
@@ -18,7 +20,7 @@ from src.UCDM.DataSchema import DataSchema
 
 class OMOPofication(WorkflowBase):
     resolver: UCDMResolver
-    dir: str = "var/"
+    dir: str = ""
 
     def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema):
         super().__init__(api, adapter, schema)
@@ -27,25 +29,34 @@ class OMOPofication(WorkflowBase):
     def execute(self, message: StartOMOPoficationWorkflow):
         logging.info("Workflow execution task")
         logging.info(message)
+        length = len(message.queries.items())
+        step = 0
 
         for table_name, query in message.queries.items():
             ucdm = self.resolver.get_ucdm_result(query)
-            if len(ucdm) == 0:
-                continue
-            if table_name == "":
-                self.build_person_table(ucdm)
-            elif table_name == "condition":
-                self.build_condition_table(ucdm)
-            elif table_name == "measurement":
-                self.build_measurement_table(ucdm)
-            elif table_name == "drug_expose":
-                self.build_drug_expose_table(ucdm)
-            elif table_name == "observation_period":
-                self.build_observation_period_table(ucdm)
-            elif table_name == "procedure":
-                self.build_procedure_table(ucdm)
-            elif table_name == "visit_occurrence":
-                self.build_visit_occurrence_table(ucdm)
+
+            if len(ucdm) > 0:
+                if table_name == "":
+                    self.build_person_table(ucdm)
+                elif table_name == "condition":
+                    self.build_condition_table(ucdm)
+                elif table_name == "measurement":
+                    self.build_measurement_table(ucdm)
+                elif table_name == "drug_expose":
+                    self.build_drug_expose_table(ucdm)
+                elif table_name == "observation_period":
+                    self.build_observation_period_table(ucdm)
+                elif table_name == "procedure":
+                    self.build_procedure_table(ucdm)
+                elif table_name == "visit_occurrence":
+                    self.build_visit_occurrence_table(ucdm)
+
+            step = step + 1
+            self.send_notification_to_api(
+                id=message.id,
+                length=length,
+                step=step
+            )
         print("OK")
 
     def build_person_table(self, ucdm: List[Dict[str, str]]):
@@ -76,4 +87,16 @@ class OMOPofication(WorkflowBase):
         builder = OMOPoficationVisitOccurrence()
         builder.build(ucdm)
 
+    def send_notification_to_api(self, id: int, length: int, step: int):
+        percent = int(round(step / length * 100, 0))
+        state = 'process'
+        if percent == 100:
+            state = 'success'
+            self.dir = os.getcwd() + "/" + OMOPoficationPerson().get_dir()
+        self.api.set_job_state(
+            run_id=str(id),
+            state=state,
+            percent=percent,
+            path=self.dir
+        )
 

@@ -17,3 +17,6 @@ class OMOPoficationBase:
         date = datetime.fromtimestamp(ts)
 
         return date.strftime('%Y-%m-%d %H:%M:%S')
+
+    def get_dir(self):
+        return self.dir

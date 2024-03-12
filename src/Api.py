@@ -21,6 +21,8 @@ from auto_api_client.model.set_table_column_stats_request import SetTableColumnS
 from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
 from auto_api_client.model.set_table_info_request import SetTableInfoRequest
 
+from auto_api_client.model.set_job_state_request import SetJobStateRequest
+
 
 class Api:
     api_instance: AgentApi = None
@@ -67,6 +69,20 @@ class Api:
             token=self.token,
             key=key,
             raw_only="1" if raw_only else "0"
+        )
+
+    def set_job_state(self, run_id: str, state: str, percent: int, path: str):
+        self.api_instance.set_job_state(
+            run_id=run_id,
+            version=self.version,
+            token=self.token,
+            set_job_state_request=SetJobStateRequest(
+                state=state,
+                result=json.dumps({
+                    "percent": percent,
+                    "path": path
+                })
+            )
         )
 
     def add_log_chunk(self, id: int, chunk: str):
