@@ -34,7 +34,7 @@ class UCDMResolver:
     def get_ucdm_result(self, cohort_definition) -> List[Dict[str, str]]:
         mapper = VariableMapper(cohort_definition['fields'])
 
-        sql = self.schema.build_cohort_definition_sql_query(
+        sql_with_distribution = self.schema.build_cohort_definition_sql_query(
             mapper,
             cohort_definition['participantTableName'],
             cohort_definition['participantIdField'],
@@ -45,14 +45,15 @@ class UCDMResolver:
             cohort_definition['withTables'],
             True
         )
-        logging.info("Model train task got: {}".format(json.dumps(sql)))
+
+        # logging.info("Model train task got: {}".format(json.dumps(sql)))
 
         try:
-            result = self.schema.fetch_all(sql)
+            result = self.schema.fetch_all(sql_with_distribution)
             result = self.normalize(result)
             result_without_count = [{k: v for k, v in d.items() if k != 'count_uniq_participants'} for d in result]
 
-            logging.info("SQL result: {}".format(json.dumps(result_without_count)))
+            # logging.info("SQL result: {}".format(json.dumps(result_without_count)))
             mapping = self.resolve_mapping(result_without_count, cohort_definition['key'])
             mapping_index = self.build_index(mapping)
 
@@ -98,7 +99,7 @@ class UCDMResolver:
                 request[field].append(value)
                 request[field] = list(set(request[field]))
 
-        logging.info("Mapping resolution request: {}".format(json.dumps(request)))
+        # logging.info("Mapping resolution request: {}".format(json.dumps(request)))
 
         return self.api.resolve_mapping(key, request)
 
@@ -108,7 +109,7 @@ class UCDMResolver:
             if not row['var_name'] in index:
                 index[row['var_name']] = {}
             index[row['var_name']][row['bio_bank_value']] = (row['ucdm_value'], row['omop_id'])
-        logging.info("Index: {}".format(json.dumps(index)))
+        # logging.info("Index: {}".format(json.dumps(index)))
         return index
 
     def convert_to_ucdm(self, result: List[Dict[str, str]], mapping_index: Dict[str, Dict[str, Tuple[str, Optional[int]]]]) -> List[Dict[str, UCDMConvertedField]]:
@@ -120,7 +121,8 @@ class UCDMResolver:
             if converted is not None:
                 output.append(converted)
             else:
-                logging.info("Skip writing row={}, as it's not converted".format(json.dumps(row)))
+                pass
+                # logging.info("Skip writing row={}, as it's not converted".format(json.dumps(row)))
 
         return output
 
@@ -152,7 +154,7 @@ class UCDMResolver:
                 converted[field] = UCDMConvertedField(str(value), str(value), None)
             else:
                 if not str(value) in mapping_index[field]:
-                    logging.info("Cant find in mapping field={}, value={}".format(field, value))
+                    # logging.info("Cant find in mapping field={}, value={}".format(field, value))
                     return None
                 ucdm_value: str = mapping_index[field][str(value)][0]
                 omop_id: int = int(mapping_index[field][str(value)][1])

@@ -83,6 +83,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_job_state(self):
+        """Test case for set_job_state
+
+        """
+        pass
+
     def test_set_kill_result(self):
         """Test case for set_kill_result
 
