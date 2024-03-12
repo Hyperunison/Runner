@@ -100,7 +100,7 @@ class Postgres(BaseSchema):
             median63_value=None
             median88_value=None
 
-        sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY 1 HAVING COUNT(*) > {} ORDER BY 1 DESC LIMIT 10".format(
+        sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY 1 HAVING COUNT(*) >= {} ORDER BY 1 DESC LIMIT 100".format(
             column_name, table_name, column_name, self.min_count)
         logging.debug(sql)
         values_counts = self.fetch_all(sql)

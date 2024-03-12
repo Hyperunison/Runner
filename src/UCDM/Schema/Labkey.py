@@ -89,7 +89,7 @@ class Labkey (BaseSchema):
             median88_value=None
             pass
 
-        sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) > {min} ORDER BY 1 DESC LIMIT 100".format(
+        sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) >= {min} ORDER BY 1 DESC LIMIT 100".format(
             column=column_name, table=table_name, min=self.min_count)
         logging.debug(sql)
         values_counts = self.fetch_all(sql)
