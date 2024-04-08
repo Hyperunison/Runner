@@ -3,7 +3,7 @@ import logging
 from typing import List, Dict
 
 from src.Message.StartWorkflow import StartWorkflow
-from src.Service.UCDMResolver import UCDMResolver
+from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 
 
@@ -44,7 +44,7 @@ class GwasFederated(WorkflowBase):
             }
         )
 
-    def build_phenotype(self, ucdm: List[Dict[str, str]], variables: List[str]) -> str:
+    def build_phenotype(self, ucdm: List[Dict[str, UCDMConvertedField]], variables: List[str]) -> str:
         if len(ucdm) == 0:
             return ''
         content = "FID IID " + (" ".join(variables)) + "\n"
@@ -52,7 +52,7 @@ class GwasFederated(WorkflowBase):
         for row in ucdm:
             content += "{} {}".format(i, i)
             for key in variables:
-                content += " " + self.convert_value(row[key])
+                content += " " + self.convert_value(row[key].ucdm_value)
             content += "\n"
             i += 1
 
