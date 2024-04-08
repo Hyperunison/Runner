@@ -33,7 +33,7 @@ class ConsoleApplicationManager:
             sentry_sdk.init(
                 dsn=config['sentry_dsn'],
                 enable_tracing=True,
-                server_name=os.getenv(os.environ['CONTAINER_NAME'], socket.gethostname()),
+                server_name=os.getenv('CONTAINER_NAME', socket.gethostname()),
                 environment=os.getenv('ENV', 'production')
             )
 
