@@ -13,7 +13,6 @@ class StartWorkflow(BaseMessage):
     parameters: Dict[str, str]
     run_name: str
     weblog_url: str
-    reply_channel: str
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartWorkflow'
@@ -21,7 +20,6 @@ class StartWorkflow(BaseMessage):
         self.dir = message.data['dir']
         self.s3_path = message.data['s3Path']
         self.workflow_name = message.data['workflowName']
-        self.reply_channel = message.data['replyChannel']
         self.workflow_version = message.data['workflowVersion']
         self.cohort_definition = message.data['cohortDefinition']
         self.parameters = message.data['parameters']
