@@ -77,9 +77,15 @@ class DataSchema:
         raise Exception("Unknown schema {}".format(schema))
 
     def build_with_sql(self, with_tables: Dict) -> str:
-        sql: str = ""
+        if len(with_tables) == 0:
+            return ''
+        first_table: bool = True
+        sql: str = "WITH "
         for table_name in with_tables:
-            sql += "WITH {} AS (\n".format(table_name)
+            if not first_table:
+                sql += ", "
+            first_table = False
+            sql += "{} AS (\n".format(table_name)
             first: bool = True
             for cohort_definition in with_tables[table_name]:
               mapper = VariableMapper(cohort_definition['fields'])
