@@ -1,6 +1,7 @@
 import signal
 import os
 import argparse
+import socket
 
 import sentry_sdk
 from src.auto.auto_api_client.configuration import Configuration
@@ -29,7 +30,12 @@ class ConsoleApplicationManager:
         configuration = Configuration(host=config['api_url'])
 
         if 'sentry_dsn' in config:
-            sentry_sdk.init(dsn=config['sentry_dsn'])
+            sentry_sdk.init(
+                dsn=config['sentry_dsn'],
+                enable_tracing=True,
+                server_name=os.getenv('CONTAINER_NAME', socket.gethostname()),
+                environment=os.getenv('ENV', 'production')
+            )
 
         self.parse_cli_args()
         return configuration

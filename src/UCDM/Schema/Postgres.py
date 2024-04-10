@@ -1,3 +1,4 @@
+import logging
 from typing import List, Dict, Tuple
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
@@ -84,6 +85,7 @@ class Postgres(BaseSchema):
             median88_value = self.get_median(table_name, column_name, median75_value, max_value)
             values_counts = []
         except ProgrammingError as e:
+            logging.debug("Can't get min/max values for {}.{}".format(table_name, column_name))
             self.engine.rollback()
             if not isinstance(e.orig, UndefinedFunction):
                 raise e
@@ -98,9 +100,11 @@ class Postgres(BaseSchema):
             median63_value=None
             median88_value=None
 
-            sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY 1 HAVING COUNT(*) > {} ORDER BY 1 DESC LIMIT 10".format(column_name, table_name, column_name, self.min_count)
-            values_counts = self.fetch_all(sql)
-
+        sql = "SELECT \"{}\" as value, count(*) as cnt from {} WHERE NOT \"{}\" IS NULL GROUP BY 1 HAVING COUNT(*) >= {} ORDER BY 1 DESC LIMIT 100".format(
+            column_name, table_name, column_name, self.min_count)
+        logging.debug(sql)
+        values_counts = self.fetch_all(sql)
+        logging.info("Frequent values counts for {}.{}: {}".format(table_name, column_name, (values_counts)))
         nulls_count = self.fetch_row("SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name))['cnt']
 
         stat = TableStat()

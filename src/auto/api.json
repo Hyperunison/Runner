@@ -1258,6 +1258,70 @@
                     }
                 }
             }
+        },
+        "\/api\/agent\/v{version}\/{token}\/job\/runner-message\/{runId}\/set-state": {
+            "put": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setJobState",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "runId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "state",
+                                    "result"
+                                ],
+                                "properties": {
+                                    "state": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "result": {
+                                        "type": "string",
+                                        "default": "{}"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {

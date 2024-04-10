@@ -8,10 +8,13 @@ RUN chown -R www-data /app /var/www
 
 # Install kubectl
 RUN apt-get install -y apt-transport-https gnupg
-RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+#RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+#RUN echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /bin/kubectl
+RUN chmod +x  /bin/kubectl
+
 RUN apt-get update
-RUN apt-get install -y kubectl
+#RUN apt-get install -y kubectl
 RUN apt-get install -y sudo
 
 # Install AWS

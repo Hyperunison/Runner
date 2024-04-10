@@ -56,6 +56,7 @@ from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
+from auto_api_client.model.set_job_state_request import SetJobStateRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
 from auto_api_client.model.set_table_column_stats_request import SetTableColumnStatsRequest
@@ -102,6 +103,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
 *AgentApi* | [**set_car_status**](docs/AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 *AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
+*AgentApi* | [**set_job_state**](docs/AgentApi.md#set_job_state) | **PUT** /api/agent/v{version}/{token}/job/runner-message/{runId}/set-state | 
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 *AgentApi* | [**set_run_status**](docs/AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
@@ -125,6 +127,7 @@ Class | Method | HTTP request | Description
  - [NextflowRun](docs/NextflowRun.md)
  - [RunnerMessage](docs/RunnerMessage.md)
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
+ - [SetJobStateRequest](docs/SetJobStateRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
  - [SetTableColumnFreequentValuesRequest](docs/SetTableColumnFreequentValuesRequest.md)
  - [SetTableColumnStatsRequest](docs/SetTableColumnStatsRequest.md)
@@ -134,9 +137,11 @@ Class | Method | HTTP request | Description
  - [TypesMap](docs/TypesMap.md)
 
 
+<a id="documentation-for-authorization"></a>
 ## Documentation For Authorization
 
- All endpoints do not require authorization.
+Endpoints do not require authorization.
+
 
 ## Author
 

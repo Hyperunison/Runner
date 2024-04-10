@@ -77,9 +77,15 @@ class DataSchema:
         raise Exception("Unknown schema {}".format(schema))
 
     def build_with_sql(self, with_tables: Dict) -> str:
-        sql: str = ""
+        if len(with_tables) == 0:
+            return ''
+        first_table: bool = True
+        sql: str = "WITH "
         for table_name in with_tables:
-            sql += "WITH {} AS (\n".format(table_name)
+            if not first_table:
+                sql += ", "
+            first_table = False
+            sql += "{} AS (\n".format(table_name)
             first: bool = True
             for cohort_definition in with_tables[table_name]:
               mapper = VariableMapper(cohort_definition['fields'])
@@ -157,8 +163,7 @@ class DataSchema:
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution:
             sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
-                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count) + \
-                   "ORDER BY {}".format(", ".join(map(str, group_array)))
+                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count)
 
         if not limit is None:
             sql += "\nLIMIT {}".format(limit)
@@ -166,15 +171,26 @@ class DataSchema:
 
         return sql
 
-    def fork(self, api: Api, car: int) -> int:
+    def fork(self, api: Api) -> int:
         pid = os.fork()
-        if pid != 0:
-            logging.info("Forked, run in fork, pid={}".format(pid))
-            api.set_car_status(car, "process", pid)
-            return pid
+        logging.info("Forked, pid={}".format(pid))
+
+        # if pid == 0:
+        #     # child process
+        #     try:
+        #         import pydevd_pycharm
+        #         pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
+        #         logging.info("Debug server connection established for pid {}".format(pid))
+        #     except:
+        #         logging.info("Debug server connection was not established for pid {}".format(pid))
+        #         pass
+
+
         api.api_instance.api_client.close()
         api.api_instance.api_client.rest_client.pool_manager.clear()
         self.schema.reconnect()
+
+        logging.info("Returning pid {}".format(pid))
 
         return pid
 
@@ -196,14 +212,18 @@ class DataSchema:
             cohort_definition.cohort_definition['withTables'],
             True
         )
-        pid = self.fork(api, cohort_definition.cohort_api_request_id)
-        if pid == 0:
+        pid = self.fork(api)
+        if pid != 0:
+            # Master process, continue working
             return
+        child_pid = os.getpid()
+        logging.info("Processing request in child process: {}".format(child_pid))
         try:
+            api.set_car_status(cohort_definition.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
-            api.set_car_status(cohort_definition.cohort_api_request_id, "success", pid)
+            api.set_car_status(cohort_definition.cohort_api_request_id, "success", child_pid)
         except Exception as e:
             logging.error("SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
@@ -215,10 +235,10 @@ class DataSchema:
                 key,
                 cohort_definition.raw_only
             )
-            api.set_car_status(cohort_definition.cohort_api_request_id, "error", pid)
-        sys.exit(0)
-
-
+            api.set_car_status(cohort_definition.cohort_api_request_id, "error", child_pid)
+        finally:
+            logging.debug("Exiting child process {}".format(child_pid))
+            sys.exit(0)
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
         try:
@@ -378,7 +398,10 @@ class DataSchema:
         if stat.values:
             values = [d['value'] for d in stat.values]
             counts = [d['cnt'] for d in stat.values]
+            logging.info("Sending frequent values for {}.{}: {}".format(table_name, column_name, ','.join(values)))
             api.set_table_column_values(stat.table_name,  stat.column_name,  values, counts)
+        else:
+            logging.info("No frequent values found for {}.{}".format(table_name, column_name))
         api.set_table_column_stats(stat.table_name, stat.column_name,
                                    stat.unique_count, stat.nulls_count,
                                    stat.min_value, stat.max_value, stat.avg_value,

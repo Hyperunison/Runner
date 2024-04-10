@@ -5,10 +5,14 @@ from typing import List, Dict
 
 class StartOMOPoficationWorkflow(BaseMessage):
     queries: Dict[str, any]
+    reply_channel: str
+    id: int
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartOMOPoficationWorkflow'
+        self.id = message.id
         self.workflow_name = message.data['workflowName']
         self.queries = message.data['queries']
+        self.reply_channel = message.data['replyChannel']
 
 

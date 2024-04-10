@@ -76,6 +76,7 @@ class Labkey (BaseSchema):
             median88_value = self.get_median(table_name, column_name, median75_value, max_value)
             values_counts = []
         except Exception as e:
+            logging.debug("Can't get min/max values for {}.{}".format(table_name, column_name))
             min_value=None
             max_value=None
             avg_value=None
@@ -86,9 +87,13 @@ class Labkey (BaseSchema):
             median75_value=None
             median63_value=None
             median88_value=None
-            sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) > {min} ORDER BY 1 DESC LIMIT 100".format(column=column_name, table=table_name, min=self.min_count)
-            values_counts = self.fetch_all(sql)
             pass
+
+        sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) >= {min} ORDER BY 1 DESC LIMIT 100".format(
+            column=column_name, table=table_name, min=self.min_count)
+        logging.debug(sql)
+        values_counts = self.fetch_all(sql)
+        logging.info("Frequent values counts for {}.{}: {}".format(table_name, column_name, (values_counts)))
 
         nulls_count = self.fetch_row("SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name))['cnt']
 
