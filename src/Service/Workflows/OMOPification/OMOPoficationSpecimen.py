@@ -19,9 +19,9 @@ class OMOPoficationSpecimen(OMOPoficationBase):
                 output = {}
                 output["specimen_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["specimen_concept_id"] = ""
-                output["specimen_type_concept_id"] = ""
-                output["specimen_date"] = ""
+                output["specimen_concept_id"] = row['c.name'].biobank_value
+                output["specimen_type_concept_id"] = row['c.type'].biobank_value
+                output["specimen_date"] = row['c.date'].biobank_value
                 output["specimen_datetime"] = ""
                 output["quantity"] = ""
                 output["unit_concept_id"] = ""
