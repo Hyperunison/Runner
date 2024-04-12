@@ -19,11 +19,11 @@ class OMOPoficationObservation(OMOPoficationBase):
                 output["observation_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["observation_concept_id"] = ""
-                output["observation_date"] = ""
+                output["observation_date"] = row['c.date'].ucdm_value
                 output["observation_datetime"] = ""
-                output["observation_type_concept_id"] = ""
+                output["observation_type_concept_id"] = row['c.name'].biobank_value
                 output["value_as_number"] = ""
-                output["value_as_string"] = ""
+                output["value_as_string"] = row['c.value'].biobank_value
                 output["value_as_concept_id"] = ""
                 output["qualifier_concept_id"] = ""
                 output["unit_concept_id"] = ""
