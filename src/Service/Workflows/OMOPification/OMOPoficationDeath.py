@@ -18,7 +18,7 @@ class OMOPoficationDeath(OMOPoficationBase):
                 output["death_date"] = ""
                 output["death_datetime"] = ""
                 output["death_type_concept_id"] = ""
-                output["cause_concept_id"] = ""
+                output["cause_concept_id"] = row['c.cause'].biobank_value
                 output["cause_source_value"] = ""
                 output["cause_source_concept_id"] = ""
                 writer.writerow(output)
