@@ -12,6 +12,9 @@ from src.Service.Workflows.OMOPification.OMOPoficationObservationPeriod import O
 from src.Service.Workflows.OMOPification.OMOPoficationPerson import OMOPoficationPerson
 from src.Service.Workflows.OMOPification.OMOPoficationProcedure import OMOPoficationProcedure
 from src.Service.Workflows.OMOPification.OMOPoficationVisitOccurrence import OMOPoficationVisitOccurrence
+from src.Service.Workflows.OMOPification.OMOPoficationDeath import OMOPoficationDeath
+from src.Service.Workflows.OMOPification.OMOPoficationObservation import OMOPoficationObservation
+from src.Service.Workflows.OMOPification.OMOPoficationSpecimen import OMOPoficationSpecimen
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
@@ -50,6 +53,12 @@ class OMOPofication(WorkflowBase):
                     self.build_procedure_table(ucdm)
                 elif table_name == "visit_occurrence":
                     self.build_visit_occurrence_table(ucdm)
+                elif table_name == "death":
+                    self.build_death_table(ucdm)
+                elif table_name == "observation":
+                    self.build_observation_table(ucdm)
+                elif table_name == "specimen":
+                    self.build_specimen_table(ucdm)
 
             step = step + 1
             self.send_notification_to_api(
@@ -85,6 +94,18 @@ class OMOPofication(WorkflowBase):
 
     def build_visit_occurrence_table(self, ucdm: List[Dict[str, str]]):
         builder = OMOPoficationVisitOccurrence()
+        builder.build(ucdm)
+
+    def build_death_table(self, ucdm: List[Dict[str, str]]):
+        builder = OMOPoficationDeath()
+        builder.build(ucdm)
+
+    def build_observation_table(self, ucdm: List[Dict[str, str]]):
+        builder = OMOPoficationObservation()
+        builder.build(ucdm)
+
+    def build_specimen_table(self, ucdm: List[Dict[str, str]]):
+        builder = OMOPoficationSpecimen()
         builder.build(ucdm)
 
     def send_notification_to_api(self, id: int, length: int, step: int):
