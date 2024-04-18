@@ -398,7 +398,7 @@ class DataSchema:
         if stat.values:
             values = [d['value'] for d in stat.values]
             counts = [d['cnt'] for d in stat.values]
-            logging.info("Sending frequent values for {}.{}: {}".format(table_name, column_name, ','.join(values)))
+            logging.info("Sending frequent values for {}.{}: {}".format(table_name, column_name, ','.join([str(val) for val in values])))
             api.set_table_column_values(stat.table_name,  stat.column_name,  values, counts)
         else:
             logging.info("No frequent values found for {}.{}".format(table_name, column_name))
