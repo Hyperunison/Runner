@@ -15,13 +15,14 @@ class OMOPoficationSpecimen(OMOPoficationBase):
         with open(filename, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=header)
             writer.writeheader()  # Writes the keys as headers
+            num: int = 1
             for row in ucdm:
                 output = {}
-                output["specimen_id"] = ""
+                output["specimen_id"] = str(num)
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["specimen_concept_id"] = row['c.name'].biobank_value
-                output["specimen_type_concept_id"] = row['c.type'].biobank_value
-                output["specimen_date"] = row['c.date'].biobank_value
+                output["specimen_concept_id"] = row['c.name'].biobank_value if 'c.name' in row else ''
+                output["specimen_type_concept_id"] = row['c.type'].biobank_value if 'c.type' in row else ''
+                output["specimen_date"] = row['c.date'].biobank_value if 'c.date' in row else ''
                 output["specimen_datetime"] = ""
                 output["quantity"] = ""
                 output["unit_concept_id"] = ""
@@ -32,4 +33,5 @@ class OMOPoficationSpecimen(OMOPoficationBase):
                 output["unit_source_value"] = ""
                 output["anatomic_site_source_value"] = ""
                 output["disease_status_source_value"] = ""
+                num += 1
                 writer.writerow(output)

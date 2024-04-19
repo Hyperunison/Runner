@@ -18,21 +18,21 @@ class OMOPoficationPerson(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["gender_concept_id"] = row['gender'].omop_id
-                output["year_of_birth"] = row['year_of_birth'].ucdm_value
+                output["gender_concept_id"] = row['gender'].omop_id if 'gender' in row else ''
+                output["year_of_birth"] = row['year_of_birth'].ucdm_value if 'year_of_birth' in row else ''
                 output["month_of_birth"] = ""                               # todo: calculate
                 output["day_of_birth"] = ""                                 # todo: calculate
                 output["birth_datetime"] = ""                               # todo: calculate
-                output["race_concept_id"] = row['race'].omop_id
-                output["ethnicity_concept_id"] = row['ethnicity'].omop_id
+                output["race_concept_id"] = row['race'].omop_id if 'race' in row else ''
+                output["ethnicity_concept_id"] = row['ethnicity'].omop_id if 'ethnicity' in row else ''
                 output["location_id"] = ""                                  # todo
                 output["provider_id"] = ""                                  # todo
                 output["care_site_id"] = ""                                 # todo
-                output["person_source_value"] = row['participant_id'].biobank_value
-                output["gender_source_value"] = row['gender'].ucdm_value
+                output["person_source_value"] = row['participant_id'].biobank_value if 'race' in row else ''
+                output["gender_source_value"] = row['gender'].ucdm_value if 'gender' in row else ''
                 output["gender_source_concept_id"] = ""
-                output["race_source_value"] = row['race'].ucdm_value
+                output["race_source_value"] = row['race'].ucdm_value if 'race' in row else ''
                 output["race_source_concept_id"] = ""
-                output["ethnicity_source_value"] = row['ethnicity'].ucdm_value
+                output["ethnicity_source_value"] = row['ethnicity'].ucdm_value if 'ethnicity' in row else ''
                 output["ethnicity_source_concept_id"] = ""
                 writer.writerow(output)

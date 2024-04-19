@@ -37,6 +37,9 @@ class OMOPofication(WorkflowBase):
 
         for table_name, query in message.queries.items():
             ucdm = self.resolver.get_ucdm_result(query)
+            if ucdm is None:
+                logging.error("Can't export {}".format(table_name))
+                continue
 
             if len(ucdm) > 0:
                 if table_name == "":

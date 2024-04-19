@@ -21,18 +21,18 @@ class OMOPoficationVisitOccurrence(OMOPoficationBase):
                 output["visit_occurrence_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
                 output["visit_concept_id"] = ""
-                output["visit_start_date"] = row['c.start_date'].ucdm_value
+                output["visit_start_date"] = row['c.start_date'].ucdm_value if 'c.start_date' in row else ''
                 output["visit_start_datetime"] = ""
-                output["visit_end_date"] = row['c.end_date'].ucdm_value
+                output["visit_end_date"] = row['c.end_date'].ucdm_value if 'c.end_date' in row else ''
                 output["visit_end_datetime"] = ""
                 output["visit_type_concept_id"] = ""
                 output["provider_id"] = ""
                 output["care_site_id"] = ""
                 output["visit_source_value"] = ""
                 output["visit_source_concept_id"] = ""
-                output["admitting_source_concept_id"] = row['c.admitting'].biobank_value
-                output["admitting_source_value"] = row['c.admitting'].ucdm_value
-                output["discharge_to_concept_id"] = row['c.discharge'].biobank_value
-                output["discharge_to_source_value"] = row['c.discharge'].ucdm_value
+                output["admitting_source_concept_id"] = row['c.admitting'].biobank_value if 'c.admitting' in row else ''
+                output["admitting_source_value"] = row['c.admitting'].ucdm_value if 'c.admitting' in row else ''
+                output["discharge_to_concept_id"] = row['c.discharge'].biobank_value if 'c.discharge' in row else ''
+                output["discharge_to_source_value"] = row['c.discharge'].ucdm_value if 'c.discharge' in row else ''
                 output["preceding_visit_occurrence_id"] = ""
                 writer.writerow(output)

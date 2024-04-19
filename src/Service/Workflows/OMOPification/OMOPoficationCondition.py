@@ -15,23 +15,25 @@ class OMOPoficationCondition(OMOPoficationBase):
         with open(filename, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=header)
             writer.writeheader()  # Writes the keys as headers
+            num: int = 1
             for row in ucdm:
                 output = {}
-                output["condition_occurrence_id"] = ""
+                output["condition_occurrence_id"] = str(num)
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["condition_concept_id"] = row['c.icd10'].omop_id
-                output["condition_start_date"] = row['c.start_date'].ucdm_value
+                output["condition_concept_id"] = row['c.name'].omop_id if 'c.name' in row else ''
+                output["condition_start_date"] = row['c.start_date'].ucdm_value if 'c.start_date' in row else ''
                 output["condition_start_datetime"] = ""
-                output["condition_end_date"] = row['c.end_date'].ucdm_value
+                output["condition_end_date"] = row['c.end_date'].ucdm_value if 'c.end_date' in row else ''
                 output["condition_end_datetime"] = ""
                 output["condition_type_concept_id"] = ""
                 output["condition_status_concept_id"] = ""
-                output["stop_reason"] = row['c.stop_reason'].ucdm_value
+                output["stop_reason"] = row['c.stop_reason'].ucdm_value if 'c.stop_reason' in row else ''
                 output["provider_id"] = ""
                 output["visit_occurrence_id"] = ""
                 output["visit_detail_id"] = ""
-                output["condition_source_value"] = ""
+                output["condition_source_value"] = row['c.name'].biobank_value if 'c.name' in row else ''
                 output["condition_source_concept_id"] = ""
                 output["condition_status_source_value"] = ""
+                num += 1
 
                 writer.writerow(output)

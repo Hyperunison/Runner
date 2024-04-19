@@ -14,17 +14,18 @@ class OMOPoficationObservation(OMOPoficationBase):
         with open(filename, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=header)
             writer.writeheader()  # Writes the keys as headers
+            num: int = 1
             for row in ucdm:
                 output = {}
-                output["observation_id"] = ""
+                output["observation_id"] = str(num)
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["observation_concept_id"] = ""
-                output["observation_date"] = row['c.date'].ucdm_value
+                output["observation_concept_id"] = row['c.name'].omop_id if 'c.name' in row else ''
+                output["observation_date"] = row['c.date'].ucdm_value if 'c.date' in row else ''
                 output["observation_datetime"] = ""
-                output["observation_type_concept_id"] = row['c.name'].biobank_value
-                output["value_as_number"] = ""
-                output["value_as_string"] = row['c.value'].biobank_value
-                output["value_as_concept_id"] = ""
+                output["observation_type_concept_id"] = ""
+                output["value_as_number"] = row['c.value_as_string'].biobank_value if 'c.value_as_string' in row else ''
+                output["value_as_string"] = row['c.value_as_number'].biobank_value if 'c.value_as_number' in row else ''
+                output["value_as_concept_id"] = row['c.value'].omop_id if 'c.value' in row else ''
                 output["qualifier_concept_id"] = ""
                 output["unit_concept_id"] = ""
                 output["provider_id"] = ""
@@ -32,7 +33,8 @@ class OMOPoficationObservation(OMOPoficationBase):
                 output["visit_detail_id"] = ""
                 output["observation_source_value"] = ""
                 output["observation_source_concept_id"] = ""
-                output["unit_source_value"] = ""
+                output["unit_source_value"] = row['c.unit'].biobank_value if 'c.unit' in row else ''
                 output["qualifier_source_value"] = ""
+                num += 1
 
                 writer.writerow(output)

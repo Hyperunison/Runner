@@ -17,7 +17,7 @@ class OMOPoficationObservationPeriod(OMOPoficationBase):
                 output = {}
                 output["observation_period_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["observation_period_start_date"] = ""
-                output["observation_period_end_date"] = ""
+                output["observation_period_start_date"] = row['c.start_date'].ucdm_value if 'c.start_date' in row else ''
+                output["observation_period_end_date"] = row['c.end_date'].ucdm_value if 'c.end_date' in row else ''
                 output["period_type_concept_id"] = ""
                 writer.writerow(output)

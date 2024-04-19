@@ -15,10 +15,10 @@ class OMOPoficationDeath(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["death_date"] = ""
+                output["death_date"] = row['c.date'].ucdm_value if 'c.date' in row else ''
                 output["death_datetime"] = ""
                 output["death_type_concept_id"] = ""
-                output["cause_concept_id"] = row['c.cause'].biobank_value
-                output["cause_source_value"] = ""
+                output["cause_concept_id"] = row['c.cause'].omop_id if 'c.cause' in row else ''
+                output["cause_source_value"] = row['c.cause'].biobank_value if 'c.cause' in row else ''
                 output["cause_source_concept_id"] = ""
                 writer.writerow(output)
