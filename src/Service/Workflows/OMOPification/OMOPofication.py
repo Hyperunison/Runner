@@ -6,7 +6,7 @@ from typing import List, Dict
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.UCDMResolver import UCDMResolver
 from src.Service.Workflows.OMOPification.OMOPoficationCondition import OMOPoficationCondition
-from src.Service.Workflows.OMOPification.OMOPoficationDrugExpose import OMOPoficationDrugExpose
+from src.Service.Workflows.OMOPification.OMOPoficationDrugExposure import OMOPoficationDrugExposure
 from src.Service.Workflows.OMOPification.OMOPoficationMeasurement import OMOPoficationMeasurement
 from src.Service.Workflows.OMOPification.OMOPoficationObservationPeriod import OMOPoficationObservationPeriod
 from src.Service.Workflows.OMOPification.OMOPoficationPerson import OMOPoficationPerson
@@ -48,8 +48,8 @@ class OMOPofication(WorkflowBase):
                     self.build_condition_table(ucdm)
                 elif table_name == "measurement":
                     self.build_measurement_table(ucdm)
-                elif table_name == "drug_expose":
-                    self.build_drug_expose_table(ucdm)
+                elif table_name == "drug_exposure":
+                    self.build_drug_exposure_table(ucdm)
                 elif table_name == "observation_period":
                     self.build_observation_period_table(ucdm)
                 elif table_name == "procedure":
@@ -83,8 +83,8 @@ class OMOPofication(WorkflowBase):
         builder = OMOPoficationMeasurement()
         builder.build(ucdm)
 
-    def build_drug_expose_table(self, ucdm: List[Dict[str, str]]):
-        builder = OMOPoficationDrugExpose()
+    def build_drug_exposure_table(self, ucdm: List[Dict[str, str]]):
+        builder = OMOPoficationDrugExposure()
         builder.build(ucdm)
 
     def build_observation_period_table(self, ucdm: List[Dict[str, str]]):

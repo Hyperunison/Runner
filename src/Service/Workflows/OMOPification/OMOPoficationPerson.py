@@ -25,9 +25,9 @@ class OMOPoficationPerson(OMOPoficationBase):
                 output["birth_datetime"] = ""                               # todo: calculate
                 output["race_concept_id"] = row['race'].omop_id if 'race' in row else ''
                 output["ethnicity_concept_id"] = row['ethnicity'].omop_id if 'ethnicity' in row else ''
-                output["location_id"] = ""                                  # todo
-                output["provider_id"] = ""                                  # todo
-                output["care_site_id"] = ""                                 # todo
+                output["location_id"] = row['c.location'].omop_id if 'c.location' in row else ''
+                output["provider_id"] = row['c.provider'].omop_id if 'c.provider' in row else ''
+                output["care_site_id"] = row['c.care_site'].omop_id if 'c.care_site' in row else ''
                 output["person_source_value"] = row['participant_id'].biobank_value if 'race' in row else ''
                 output["gender_source_value"] = row['gender'].ucdm_value if 'gender' in row else ''
                 output["gender_source_concept_id"] = ""
