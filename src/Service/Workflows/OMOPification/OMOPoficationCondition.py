@@ -1,11 +1,12 @@
 from typing import List, Dict
 
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
 
 class OMOPoficationCondition(OMOPoficationBase):
-    def build(self, ucdm: List[Dict[str, str]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
         header = ["condition_occurrence_id", "person_id", "condition_concept_id", "condition_start_date",
                   "condition_start_datetime", "condition_end_date", "condition_end_datetime",
                   "condition_type_concept_id",

@@ -1,11 +1,12 @@
 from typing import List, Dict
 
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
 
 class OMOPoficationSpecimen(OMOPoficationBase):
-    def build(self, ucdm: List[Dict[str, str]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
         header = ["specimen_id", "person_id", "specimen_concept_id", "specimen_type_concept_id",
                   "specimen_date", "specimen_datetime", "quantity", "unit_concept_id",
                   "anatomic_site_concept_id", "disease_status_concept_id", "specimen_source_id",

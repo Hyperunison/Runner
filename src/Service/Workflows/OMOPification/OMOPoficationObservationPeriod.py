@@ -1,12 +1,13 @@
 from typing import List, Dict
 
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
 
 class OMOPoficationObservationPeriod(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, str]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
         header = ["observation_period_id", "person_id", "observation_period_start_date",
                   "observation_period_end_date", "period_type_concept_id"]
         filename = self.dir + "/observation_period.csv"

@@ -1,12 +1,13 @@
 from typing import List, Dict
 
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
 
 class OMOPoficationPerson(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, str]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
         header = ["person_id", "gender_concept_id", "year_of_birth", "month_of_birth", "day_of_birth", "birth_datetime",
                   "race_concept_id", "ethnicity_concept_id", "location_id", "provider_id", "care_site_id",
                   "person_source_value", "gender_source_value", "gender_source_concept_id", "race_source_value",

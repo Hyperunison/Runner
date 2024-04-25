@@ -1,12 +1,13 @@
 from typing import List, Dict
 
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
 
 class OMOPoficationMeasurement(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, str]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
         header = ["measurement_id", "person_id", "measurement_concept_id", "measurement_date",
                   "measurement_datetime", "measurement_time", "measurement_type_concept_id",
                   "operator_concept_id", "value_as_number", "value_as_concept_id",
@@ -22,23 +23,23 @@ class OMOPoficationMeasurement(OMOPoficationBase):
                 output = {}
                 output["measurement_id"] = num
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["measurement_concept_id"] = row['c.name'].omop_id if 'c.name' in row else ''
-                output["measurement_date"] = row['c.date'].biobank_value if 'c.date' in row else ''
-                output["measurement_datetime"] = row['c.datetime'].ucdm_value if 'c.datetime' in row else ''
+                output["measurement_concept_id"] = self.render_omop_id(row, 'c.name')
+                output["measurement_date"] = self.render_date(row, 'c.date')
+                output["measurement_datetime"] = self.render_ucdm_value(row, 'c.datetime')
                 output["measurement_time"] = ""
-                output["measurement_type_concept_id"] = row['c.type'].omop_id if 'c.type' in row else ''
-                output["operator_concept_id"] = row['c.operator'].omop_id if 'c.operator' in row else ''
-                output["value_as_number"] = row['c.value_as_number'].ucdm_value if 'c.value_as_number' in row else ''
-                output["value_as_concept_id"] = row['c.value'].omop_id if 'c.value' in row else ''
-                output["unit_concept_id"] = row['c.unit'].omop_id if 'c.unit' in row else ''
-                output["range_low"] = row['c.range_low'].ucdm_value if 'c.range_low' in row else ''
-                output["range_high"] = row['c.range_high'].ucdm_value if 'c.range_high' in row else ''
-                output["provider_id"] = row['c.provider'].omop_id if 'c.provider' in row else ''
-                output["visit_occurrence_id"] = row['c.visit_occurrence'].ucdm_value if 'c.visit_occurrence' in row else ''
-                output["visit_detail_id"] = row['c.visit_detail'].ucdm_value if 'c.visit_detail' in row else ''
-                output["measurement_source_value"] = row['c.value'].biobank_value if 'c.value' in row else ''
+                output["measurement_type_concept_id"] = self.render_omop_id(row, 'c.type')
+                output["operator_concept_id"] = self.render_omop_id(row, 'c.operator')
+                output["value_as_number"] = self.render_ucdm_value(row, 'c.value_as_number')
+                output["value_as_concept_id"] = self.render_omop_id(row, 'c.value')
+                output["unit_concept_id"] = self.render_omop_id(row, 'c.unit')
+                output["range_low"] = self.render_ucdm_value(row, 'c.range_low')
+                output["range_high"] = self.render_ucdm_value(row, 'c.range_high')
+                output["provider_id"] = self.render_omop_id(row, 'c.provider')
+                output["visit_occurrence_id"] = self.render_ucdm_value(row, 'c.visit_occurrence')
+                output["visit_detail_id"] = self.render_ucdm_value(row, 'c.visit_detail')
+                output["measurement_source_value"] = self.render_biobank_value(row, 'c.value')
                 output["measurement_source_concept_id"] = ""
-                output["unit_source_value"] = row['c.unit'].biobank_value if 'c.unit' in row else ''
-                output["value_source_value"] = row['c.value'].biobank_value if 'c.value' in row else ''
+                output["unit_source_value"] = self.render_biobank_value(row, 'c.unit')
+                output["value_source_value"] = self.render_biobank_value(row, 'c.value')
                 num += 1
                 writer.writerow(output)
