@@ -29,7 +29,7 @@ class OMOPoficationMeasurement(OMOPoficationBase):
                 output["measurement_type_concept_id"] = row['c.type'].omop_id if 'c.type' in row else ''
                 output["operator_concept_id"] = row['c.operator'].omop_id if 'c.operator' in row else ''
                 output["value_as_number"] = row['c.value_as_number'].ucdm_value if 'c.value_as_number' in row else ''
-                output["value_as_concept_id"] = row['c.name'].omop_id if 'c.name' in row else ''
+                output["value_as_concept_id"] = row['c.value'].omop_id if 'c.value' in row else ''
                 output["unit_concept_id"] = row['c.unit'].omop_id if 'c.unit' in row else ''
                 output["range_low"] = row['c.range_low'].ucdm_value if 'c.range_low' in row else ''
                 output["range_high"] = row['c.range_high'].ucdm_value if 'c.range_high' in row else ''
