@@ -43,6 +43,7 @@ with ApiClient(configuration) as api_client:
     check_interval = config['check_runs_status_interval']
     last_check = None
     while True:
+        response = None
         try:
             if not last_check or time.time() - last_check > check_interval:
                 adapter.check_runs_statuses()
@@ -79,7 +80,9 @@ with ApiClient(configuration) as api_client:
                 if False:
                     logging.debug("idle, do nothing")
             else:
-                logging.error("Unknown message type {}".format(type(message)))
+                error = "Unknown message type {}".format(type(message))
+                if not response is None and not response.id is None:
+                    api.set_task_error(response.id, error)
 
             if message is not None:
                 if not manager.args.skip_accept:
@@ -87,8 +90,15 @@ with ApiClient(configuration) as api_client:
             else:
                 time.sleep(config['idle_delay'])
         except auto_api_client.ApiException as e:
-            logging.critical("Exception when calling AgentApi: %s\n" % e)
+            error = "Exception when calling AgentApi: %s\n" % e
+            logging.critical(error)
+            if not response is None and not response.id is None:
+                api.set_task_error(response.id, error)
+
         except Exception as e:
-            logging.critical("Unknown exception: %s\n" % e)
+            error = "Unknown exception: %s\n" % e
+            logging.critical(error)
+            if not response is None and not response.id is None:
+                api.set_task_error(response.id, error)
             raise e
 

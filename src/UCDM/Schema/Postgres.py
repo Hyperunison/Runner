@@ -17,7 +17,7 @@ class Postgres(BaseSchema):
 
     def __init__(self, dsn: str, min_count: int):
         self.dsn = dsn
-        self.engine = create_engine(dsn).connect()
+        self.engine = create_engine(dsn, isolation_level="AUTOCOMMIT").connect()
         super().__init__(dsn, min_count)
 
     def get_tables_list(self) -> List[str]:

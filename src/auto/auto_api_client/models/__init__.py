@@ -26,4 +26,5 @@ from auto_api_client.model.set_table_column_stats_request import SetTableColumnS
 from auto_api_client.model.set_table_info_request import SetTableInfoRequest
 from auto_api_client.model.set_table_stats_request import SetTableStatsRequest
 from auto_api_client.model.set_tables_list_request import SetTablesListRequest
+from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
 from auto_api_client.model.types_map import TypesMap

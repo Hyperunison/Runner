@@ -23,6 +23,8 @@ from auto_api_client.model.set_table_info_request import SetTableInfoRequest
 
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
 
+from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
+
 
 class Api:
     api_instance: AgentApi = None
@@ -95,6 +97,11 @@ class Api:
     def accept_task(self, id: int):
         logging.info("Accepting task id={}".format(id))
         self.api_instance.accept_task(id=str(id), token=self.token, version=self.version)
+
+    def set_task_error(self, id: int, error: str):
+        logging.info("Setting task id={} to error".format(id))
+        logging.debug("Error of task id={} is {}".format(id, error))
+        self.api_instance.set_task_error(id=str(id), token=self.token, version=self.version, set_task_error_request=SetTaskErrorRequest(error=error))
 
     def set_tables_list(self, tables: List[str]):
         logging.info("Sending list tables {}".format(', '.join(tables)))

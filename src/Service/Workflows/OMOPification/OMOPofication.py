@@ -36,6 +36,7 @@ class OMOPofication(WorkflowBase):
         step = 0
 
         for table_name, query in message.queries.items():
+            step = step + 1
             ucdm = self.resolver.get_ucdm_result(query)
             if ucdm is None:
                 logging.error("Can't export {}".format(table_name))
@@ -63,13 +64,18 @@ class OMOPofication(WorkflowBase):
                 elif table_name == "specimen":
                     self.build_specimen_table(ucdm)
 
-            step = step + 1
+
             self.send_notification_to_api(
                 id=message.id,
                 length=length,
                 step=step
             )
-        print("OK")
+        self.send_notification_to_api(
+            id=message.id,
+            length=length,
+            step=step
+        )
+        logging.info("Writing OMOP CSV files finished successfully")
 
     def build_person_table(self, ucdm: List[Dict[str, str]]):
         builder = OMOPoficationPerson()
