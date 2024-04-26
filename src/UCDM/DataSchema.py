@@ -143,7 +143,7 @@ class DataSchema:
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
             if exp['type'] != 'constant':
                 # Labkey does not support GROUP BY <constant>
-                group_array.append('"' + alias + '"')
+                group_array.append(query.select[alias])
 
         select_string = ", ".join(select_array)
 
