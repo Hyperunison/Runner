@@ -271,6 +271,7 @@ class DataSchema:
             logging.debug("VARIABLE {} got".format(statement['name']))
             return mapper.convert_var_name(statement['name'])
         if statement['type'] == 'constant':
+
             value = json.loads(statement['json'])
             if isinstance(value, int):
                 return "{}".format(value)

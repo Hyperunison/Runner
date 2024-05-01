@@ -148,30 +148,38 @@ class Labkey (BaseSchema):
 
     def statement_callback(self, statement) -> Dict:
         date_functions = ['hours', 'days', 'weeks', 'months', 'years']
-        # Catching adding interval to date/datetime
-        if statement['type'] == 'binary' and statement['operator'] in ["+", "-"] and statement['right']['type'] == 'function' and statement['right']['name'] in date_functions:
-            interval_map = dict()
-            interval_map['hours'] = 'SQL_TSI_HOUR'
-            interval_map['days'] = 'SQL_TSI_DAY'
-            interval_map['weeks'] = 'SQL_TSI_WEEK'
-            interval_map['months'] = 'SQL_TSI_MONTH'
-            interval_map['years'] = 'SQL_TSI_YEAR'
+        if statement['type'] == 'binary' and statement['operator'] in ["+", "-"]:
+            # Catching adding interval to date/datetime
+            if (statement['right']['type'] == 'function' and statement['right']['name'] in date_functions) or (statement['left']['type'] == 'function' and statement['left']['name'] in date_functions):
+                interval_map = dict()
+                interval_map['hours'] = 'SQL_TSI_HOUR'
+                interval_map['days'] = 'SQL_TSI_DAY'
+                interval_map['weeks'] = 'SQL_TSI_WEEK'
+                interval_map['months'] = 'SQL_TSI_MONTH'
+                interval_map['years'] = 'SQL_TSI_YEAR'
+                if statement['right']['type'] == 'function' and statement['right']['name'] in date_functions:
+                    interval = statement['right']
+                    date = statement['left']
+                else:
+                    interval = statement['left']
+                    date = statement['right']
 
-            result = dict()
-            result['type'] = 'function'
-            result['name'] = 'timestampadd'
+                result = dict()
+                result['type'] = 'function'
+                result['name'] = 'timestampadd'
 
-            node1 = dict()
-            node1['type'] = 'constant'
-            node1['json'] = '"'+interval_map[statement['right']['name']]+'"'
+                node1 = dict()
+                node1['type'] = 'constant'
+                node1['json'] = '"'+interval_map[interval['name']]+'"'
 
-            node2 = dict()
-            node2['type'] = 'constant'
-            node2['json'] = statement['right']['nodes'][0]['json']
+                node2 = dict()
+                node2['type'] = 'constant'
+                if statement['operator'] == '+':
+                    node2['json'] = interval['nodes'][0]['json']
+                else:
+                    node2['json'] = "-" + interval['nodes'][0]['json']
 
-            node3 = statement['left']
-
-            result['nodes'] = [node1, node2, node3]
+                result['nodes'] = [node1, node2, date]
 
             return result
         else:
