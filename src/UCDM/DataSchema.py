@@ -265,6 +265,8 @@ class DataSchema:
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
         logging.debug("Statement got {}".format(json.dumps(statement)))
 
+        statement = self.schema.statement_callback(statement)
+
         if statement['type'] == 'variable':
             logging.debug("VARIABLE {} got".format(statement['name']))
             return mapper.convert_var_name(statement['name'])
@@ -319,15 +321,19 @@ class DataSchema:
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
             if statement['name'] in ['hours', 'days', 'weeks', 'months', 'years']:
-                var = json.loads(statement['nodes'][0]['json'])
-                name = statement['name']
-                return "'{} {}'::interval".format(var, name)
+                count = json.loads(statement['nodes'][0]['json'])
+                return self.schema.sql_expression_interval(count, statement['name'])
 
             if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar']:
-                return "({})::{}".format(
+                return self.schema.sql_expression_cast_data_type(
                     self.build_sql_expression(statement['nodes'][0], query, mapper),
                     statement['name']
                 )
+
+            # known functions
+            if statement['name'] in self.schema.known_functions:
+                sql = statement['name']+"("+", ".join(str(self.build_sql_expression(node, query, mapper)) for node in statement['nodes'])+")"
+                return sql
 
             raise NotImplementedError("Unknown function {}".format(statement['name']))
 

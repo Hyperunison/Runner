@@ -14,6 +14,8 @@ class Labkey (BaseSchema):
     manager_schema = 'ListManager'
     credentials_path = '/root/.netrc'
 
+    known_functions = ['timestampadd']
+
     def __init__(self, dsn: str, min_count: int):
         parsed_dsn = urlparse(dsn)
         labkey_server = parsed_dsn.hostname
@@ -137,3 +139,40 @@ class Labkey (BaseSchema):
 
     def reconnect(self):
         return
+
+    def sql_expression_interval(self, count: str, unit: str) -> str:
+        raise NotImplementedError("Interval type is not exists in LabKey")
+
+    def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
+        return "CAST({} AS {})".format(expression, data_type)
+
+    def statement_callback(self, statement) -> Dict:
+        date_functions = ['hours', 'days', 'weeks', 'months', 'years']
+        # Catching adding interval to date/datetime
+        if statement['type'] == 'binary' and statement['operator'] in ["+", "-"] and statement['right']['type'] == 'function' and statement['right']['name'] in date_functions:
+            interval_map = dict()
+            interval_map['hours'] = 'SQL_TSI_HOUR'
+            interval_map['days'] = 'SQL_TSI_DAY'
+            interval_map['weeks'] = 'SQL_TSI_WEEK'
+            interval_map['months'] = 'SQL_TSI_MONTH'
+            interval_map['years'] = 'SQL_TSI_YEAR'
+
+            result = dict()
+            result['type'] = 'function'
+            result['name'] = 'timestampadd'
+
+            node1 = dict()
+            node1['type'] = 'constant'
+            node1['json'] = '"'+interval_map[statement['right']['name']]+'"'
+
+            node2 = dict()
+            node2['type'] = 'constant'
+            node2['json'] = statement['right']['nodes'][0]['json']
+
+            node3 = statement['left']
+
+            result['nodes'] = [node1, node2, node3]
+
+            return result
+        else:
+            return statement
