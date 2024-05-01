@@ -161,7 +161,7 @@ class DataSchema:
             sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
-        if distribution:
+        if distribution and len(group_array) > 0:
             sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count)
 
@@ -318,21 +318,18 @@ class DataSchema:
                     "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
-            if statement['name'] == 'hours':
+            if statement['name'] in ['hours', 'days', 'weeks', 'months', 'years']:
                 var = json.loads(statement['nodes'][0]['json'])
-                return var * 60 * 60
-            if statement['name'] == 'days':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 24 * 60 * 60
-            if statement['name'] == 'weeks':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 7 * 24 * 60 * 60
-            if statement['name'] == 'months':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 30 * 24 * 60 * 60
-            if statement['name'] == 'years':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 365 * 24 * 60 * 60
+                name = statement['name']
+                return "'{} {}'::interval".format(var, name)
+
+            if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar']:
+                return "({})::{}".format(
+                    self.build_sql_expression(statement['nodes'][0], query, mapper),
+                    statement['name']
+                )
+
+            raise NotImplementedError("Unknown function {}".format(statement['name']))
 
     def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> str:
         s = self.build_sql_expression(statement, query, mapper)
