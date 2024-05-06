@@ -17,7 +17,7 @@ class Postgres(BaseSchema):
 
     def __init__(self, dsn: str, min_count: int):
         self.dsn = dsn
-        self.engine = create_engine(dsn).connect()
+        self.engine = create_engine(dsn, isolation_level="AUTOCOMMIT").connect()
         super().__init__(dsn, min_count)
 
     def get_tables_list(self) -> List[str]:
@@ -155,3 +155,9 @@ class Postgres(BaseSchema):
     def reconnect(self):
         self.engine.close()
         self.engine = create_engine(self.dsn).connect()
+
+    def sql_expression_interval(self, count: str, unit: str) -> str:
+        return "'{} {}'::interval".format(count, unit)
+
+    def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
+        return "({})::{}".format(expression, data_type)

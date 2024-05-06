@@ -1,12 +1,13 @@
 from typing import List, Dict
 
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
 
 class OMOPoficationVisitOccurrence(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, str]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
         header = ["visit_occurrence_id", "person_id", "visit_concept_id", "visit_start_date",
                   "visit_start_datetime", "visit_end_date", "visit_end_datetime", "visit_type_concept_id",
                   "provider_id", "care_site_id", "visit_source_value", "visit_source_concept_id",
@@ -20,19 +21,19 @@ class OMOPoficationVisitOccurrence(OMOPoficationBase):
                 output = {}
                 output["visit_occurrence_id"] = ""
                 output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
-                output["visit_concept_id"] = ""
-                output["visit_start_date"] = row['c.start_date'].ucdm_value
-                output["visit_start_datetime"] = ""
-                output["visit_end_date"] = row['c.end_date'].ucdm_value
-                output["visit_end_datetime"] = ""
-                output["visit_type_concept_id"] = ""
-                output["provider_id"] = ""
-                output["care_site_id"] = ""
-                output["visit_source_value"] = ""
+                output["visit_concept_id"] = self.render_omop_id(row, 'c.name')
+                output["visit_start_date"] = self.render_ucdm_value(row, 'c.start_date')
+                output["visit_start_datetime"] = self.render_ucdm_value(row, 'c.start_datetime')
+                output["visit_end_date"] = self.render_ucdm_value(row, 'c.end_date')
+                output["visit_end_datetime"] = self.render_ucdm_value(row, 'c.end_datetime')
+                output["visit_type_concept_id"] = self.render_omop_id(row, 'c.type')
+                output["provider_id"] = self.render_omop_id(row, 'c.provider')
+                output["care_site_id"] = self.render_omop_id(row, 'c.care_site')
+                output["visit_source_value"] = self.render_biobank_value(row, 'c.name')
                 output["visit_source_concept_id"] = ""
-                output["admitting_source_concept_id"] = row['c.admitting'].biobank_value
-                output["admitting_source_value"] = row['c.admitting'].ucdm_value
-                output["discharge_to_concept_id"] = row['c.discharge'].biobank_value
-                output["discharge_to_source_value"] = row['c.discharge'].ucdm_value
-                output["preceding_visit_occurrence_id"] = ""
+                output["admitting_source_concept_id"] = ''
+                output["admitting_source_value"] = self.render_ucdm_value(row, 'c.admitting')
+                output["discharge_to_concept_id"] = ''
+                output["discharge_to_source_value"] = self.render_ucdm_value(row, 'c.discharge')
+                output["preceding_visit_occurrence_id"] = self.render_ucdm_value(row, 'c.preceding_visit_occurrence_id')
                 writer.writerow(output)

@@ -161,7 +161,7 @@ class DataSchema:
             sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
-        if distribution:
+        if distribution and len(group_array) > 0:
             sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count)
 
@@ -265,10 +265,13 @@ class DataSchema:
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
         logging.debug("Statement got {}".format(json.dumps(statement)))
 
+        statement = self.schema.statement_callback(statement)
+
         if statement['type'] == 'variable':
             logging.debug("VARIABLE {} got".format(statement['name']))
             return mapper.convert_var_name(statement['name'])
         if statement['type'] == 'constant':
+
             value = json.loads(statement['json'])
             if isinstance(value, int):
                 return "{}".format(value)
@@ -318,21 +321,22 @@ class DataSchema:
                     "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
                     "    END"
-            if statement['name'] == 'hours':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 60 * 60
-            if statement['name'] == 'days':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 24 * 60 * 60
-            if statement['name'] == 'weeks':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 7 * 24 * 60 * 60
-            if statement['name'] == 'months':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 30 * 24 * 60 * 60
-            if statement['name'] == 'years':
-                var = json.loads(statement['nodes'][0]['json'])
-                return var * 365 * 24 * 60 * 60
+            if statement['name'] in ['hours', 'days', 'weeks', 'months', 'years']:
+                count = json.loads(statement['nodes'][0]['json'])
+                return self.schema.sql_expression_interval(count, statement['name'])
+
+            if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar']:
+                return self.schema.sql_expression_cast_data_type(
+                    self.build_sql_expression(statement['nodes'][0], query, mapper),
+                    statement['name']
+                )
+
+            # known functions
+            if statement['name'] in self.schema.known_functions:
+                sql = statement['name']+"("+", ".join(str(self.build_sql_expression(node, query, mapper)) for node in statement['nodes'])+")"
+                return sql
+
+            raise NotImplementedError("Unknown function {}".format(statement['name']))
 
     def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> str:
         s = self.build_sql_expression(statement, query, mapper)

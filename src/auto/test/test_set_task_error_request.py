@@ -12,11 +12,11 @@ import sys
 import unittest
 
 import auto_api_client
-from auto_api_client.model.biobank_data_column_frequent_value import BiobankDataColumnFrequentValue
+from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
 
 
-class TestBiobankDataColumnFrequentValue(unittest.TestCase):
-    """BiobankDataColumnFrequentValue unit test stubs"""
+class TestSetTaskErrorRequest(unittest.TestCase):
+    """SetTaskErrorRequest unit test stubs"""
 
     def setUp(self):
         pass
@@ -24,10 +24,10 @@ class TestBiobankDataColumnFrequentValue(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testBiobankDataColumnFrequentValue(self):
-        """Test BiobankDataColumnFrequentValue"""
+    def testSetTaskErrorRequest(self):
+        """Test SetTaskErrorRequest"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = BiobankDataColumnFrequentValue()  # noqa: E501
+        # model = SetTaskErrorRequest()  # noqa: E501
         pass
 
 

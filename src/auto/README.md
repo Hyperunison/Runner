@@ -63,6 +63,7 @@ from auto_api_client.model.set_table_column_stats_request import SetTableColumnS
 from auto_api_client.model.set_table_info_request import SetTableInfoRequest
 from auto_api_client.model.set_table_stats_request import SetTableStatsRequest
 from auto_api_client.model.set_tables_list_request import SetTablesListRequest
+from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
 from auto_api_client.model.types_map import TypesMap
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
@@ -112,6 +113,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**set_table_info**](docs/AgentApi.md#set_table_info) | **PUT** /api/agent/v{version}/{token}/ucdm/tables/{table} | 
 *AgentApi* | [**set_table_stats**](docs/AgentApi.md#set_table_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns | 
 *AgentApi* | [**set_tables_list**](docs/AgentApi.md#set_tables_list) | **POST** /api/agent/v{version}/{token}/ucdm/tables | 
+*AgentApi* | [**set_task_error**](docs/AgentApi.md#set_task_error) | **POST** /api/agent/v{version}/{token}/task/{id}/error | 
 *AgentApi* | [**update_process_item**](docs/AgentApi.md#update_process_item) | **POST** /api/agent/v{version}/{token}/run/{id}/process | 
 
 
@@ -134,6 +136,7 @@ Class | Method | HTTP request | Description
  - [SetTableInfoRequest](docs/SetTableInfoRequest.md)
  - [SetTableStatsRequest](docs/SetTableStatsRequest.md)
  - [SetTablesListRequest](docs/SetTablesListRequest.md)
+ - [SetTaskErrorRequest](docs/SetTaskErrorRequest.md)
  - [TypesMap](docs/TypesMap.md)
 
 

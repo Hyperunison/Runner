@@ -7,6 +7,8 @@ class BaseSchema:
     engine = None
     min_count: int = 0
 
+    known_functions = []
+
     def __init__(self, dsn: str, min_count: int):
         self.min_count = min_count
         super().__init__()
@@ -34,3 +36,12 @@ class BaseSchema:
 
     def reconnect(self):
         raise NotImplementedError()
+
+    def sql_expression_interval(self, count: str, unit: str) -> str:
+        raise NotImplementedError()
+
+    def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
+        raise NotImplementedError()
+
+    def statement_callback(self, statement) -> Dict:
+        return statement

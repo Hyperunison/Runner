@@ -137,6 +137,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_task_error(self):
+        """Test case for set_task_error
+
+        """
+        pass
+
     def test_update_process_item(self):
         """Test case for update_process_item
 

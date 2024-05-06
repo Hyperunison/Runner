@@ -6,7 +6,7 @@ from typing import List, Dict
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.UCDMResolver import UCDMResolver
 from src.Service.Workflows.OMOPification.OMOPoficationCondition import OMOPoficationCondition
-from src.Service.Workflows.OMOPification.OMOPoficationDrugExpose import OMOPoficationDrugExpose
+from src.Service.Workflows.OMOPification.OMOPoficationDrugExposure import OMOPoficationDrugExposure
 from src.Service.Workflows.OMOPification.OMOPoficationMeasurement import OMOPoficationMeasurement
 from src.Service.Workflows.OMOPification.OMOPoficationObservationPeriod import OMOPoficationObservationPeriod
 from src.Service.Workflows.OMOPification.OMOPoficationPerson import OMOPoficationPerson
@@ -36,7 +36,11 @@ class OMOPofication(WorkflowBase):
         step = 0
 
         for table_name, query in message.queries.items():
+            step = step + 1
             ucdm = self.resolver.get_ucdm_result(query)
+            if ucdm is None:
+                logging.error("Can't export {}".format(table_name))
+                continue
 
             if len(ucdm) > 0:
                 if table_name == "":
@@ -45,8 +49,8 @@ class OMOPofication(WorkflowBase):
                     self.build_condition_table(ucdm)
                 elif table_name == "measurement":
                     self.build_measurement_table(ucdm)
-                elif table_name == "drug_expose":
-                    self.build_drug_expose_table(ucdm)
+                elif table_name == "drug_exposure":
+                    self.build_drug_exposure_table(ucdm)
                 elif table_name == "observation_period":
                     self.build_observation_period_table(ucdm)
                 elif table_name == "procedure":
@@ -60,13 +64,18 @@ class OMOPofication(WorkflowBase):
                 elif table_name == "specimen":
                     self.build_specimen_table(ucdm)
 
-            step = step + 1
+
             self.send_notification_to_api(
                 id=message.id,
                 length=length,
                 step=step
             )
-        print("OK")
+        self.send_notification_to_api(
+            id=message.id,
+            length=length,
+            step=step
+        )
+        logging.info("Writing OMOP CSV files finished successfully")
 
     def build_person_table(self, ucdm: List[Dict[str, str]]):
         builder = OMOPoficationPerson()
@@ -80,8 +89,8 @@ class OMOPofication(WorkflowBase):
         builder = OMOPoficationMeasurement()
         builder.build(ucdm)
 
-    def build_drug_expose_table(self, ucdm: List[Dict[str, str]]):
-        builder = OMOPoficationDrugExpose()
+    def build_drug_exposure_table(self, ucdm: List[Dict[str, str]]):
+        builder = OMOPoficationDrugExposure()
         builder.build(ucdm)
 
     def build_observation_period_table(self, ucdm: List[Dict[str, str]]):
