@@ -58,6 +58,7 @@ from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
+from auto_api_client.model.set_sql_query_for_cohort_api_request_request import SetSQLQueryForCohortApiRequestRequest
 from auto_api_client.model.set_table_column_freequent_values_request import SetTableColumnFreequentValuesRequest
 from auto_api_client.model.set_table_column_stats_request import SetTableColumnStatsRequest
 from auto_api_client.model.set_table_info_request import SetTableInfoRequest
@@ -108,6 +109,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 *AgentApi* | [**set_run_status**](docs/AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+*AgentApi* | [**set_sql_query_for_cohort_api_request**](docs/AgentApi.md#set_sql_query_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/sql-query | 
 *AgentApi* | [**set_table_column_freequent_values**](docs/AgentApi.md#set_table_column_freequent_values) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values | 
 *AgentApi* | [**set_table_column_stats**](docs/AgentApi.md#set_table_column_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column} | 
 *AgentApi* | [**set_table_info**](docs/AgentApi.md#set_table_info) | **PUT** /api/agent/v{version}/{token}/ucdm/tables/{table} | 
@@ -131,6 +133,7 @@ Class | Method | HTTP request | Description
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
  - [SetJobStateRequest](docs/SetJobStateRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
+ - [SetSQLQueryForCohortApiRequestRequest](docs/SetSQLQueryForCohortApiRequestRequest.md)
  - [SetTableColumnFreequentValuesRequest](docs/SetTableColumnFreequentValuesRequest.md)
  - [SetTableColumnStatsRequest](docs/SetTableColumnStatsRequest.md)
  - [SetTableInfoRequest](docs/SetTableInfoRequest.md)

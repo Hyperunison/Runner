@@ -162,6 +162,72 @@
                 }
             }
         },
+        "\/api\/agent\/v{version}\/{token}\/cohort\/{id}\/sql-query": {
+            "put": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setSQLQueryForCohortApiRequest",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\da-f]+"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "required": [
+                                    "sql"
+                                ],
+                                "properties": {
+                                    "sql": {
+                                        "type": "string",
+                                        "default": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Result",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "\/api\/agent\/v{version}\/{token}\/task\/{id}\/block": {
             "post": {
                 "tags": [
@@ -448,6 +514,10 @@
                                     "sql": {
                                         "type": "string",
                                         "default": ""
+                                    },
+                                    "cohortApiRequestId": {
+                                        "type": "string",
+                                        "default": null
                                     }
                                 },
                                 "type": "object"
@@ -1416,7 +1486,7 @@
                     "runnerInstance": {
                         "type": "string"
                     },
-                    "text": {
+                    "error": {
                         "type": "string"
                     }
                 },
@@ -1602,6 +1672,12 @@
                     },
                     "updateStatus": {
                         "type": "string"
+                    },
+                    "isMappingIgnored": {
+                        "type": "boolean"
+                    },
+                    "mappingRuleCount": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -1613,6 +1689,10 @@
                     },
                     "rowsCount": {
                         "type": "integer"
+                    },
+                    "domainSuggestions": {
+                        "type": "object",
+                        "additionalProperties": true
                     }
                 },
                 "type": "object"

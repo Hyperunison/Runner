@@ -107,6 +107,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_sql_query_for_cohort_api_request(self):
+        """Test case for set_sql_query_for_cohort_api_request
+
+        """
+        pass
+
     def test_set_table_column_freequent_values(self):
         """Test case for set_table_column_freequent_values
 

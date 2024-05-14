@@ -83,6 +83,7 @@ class SetCohortDefinitionAggregationRequest(ModelNormal):
         return {
             'result': (str,),  # noqa: E501
             'sql': (str,),  # noqa: E501
+            'cohort_api_request_id': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -93,6 +94,7 @@ class SetCohortDefinitionAggregationRequest(ModelNormal):
     attribute_map = {
         'result': 'result',  # noqa: E501
         'sql': 'sql',  # noqa: E501
+        'cohort_api_request_id': 'cohortApiRequestId',  # noqa: E501
     }
 
     read_only_vars = {
@@ -140,6 +142,7 @@ class SetCohortDefinitionAggregationRequest(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            cohort_api_request_id (str): [optional]  # noqa: E501
         """
 
         result = kwargs.get('result', "")
@@ -233,6 +236,7 @@ class SetCohortDefinitionAggregationRequest(ModelNormal):
                                 Animal class but this time we won't travel
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
+            cohort_api_request_id (str): [optional]  # noqa: E501
         """
 
         result = kwargs.get('result', "")

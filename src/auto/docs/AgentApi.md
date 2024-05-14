@@ -18,6 +18,7 @@ Method | HTTP request | Description
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+[**set_sql_query_for_cohort_api_request**](AgentApi.md#set_sql_query_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/sql-query | 
 [**set_table_column_freequent_values**](AgentApi.md#set_table_column_freequent_values) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values | 
 [**set_table_column_stats**](AgentApi.md#set_table_column_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column} | 
 [**set_table_info**](AgentApi.md#set_table_info) | **PUT** /api/agent/v{version}/{token}/ucdm/tables/{table} | 
@@ -709,6 +710,7 @@ with auto_api_client.ApiClient() as api_client:
     set_cohort_definition_aggregation_request = SetCohortDefinitionAggregationRequest(
         result="",
         sql="",
+        cohort_api_request_id="cohort_api_request_id_example",
     ) # SetCohortDefinitionAggregationRequest |  (optional)
 
     # example passing only required values which don't have defaults set
@@ -1073,6 +1075,86 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_sql_query_for_cohort_api_request**
+> str set_sql_query_for_cohort_api_request(version, token, id)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_sql_query_for_cohort_api_request_request import SetSQLQueryForCohortApiRequestRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "f" # str | 
+    id = "id_example" # str | 
+    set_sql_query_for_cohort_api_request_request = SetSQLQueryForCohortApiRequestRequest(
+        sql="",
+    ) # SetSQLQueryForCohortApiRequestRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_sql_query_for_cohort_api_request(version, token, id)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_sql_query_for_cohort_api_request: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_sql_query_for_cohort_api_request(version, token, id, set_sql_query_for_cohort_api_request_request=set_sql_query_for_cohort_api_request_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_sql_query_for_cohort_api_request: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **id** | **str**|  |
+ **set_sql_query_for_cohort_api_request_request** | [**SetSQLQueryForCohortApiRequestRequest**](SetSQLQueryForCohortApiRequestRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Result |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

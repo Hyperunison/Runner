@@ -25,6 +25,9 @@ from auto_api_client.model.set_job_state_request import SetJobStateRequest
 
 from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
 
+from auto_api_client.model.set_sql_query_for_cohort_api_request_request import \
+    SetSQLQueryForCohortApiRequestRequest
+
 
 class Api:
     api_instance: AgentApi = None
@@ -60,7 +63,14 @@ class Api:
             version=self.version
         )
 
-    def set_cohort_definition_aggregation(self, data: any, sql: str, channel: str, key: str, raw_only: bool):
+    def set_cohort_definition_aggregation(
+            self,
+            data: any,
+            sql: str,
+            channel: str,
+            key: str,
+            raw_only: bool
+    ):
         self.api_instance.set_cohort_definition_aggregation(
             set_cohort_definition_aggregation_request=SetCohortDefinitionAggregationRequest(
                 result=json.dumps(data),
@@ -84,6 +94,16 @@ class Api:
                     "percent": percent,
                     "path": path
                 })
+            )
+        )
+
+    def set_cohort_sql_query(self, id: int, sql: str):
+        self.api_instance.set_sql_query_for_cohort_api_request(
+            id=str(id),
+            version=self.version,
+            token=self.token,
+            set_sql_query_for_cohort_api_request_request=SetSQLQueryForCohortApiRequestRequest(
+                sql=sql
             )
         )
 
