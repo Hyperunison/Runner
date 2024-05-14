@@ -246,6 +246,10 @@ class DataSchema:
                 cohort_definition.raw_only
             )
             api.set_car_status(cohort_definition.cohort_api_request_id, "error", child_pid)
+            api.set_cohort_error(
+                cohort_definition.cohort_api_request_id,
+                "SQL query error: {}".format(e)
+            )
         finally:
             logging.debug("Exiting child process {}".format(child_pid))
             sys.exit(0)

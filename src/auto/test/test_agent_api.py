@@ -83,6 +83,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_error_for_cohort_api_request(self):
+        """Test case for set_error_for_cohort_api_request
+
+        """
+        pass
+
     def test_set_job_state(self):
         """Test case for set_job_state
 

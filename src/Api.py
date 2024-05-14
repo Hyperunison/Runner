@@ -107,6 +107,16 @@ class Api:
             )
         )
 
+    def set_cohort_error(self, id: int, error: str):
+        self.api_instance.set_error_for_cohort_api_request(
+            id=str(id),
+            version=self.version,
+            token=self.token,
+            set_task_error_request=SetTaskErrorRequest(
+                error=error
+            )
+        )
+
     def add_log_chunk(self, id: int, chunk: str):
         logging.info("Adding logs to run={}, len={}".format(id, len(chunk)))
         try:
