@@ -27,6 +27,8 @@ Name | Type | Description | Notes
 **median75_value** | **float** |  | [optional] 
 **median88_value** | **float** |  | [optional] 
 **update_status** | **str** |  | [optional] 
+**is_mapping_ignored** | **bool** |  | [optional] 
+**mapping_rule_count** | **int** |  | [optional] 
 **any string name** | **bool, date, datetime, dict, float, int, list, str, none_type** | any string name can be used but the value must be the correct type | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

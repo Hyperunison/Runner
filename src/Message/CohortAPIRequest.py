@@ -15,4 +15,3 @@ class CohortAPIRequest(BaseMessage):
         self.biobank_id = message.data['biobankId']
         self.raw_only = message.data['rawOnly']
         self.cohort_api_request_id = message.data['cohortApiRequestId']
-

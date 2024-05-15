@@ -212,6 +212,10 @@ class DataSchema:
             cohort_definition.cohort_definition['withTables'],
             True
         )
+        api.set_cohort_sql_query(
+            cohort_definition.cohort_api_request_id,
+            sql
+        )
         pid = self.fork(api)
         if pid != 0:
             # Master process, continue working
@@ -222,7 +226,13 @@ class DataSchema:
             api.set_car_status(cohort_definition.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
+            api.set_cohort_definition_aggregation(
+                result,
+                sql,
+                cohort_definition.reply_channel,
+                key,
+                cohort_definition.raw_only
+            )
             api.set_car_status(cohort_definition.cohort_api_request_id, "success", child_pid)
         except Exception as e:
             logging.error("SQL query error: {}".format(e))
@@ -236,6 +246,10 @@ class DataSchema:
                 cohort_definition.raw_only
             )
             api.set_car_status(cohort_definition.cohort_api_request_id, "error", child_pid)
+            api.set_cohort_error(
+                cohort_definition.cohort_api_request_id,
+                "SQL query error: {}".format(e)
+            )
         finally:
             logging.debug("Exiting child process {}".format(child_pid))
             sys.exit(0)
