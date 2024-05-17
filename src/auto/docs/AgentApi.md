@@ -711,7 +711,6 @@ with auto_api_client.ApiClient() as api_client:
     set_cohort_definition_aggregation_request = SetCohortDefinitionAggregationRequest(
         result="",
         sql="",
-        cohort_api_request_id="cohort_api_request_id_example",
     ) # SetCohortDefinitionAggregationRequest |  (optional)
 
     # example passing only required values which don't have defaults set
