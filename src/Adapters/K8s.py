@@ -268,7 +268,7 @@ class K8s(BaseAdapter):
             namespace = self.namespace,
             pod_prefix = self.pod_prefix,
             run_id = run_id,
-            image = '311239890978.dkr.ecr.eu-central-1.amazonaws.com/base:nextflow-dev-latest',
+            image = '058264135461.dkr.ecr.eu-central-1.amazonaws.com/main:nextflow-dev-latest',
             container_hash = container_hash,
             run_remote_dir = '/var/run/secrets/kubernetes.io/serviceaccount',
             claim_name = self.volume,

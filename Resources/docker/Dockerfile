@@ -40,5 +40,8 @@ RUN pip install "python-json-logger"
 
 RUN apt-get install psmisc
 
+RUN wget https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.14/aws-iam-authenticator_0.6.14_linux_amd64 -O /bin/aws-iam-authenticator
+RUN chmod +x /bin/aws-iam-authenticator
+
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
 ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; done
