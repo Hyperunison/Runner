@@ -10,6 +10,7 @@ import time
 import hashlib
 import os
 import sys
+from json import JSONDecodeError
 from typing import Optional, Dict, List
 
 from src.Adapters.BaseAdapter import BaseAdapter
@@ -208,7 +209,11 @@ class K8s(BaseAdapter):
         if p.returncode > 0:
             logging.critical("Can't check pods statuses, output={}, stderr: {}".format(p.stdout, p.stderr))
             return
-        data = json.loads(str(p.stdout.decode('utf-8')))
+        try:
+            data = json.loads(str(p.stdout.decode('utf-8')))
+        except JSONDecodeError as e:
+            logging.critical("Can't fetch k8s pods statuses, invalid json received: {}".format(p.stdout.decode('utf-8')))
+            return
         for pod in data['items']:
             pod_name = pod['metadata']['name']
             run_id = int(pod['metadata']['labels']['run_id'])

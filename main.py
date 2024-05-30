@@ -1,5 +1,5 @@
 import logging
-import yaml
+from src.Service.ConfigurationLoader import ConfigurationLoader
 import time
 import auto_api_client
 import socket
@@ -28,7 +28,7 @@ try:
 except:
     pass
 
-config = yaml.safe_load(open("config.yaml", "r"))
+config = ConfigurationLoader("config.yaml").get_config()
 
 manager = ConsoleApplicationManager()
 configuration = manager.initialize(config)
