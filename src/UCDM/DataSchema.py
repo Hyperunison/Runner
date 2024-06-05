@@ -143,7 +143,7 @@ class DataSchema:
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
             if exp['type'] != 'constant':
                 # Labkey does not support GROUP BY <constant>
-                group_array.append(query.select[alias])
+                group_array.append(alias)
 
         select_string = ", ".join(select_array)
 
@@ -162,7 +162,7 @@ class DataSchema:
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
-            sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
+            sql += 'GROUP BY "{}" \n'.format('", "'.join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count)
 
         if not limit is None:
