@@ -4,10 +4,12 @@ from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
+from src.Service.Workflows.PersonIdGenerator import PersonIdGenerator
+
 
 class OMOPoficationDrugExposure(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]], person_id_generator: PersonIdGenerator):
         header = ["drug_exposure_id", "person_id", "drug_concept_id", "drug_exposure_start_date",
                   "drug_exposure_start_datetime", "drug_exposure_end_date", "drug_exposure_end_datetime",
                   "verbatim_end_date", "drug_type_concept_id", "stop_reason", "refills",
@@ -22,7 +24,7 @@ class OMOPoficationDrugExposure(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["drug_exposure_id"] = str(num)
-                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
+                output["person_id"] = person_id_generator.get_person_id_int(row['participant_id'].biobank_value)
                 output["drug_concept_id"] = self.render_omop_id(row, 'c.name')
                 output["drug_exposure_start_date"] = self.render_ucdm_value(row, 'c.start_date')
                 output["drug_exposure_start_datetime"] = self.render_ucdm_value(row, 'c.start_datetime')

@@ -178,11 +178,12 @@ class DataSchema:
         # if pid == 0:
         #     # child process
         #     try:
+        #         logging.info("Tty start debugging")
         #         import pydevd_pycharm
         #         pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
         #         logging.info("Debug server connection established for pid {}".format(pid))
-        #     except:
-        #         logging.info("Debug server connection was not established for pid {}".format(pid))
+        #     except Exception as e:
+        #         logging.info("Debug server connection was not established for pid {}, error {}".format(pid, e))
         #         pass
 
 
@@ -295,16 +296,19 @@ class DataSchema:
                 return "null"
             return "'{}'".format(escape_string(str(value)))
 
+        if statement['type'] == 'array':
+            expressions = []
+            for const in statement['nodes']:
+                expressions.append(self.build_sql_expression(const, query, mapper))
+            return '({})'.format(', '.join(expressions))
         if statement['type'] == 'binary':
             operator = statement['operator']
             if operator == 'in' or operator == 'not in':
-                constants = []
-                for const in statement['right']['nodes']:
-                    constants.append(self.build_sql_expression(const, query, mapper))
-                return "{} {} ({})".format(
+                right = self.build_sql_expression(statement['right'], query, mapper)
+                return "{} {} {}".format(
                     self.add_staples_around_statement(statement['left'], query, mapper),
                     operator.upper(),
-                    ','.join(constants)
+                    right,
                 )
 
             if operator == "==":
@@ -326,6 +330,7 @@ class DataSchema:
             )
 
         if statement['type'] == 'function':
+            logging.info('Function call got: {}'.format(statement['name']))
             if statement['name'] == 'ifelse':
                 condition = statement['nodes'][0]
                 result1 = statement['nodes'][1]

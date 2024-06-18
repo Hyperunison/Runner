@@ -4,9 +4,11 @@ from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
+from src.Service.Workflows.PersonIdGenerator import PersonIdGenerator
+
 
 class OMOPoficationCondition(OMOPoficationBase):
-    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]], person_id_generator: PersonIdGenerator):
         header = ["condition_occurrence_id", "person_id", "condition_concept_id", "condition_start_date",
                   "condition_start_datetime", "condition_end_date", "condition_end_datetime",
                   "condition_type_concept_id",
@@ -20,7 +22,7 @@ class OMOPoficationCondition(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["condition_occurrence_id"] = str(num)
-                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
+                output["person_id"] = person_id_generator.get_person_id_int(row['participant_id'].biobank_value)
                 output["condition_concept_id"] = self.render_omop_id(row, 'c.name')
                 output["condition_start_date"] = self.render_ucdm_value(row, 'c.start_date')
                 output["condition_start_datetime"] = self.render_ucdm_value(row, 'c.start_datetime')

@@ -4,9 +4,11 @@ from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
+from src.Service.Workflows.PersonIdGenerator import PersonIdGenerator
+
 
 class OMOPoficationSpecimen(OMOPoficationBase):
-    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]], person_id_generator: PersonIdGenerator):
         header = ["specimen_id", "person_id", "specimen_concept_id", "specimen_type_concept_id",
                   "specimen_date", "specimen_datetime", "quantity", "unit_concept_id",
                   "anatomic_site_concept_id", "disease_status_concept_id", "specimen_source_id",
@@ -20,7 +22,7 @@ class OMOPoficationSpecimen(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["specimen_id"] = str(num)
-                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
+                output["person_id"] = person_id_generator.get_person_id_int(row['participant_id'].biobank_value)
                 output["specimen_concept_id"] = self.render_omop_id(row, 'c.name')
                 output["specimen_type_concept_id"] = self.render_omop_id(row, 'c.type')
                 output["specimen_date"] = self.render_ucdm_value(row, 'c.date')

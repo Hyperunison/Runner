@@ -4,10 +4,12 @@ from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
+from src.Service.Workflows.PersonIdGenerator import PersonIdGenerator
+
 
 class OMOPoficationPerson(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]], person_id_generator: PersonIdGenerator):
         header = ["person_id", "gender_concept_id", "year_of_birth", "month_of_birth", "day_of_birth", "birth_datetime",
                   "race_concept_id", "ethnicity_concept_id", "location_id", "provider_id", "care_site_id",
                   "person_source_value", "gender_source_value", "gender_source_concept_id", "race_source_value",
@@ -18,7 +20,7 @@ class OMOPoficationPerson(OMOPoficationBase):
             writer.writeheader()  # Writes the keys as headers
             for row in ucdm:
                 output = {}
-                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
+                output["person_id"] = person_id_generator.get_person_id_int(row['participant_id'].biobank_value)
                 output["gender_concept_id"] = self.render_omop_id(row, 'gender')
                 output["year_of_birth"] = self.render_ucdm_value(row, 'year_of_birth')
                 output["month_of_birth"] = ""                               # todo: calculate

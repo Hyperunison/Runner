@@ -31,7 +31,7 @@ class UCDMResolver:
         self.api = api
         self.schema = schema
 
-    def get_ucdm_result(self, cohort_definition) -> List[Dict[str, str]]:
+    def get_ucdm_result(self, cohort_definition) -> List[Dict[str, UCDMConvertedField]]:
         mapper = VariableMapper(cohort_definition['fields'])
 
         sql_with_distribution = self.schema.build_cohort_definition_sql_query(

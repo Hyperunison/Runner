@@ -4,10 +4,12 @@ from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.OMOPification.OMOPoficationBase import OMOPoficationBase
 import csv
 
+from src.Service.Workflows.PersonIdGenerator import PersonIdGenerator
+
 
 class OMOPoficationVisitOccurrence(OMOPoficationBase):
 
-    def build(self, ucdm: List[Dict[str, UCDMConvertedField]]):
+    def build(self, ucdm: List[Dict[str, UCDMConvertedField]], person_id_generator: PersonIdGenerator):
         header = ["visit_occurrence_id", "person_id", "visit_concept_id", "visit_start_date",
                   "visit_start_datetime", "visit_end_date", "visit_end_datetime", "visit_type_concept_id",
                   "provider_id", "care_site_id", "visit_source_value", "visit_source_concept_id",
@@ -20,7 +22,7 @@ class OMOPoficationVisitOccurrence(OMOPoficationBase):
             for row in ucdm:
                 output = {}
                 output["visit_occurrence_id"] = ""
-                output["person_id"] = self.transform_person_id_to_integer(row['participant_id'].biobank_value)
+                output["person_id"] = person_id_generator.get_person_id_int(row['participant_id'].biobank_value)
                 output["visit_concept_id"] = self.render_omop_id(row, 'c.name')
                 output["visit_start_date"] = self.render_ucdm_value(row, 'c.start_date')
                 output["visit_start_datetime"] = self.render_ucdm_value(row, 'c.start_datetime')
