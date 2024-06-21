@@ -90,7 +90,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -166,7 +166,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -247,7 +247,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -324,7 +324,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -395,7 +395,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -471,7 +471,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -549,7 +549,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -618,7 +618,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -691,7 +691,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -777,7 +777,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -866,7 +866,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -947,7 +947,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1026,7 +1026,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1114,7 +1114,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1199,7 +1199,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1279,7 +1279,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1364,7 +1364,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                     ('table',): {
@@ -1465,7 +1465,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                     ('table',): {
@@ -1563,7 +1563,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                     ('table',): {
@@ -1651,7 +1651,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                     ('table',): {
@@ -1736,7 +1736,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1813,7 +1813,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },
@@ -1893,7 +1893,7 @@ class AgentApi(object):
                     ('token',): {
 
                         'regex': {
-                            'pattern': r'[\da-f]+',  # noqa: E501
+                            'pattern': r'[\w-]+',  # noqa: E501
                         },
                     },
                 },

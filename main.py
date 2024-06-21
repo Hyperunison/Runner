@@ -24,6 +24,7 @@ from src.auto.auto_api_client.api_client import ApiClient
 
 try:
     import pydevd_pycharm
+
     pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
 except:
     pass
@@ -38,7 +39,8 @@ with ApiClient(configuration) as api_client:
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
     adapter = create_by_config(api, config, runner_instance_id)
-    schema = DataSchema(config['phenoenotypicDb']['dsn'], config['phenoenotypicDb']['schema'], config['phenoenotypicDb']['min_count'])
+    schema = DataSchema(config['phenoenotypicDb']['dsn'], config['phenoenotypicDb']['schema'],
+                        config['phenoenotypicDb']['min_count'])
     workflow_executor = NextflowCohortWorkflowExecutor(api, adapter, schema)
     check_interval = config['check_runs_status_interval']
     last_check = None
@@ -71,7 +73,9 @@ with ApiClient(configuration) as api_client:
             elif type(message) is UpdateTableColumnsList:
                 schema.update_table_columns_list(api, message, config['data_protected']['columns'])
             elif type(message) is UpdateTableColumnStats:
-                schema.update_table_column_stats(api, message, config['phenoenotypicDb']['min_count'], config['data_protected']['tables'], config['data_protected']['columns'])
+                schema.update_table_column_stats(api, message, config['phenoenotypicDb']['min_count'],
+                                                 config['data_protected']['tables'],
+                                                 config['data_protected']['columns'])
             elif type(message) is StartWorkflow:
                 workflow_executor.execute_workflow(message)
             elif type(message) is StartOMOPoficationWorkflow:
@@ -101,4 +105,3 @@ with ApiClient(configuration) as api_client:
             if not response is None and not response.id is None:
                 api.set_task_error(response.id, error)
             raise e
-

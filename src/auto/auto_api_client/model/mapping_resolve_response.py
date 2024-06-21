@@ -82,9 +82,9 @@ class MappingResolveResponse(ModelNormal):
         """
         return {
             'var_name': (str,),  # noqa: E501
-            'bio_bank_value': (str,),  # noqa: E501
-            'ucdm_value': (str,),  # noqa: E501
-            'omop_id': (int,),  # noqa: E501
+            'biobank_value': (str,),  # noqa: E501
+            'export_value': (str,),  # noqa: E501
+            'automation_strategy': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -94,9 +94,9 @@ class MappingResolveResponse(ModelNormal):
 
     attribute_map = {
         'var_name': 'varName',  # noqa: E501
-        'bio_bank_value': 'bioBankValue',  # noqa: E501
-        'ucdm_value': 'ucdmValue',  # noqa: E501
-        'omop_id': 'omopId',  # noqa: E501
+        'biobank_value': 'biobankValue',  # noqa: E501
+        'export_value': 'exportValue',  # noqa: E501
+        'automation_strategy': 'automationStrategy',  # noqa: E501
     }
 
     read_only_vars = {
@@ -141,9 +141,9 @@ class MappingResolveResponse(ModelNormal):
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
             var_name (str): [optional]  # noqa: E501
-            bio_bank_value (str): [optional]  # noqa: E501
-            ucdm_value (str): [optional]  # noqa: E501
-            omop_id (int): [optional]  # noqa: E501
+            biobank_value (str): [optional]  # noqa: E501
+            export_value (str): [optional]  # noqa: E501
+            automation_strategy (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -230,9 +230,9 @@ class MappingResolveResponse(ModelNormal):
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
             var_name (str): [optional]  # noqa: E501
-            bio_bank_value (str): [optional]  # noqa: E501
-            ucdm_value (str): [optional]  # noqa: E501
-            omop_id (int): [optional]  # noqa: E501
+            biobank_value (str): [optional]  # noqa: E501
+            export_value (str): [optional]  # noqa: E501
+            automation_strategy (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

@@ -28,7 +28,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -78,7 +78,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -118,7 +118,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -184,7 +184,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -250,7 +250,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -327,7 +327,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -375,7 +375,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -423,7 +423,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -472,7 +472,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -552,7 +552,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -643,7 +643,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -703,7 +703,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -764,7 +764,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -822,7 +822,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -900,7 +900,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -947,7 +947,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -987,7 +987,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -1049,7 +1049,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -1116,7 +1116,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -1201,7 +1201,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -1325,7 +1325,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -1439,7 +1439,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     }
                 ],
@@ -1479,7 +1479,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "[\\da-f]+"
+                            "pattern": "[\\w-]+"
                         }
                     },
                     {
@@ -1570,14 +1570,14 @@
                     "varName": {
                         "type": "string"
                     },
-                    "bioBankValue": {
+                    "biobankValue": {
                         "type": "string"
                     },
-                    "ucdmValue": {
+                    "exportValue": {
                         "type": "string"
                     },
-                    "omopId": {
-                        "type": "integer"
+                    "automationStrategy": {
+                        "type": "string"
                     }
                 },
                 "type": "object"

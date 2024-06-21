@@ -52,7 +52,7 @@ class GwasFederated(WorkflowBase):
         for row in ucdm:
             content += "{} {}".format(i, i)
             for key in variables:
-                content += " " + self.convert_value(row[key].ucdm_value)
+                content += " " + self.convert_value(row[key].export_value)
             content += "\n"
             i += 1
 

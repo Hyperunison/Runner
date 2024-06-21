@@ -79,7 +79,7 @@ with auto_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     id = "id_example" # str | 
 
     try:
