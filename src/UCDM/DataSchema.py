@@ -351,7 +351,7 @@ class DataSchema:
                 count = json.loads(statement['nodes'][0]['json'])
                 return self.schema.sql_expression_interval(count, statement['name'])
 
-            if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar']:
+            if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar', 'timestamp']:
                 return self.schema.sql_expression_cast_data_type(
                     self.build_sql_expression(statement['nodes'][0], query, mapper),
                     statement['name']
