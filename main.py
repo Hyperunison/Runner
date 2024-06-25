@@ -30,6 +30,7 @@ except:
     pass
 
 config = ConfigurationLoader("config.yaml").get_config()
+allow_private_upload_data_to_unison = config['allow_private_upload_data_to_unison'] == 1
 
 manager = ConsoleApplicationManager()
 configuration = manager.initialize(config)
@@ -77,9 +78,9 @@ with ApiClient(configuration) as api_client:
                                                  config['data_protected']['tables'],
                                                  config['data_protected']['columns'])
             elif type(message) is StartWorkflow:
-                workflow_executor.execute_workflow(message)
+                workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
             elif type(message) is StartOMOPoficationWorkflow:
-                workflow_executor.execute_workflow(message)
+                workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
             elif message is None:
                 if False:
                     logging.debug("idle, do nothing")

@@ -17,8 +17,10 @@ class OMOPofication(WorkflowBase):
     dir: str = "var/"
     api: Api
     schema: DataSchema
+    may_upload_private_data: bool
 
-    def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema):
+    def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema, may_upload_private_data: bool):
+        self.may_upload_private_data = may_upload_private_data
         super().__init__(api, adapter, schema)
 
     def execute(self, message: StartOMOPoficationWorkflow):
@@ -28,7 +30,10 @@ class OMOPofication(WorkflowBase):
         length = len(message.queries.items())
         step = 0
 
-        self.send_notification_to_api(id=message.id, length=length, step=step)
+        s3_folder = 's3://' + message.s3_bucket + message.s3_path
+        result_path = s3_folder if self.may_upload_private_data else (os.path.abspath('.') + '/' + self.dir)
+
+        self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
 
         for table_name, val in message.queries.items():
             query = val['query']
@@ -42,20 +47,23 @@ class OMOPofication(WorkflowBase):
                 continue
 
             if len(ucdm) > 0:
-                self.build(table_name, ucdm, fields_map)
+                filename = self.build(table_name, ucdm, fields_map)
+                if self.may_upload_private_data:
+                    s3_path = s3_folder + table_name + '.csv'
+                    if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
+                        logging.critical("Can't upload result file to S3, abort pipeline execution")
+                        self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
+                        return
+            self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
 
-            self.send_notification_to_api(id=message.id, length=length, step=step)
+        self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
         logging.info("Writing OMOP CSV files finished successfully")
 
-    def send_notification_to_api(self, id: int, length: int, step: int):
+    def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))
-        state = 'process'
-        if percent == 100:
-            state = 'success'
-            self.dir = os.getcwd() + "/" + self.dir
-        self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=self.dir)
+        self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
 
-    def build(self, table_name: str, ucdm: List[Dict[str, UCDMConvertedField]], fields_map: Dict[str, str]):
+    def build(self, table_name: str, ucdm: List[Dict[str, UCDMConvertedField]], fields_map: Dict[str, str]) -> str:
         filename = self.dir + "{}.csv".format(table_name)
         with open(filename, 'w', newline='') as file:
             header = list(fields_map.values())
@@ -69,3 +77,4 @@ class OMOPofication(WorkflowBase):
                     output[field_name] = value if value is not None else ''
 
                 writer.writerow(output)
+        return filename

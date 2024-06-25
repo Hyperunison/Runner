@@ -16,12 +16,12 @@ class NextflowCohortWorkflowExecutor:
         self.adapter = adapter
         self.schema = schema
 
-    def execute_workflow(self, message: StartWorkflow):
+    def execute_workflow(self, message: StartWorkflow, may_upload_private_data: bool):
         workflow: WorkflowBase
         if message.workflow_name == 'GwasFederated':
             workflow = GwasFederated(self.api, self.adapter, self.schema)
         elif message.workflow_name == 'OMOPification':
-            workflow = OMOPofication(self.api, self.adapter, self.schema)
+            workflow = OMOPofication(self.api, self.adapter, self.schema, may_upload_private_data)
         else:
             raise ValueError("Unknown workflow {}".format(message.workflow_name))
 

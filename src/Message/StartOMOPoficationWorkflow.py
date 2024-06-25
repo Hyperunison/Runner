@@ -7,6 +7,10 @@ class StartOMOPoficationWorkflow(BaseMessage):
     queries: Dict[str, any]
     reply_channel: str
     id: int
+    aws_id: str
+    aws_key: str
+    s3_bucket: str
+    s3_path: str
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartOMOPoficationWorkflow'
@@ -14,5 +18,9 @@ class StartOMOPoficationWorkflow(BaseMessage):
         self.workflow_name = message.data['workflowName']
         self.queries = message.data['queries']
         self.reply_channel = message.data['replyChannel']
+        self.aws_id = message.data['awsId']
+        self.aws_key = message.data['awsKey']
+        self.s3_bucket = message.data['s3Bucket']
+        self.s3_path = message.data['s3Path']
 
 

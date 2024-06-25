@@ -93,6 +93,7 @@ class BiobankDataTable(ModelNormal):
             'user_description': (str,),  # noqa: E501
             'onboarding_status': (str,),  # noqa: E501
             'rows_count': (int,),  # noqa: E501
+            'cte': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -107,6 +108,7 @@ class BiobankDataTable(ModelNormal):
         'user_description': 'userDescription',  # noqa: E501
         'onboarding_status': 'onboardingStatus',  # noqa: E501
         'rows_count': 'rowsCount',  # noqa: E501
+        'cte': 'cte',  # noqa: E501
     }
 
     read_only_vars = {
@@ -156,6 +158,7 @@ class BiobankDataTable(ModelNormal):
             user_description (str): [optional]  # noqa: E501
             onboarding_status (str): [optional]  # noqa: E501
             rows_count (int): [optional]  # noqa: E501
+            cte (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -247,6 +250,7 @@ class BiobankDataTable(ModelNormal):
             user_description (str): [optional]  # noqa: E501
             onboarding_status (str): [optional]  # noqa: E501
             rows_count (int): [optional]  # noqa: E501
+            cte (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

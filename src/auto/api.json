@@ -1604,6 +1604,9 @@
                     },
                     "rowsCount": {
                         "type": "integer"
+                    },
+                    "cte": {
+                        "type": "string"
                     }
                 },
                 "type": "object"
