@@ -8,19 +8,17 @@ from typing import List, Dict, Tuple
 import csv
 from typing import Optional
 
+from src.Service.Workflows.SerialGenerator import SerialGenerator
+from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.UCDM.DataSchema import DataSchema, VariableMapper
 from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 
 
 class UCDMConvertedField:
-    biobank_value: str
-    ucdm_value: str
-    omop_id: Optional[int]
+    export_value: str
 
-    def __init__(self, biobank_value: str, ucdm_value: str, omop_id: Optional[int]):
-        self.biobank_value = biobank_value
-        self.ucdm_value = ucdm_value
-        self.omop_id = omop_id
+    def __init__(self, export_value: str):
+        self.export_value = export_value
 
 
 class UCDMResolver:
@@ -31,7 +29,7 @@ class UCDMResolver:
         self.api = api
         self.schema = schema
 
-    def get_ucdm_result(self, cohort_definition) -> List[Dict[str, str]]:
+    def get_ucdm_result(self, cohort_definition) -> List[Dict[str, UCDMConvertedField]]:
         mapper = VariableMapper(cohort_definition['fields'])
 
         sql_with_distribution = self.schema.build_cohort_definition_sql_query(
@@ -43,7 +41,8 @@ class UCDMResolver:
             cohort_definition['export'],
             1000000000,
             cohort_definition['withTables'],
-            True
+            True,
+            False,
         )
 
         # logging.info("Model train task got: {}".format(json.dumps(sql)))
@@ -64,9 +63,10 @@ class UCDMResolver:
                 cohort_definition['join'],
                 cohort_definition['where'],
                 cohort_definition['export'],
-                100,
+                10000,
                 cohort_definition['withTables'],
-                False
+                False,
+                False,
             )
             result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
@@ -85,7 +85,7 @@ class UCDMResolver:
                 if isinstance(v, bool):
                     value = str(int(v))
                 else:
-                    value = str(v)
+                    value = str(v) if v is not None else ''
                 row_result[k] = value
             result.append(row_result)
         return result
@@ -103,21 +103,23 @@ class UCDMResolver:
 
         return self.api.resolve_mapping(key, request)
 
-    def build_index(self, res: List[MappingResolveResponse]) -> Dict[str, Dict[str, Tuple[str, Optional[int]]]]:
-        index: Dict[str, Dict[str, Tuple[str, Optional[int]]]] = {}
+    def build_index(self, res: List[MappingResolveResponse]) -> Dict[str, Dict[str, Tuple[str, str]]]:
+        index: Dict[str, Dict[str, Tuple[str, str]]] = {}
         for row in res:
             if not row['var_name'] in index:
                 index[row['var_name']] = {}
-            index[row['var_name']][row['bio_bank_value']] = (row['ucdm_value'], row['omop_id'])
+            index[row['var_name']][row['biobank_value']] = (row['export_value'], row['automation_strategy'])
         # logging.info("Index: {}".format(json.dumps(index)))
         return index
 
-    def convert_to_ucdm(self, result: List[Dict[str, str]], mapping_index: Dict[str, Dict[str, Tuple[str, Optional[int]]]]) -> List[Dict[str, UCDMConvertedField]]:
+    def convert_to_ucdm(self, result: List[Dict[str, str]], mapping_index: Dict[str, Dict[str, Tuple[str, str]]]) -> List[Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
+        serials: Dict[str, SerialGenerator] = {}
+        str_to_int: Dict[str, StrToIntGenerator] = {}
         for row in result:
-            converted = self.convert_row(mapping_index, row)
+            converted = self.convert_row(mapping_index, row, serials, str_to_int)
             if converted is not None:
                 output.append(converted)
             else:
@@ -147,17 +149,35 @@ class UCDMResolver:
             for row in ucdm_result:
                 writer.writerow(row)
 
-    def convert_row(self, mapping_index: Dict[str, Dict[str, Tuple[str, Optional[int]]]], row: Dict[str, str]) -> Optional[Dict[str, UCDMConvertedField]]:
+    def convert_row(
+            self,
+            mapping_index: Dict[str, Dict[str, Tuple[str, str]]],
+            row: Dict[str, str],
+            serials: Dict[str, SerialGenerator],
+            str_to_int: Dict[str, StrToIntGenerator],
+    ) -> Optional[Dict[str, UCDMConvertedField]]:
         converted: Dict[str, UCDMConvertedField] = {}
         for field, value in row.items():
             if not field in mapping_index:
-                converted[field] = UCDMConvertedField(str(value), str(value), None)
+                result = str(value)
             else:
                 if not str(value) in mapping_index[field]:
                     # logging.info("Cant find in mapping field={}, value={}".format(field, value))
                     return None
-                ucdm_value: str = mapping_index[field][str(value)][0]
-                omop_id: int = int(mapping_index[field][str(value)][1])
-                converted[field] = UCDMConvertedField(str(value), str(ucdm_value), omop_id)
+                val = mapping_index[field][str(value)][0]
+                export_value: str = val if val is not None else ''
+                mapping_strategy = mapping_index[field][str(value)][1]
+
+                if mapping_strategy == 'convertStringToInt':
+                    if not field in str_to_int:
+                        str_to_int[field] = StrToIntGenerator()
+                    export_value = str(str_to_int[field].get_int(export_value))
+
+                if mapping_strategy == 'serial':
+                    if not field in serials:
+                        serials[field] = SerialGenerator()
+                    export_value = str(serials[field].get_next_value())
+                result = export_value
+            converted[field] = UCDMConvertedField(result)
 
         return converted

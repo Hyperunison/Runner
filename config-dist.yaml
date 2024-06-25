@@ -1,3 +1,11 @@
+# You may use syntax:
+# - ARG("some_cli_arg") - to pass CLI var to config
+# - ENV("some_cli_arg") - to pass ENV var to config
+# For example:
+#```yaml
+# api_url: ENV("api_url")
+#```
+
 api_version: 1.0
 api_url: "http://localhost:8082"
 agent_token: "63478ac069b96f79b9d97c9"

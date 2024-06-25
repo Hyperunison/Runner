@@ -10,6 +10,7 @@ import time
 import hashlib
 import os
 import sys
+from json import JSONDecodeError
 from typing import Optional, Dict, List
 
 from src.Adapters.BaseAdapter import BaseAdapter
@@ -208,7 +209,11 @@ class K8s(BaseAdapter):
         if p.returncode > 0:
             logging.critical("Can't check pods statuses, output={}, stderr: {}".format(p.stdout, p.stderr))
             return
-        data = json.loads(str(p.stdout.decode('utf-8')))
+        try:
+            data = json.loads(str(p.stdout.decode('utf-8')))
+        except JSONDecodeError as e:
+            logging.critical("Can't fetch k8s pods statuses, invalid json received: {}".format(p.stdout.decode('utf-8')))
+            return
         for pod in data['items']:
             pod_name = pod['metadata']['name']
             run_id = int(pod['metadata']['labels']['run_id'])
@@ -268,7 +273,7 @@ class K8s(BaseAdapter):
             namespace = self.namespace,
             pod_prefix = self.pod_prefix,
             run_id = run_id,
-            image = '311239890978.dkr.ecr.eu-central-1.amazonaws.com/base:nextflow-dev-latest',
+            image = '058264135461.dkr.ecr.eu-central-1.amazonaws.com/main:nextflow-dev-latest',
             container_hash = container_hash,
             run_remote_dir = '/var/run/secrets/kubernetes.io/serviceaccount',
             claim_name = self.volume,

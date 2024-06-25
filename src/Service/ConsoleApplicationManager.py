@@ -46,5 +46,5 @@ class ConsoleApplicationManager:
             description='Program interacts with local database and Hyperunison',
             epilog='')
         parser.add_argument('-s', '--skip_accept', action='store_true')
-        self.args = parser.parse_args()
+        self.args = parser.parse_known_args()[0]
 

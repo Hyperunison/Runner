@@ -14,6 +14,7 @@ from src.UCDM.Schema.Labkey import Labkey
 from src.UCDM.Schema.Postgres import Postgres
 from src.UCDM.Schema.BaseSchema import BaseSchema
 
+
 class SQLJoin:
     table: str
     alias: str
@@ -38,6 +39,7 @@ class SQLQuery:
 
 def escape_string(s: str) -> str:
     return s.replace('\\', '\\\\').replace("'", "\\'")
+
 
 class VariableMapper:
     map: Dict[str, str] = {
@@ -64,7 +66,7 @@ class DataSchema:
     dst: str = ""
     schema: BaseSchema
 
-    def __init__(self, dsn: str, schema:str, min_count: int):
+    def __init__(self, dsn: str, schema: str, min_count: int):
         self.min_count = min_count
         self.schema = self.create_schema(dsn, schema, min_count)
         super().__init__()
@@ -73,7 +75,7 @@ class DataSchema:
         if schema == 'labkey':
             return Labkey(dsn, min_count)
         if schema == 'postgres':
-            return Postgres(dsn,    min_count)
+            return Postgres(dsn, min_count)
         raise Exception("Unknown schema {}".format(schema))
 
     def build_with_sql(self, with_tables: Dict) -> str:
@@ -88,22 +90,23 @@ class DataSchema:
             sql += "{} AS (\n".format(table_name)
             first: bool = True
             for cohort_definition in with_tables[table_name]:
-              mapper = VariableMapper(cohort_definition['fields'])
-              sql_part = self.build_cohort_definition_sql_query(
-                  mapper,
-                  cohort_definition['participantTableName'],
-                  cohort_definition['participantIdField'],
-                  cohort_definition['join'],
-                  cohort_definition['where'],
-                  cohort_definition['export'],
-                  None,
-                  cohort_definition['withTables'],
-                  False
-              )
-              if not first:
-                  sql += "\nUNION ALL\n"
-              first = False
-              sql += sql_part
+                mapper = VariableMapper(cohort_definition['fields'])
+                sql_part = self.build_cohort_definition_sql_query(
+                    mapper,
+                    cohort_definition['participantTableName'],
+                    cohort_definition['participantIdField'],
+                    cohort_definition['join'],
+                    cohort_definition['where'],
+                    cohort_definition['export'],
+                    None,
+                    cohort_definition['withTables'],
+                    False,
+                    True,
+                )
+                if not first:
+                    sql += "\nUNION ALL\n"
+                first = False
+                sql += sql_part
             sql += ")\n"
         return sql
 
@@ -117,11 +120,11 @@ class DataSchema:
             export,
             limit: Optional[int],
             with_tables: any,
-            distribution: bool
+            distribution: bool,
+            add_participant_id: bool = False,
     ) -> str:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
-
 
         if isinstance(with_tables, dict):
             with_sql = self.build_with_sql(with_tables)
@@ -138,32 +141,38 @@ class DataSchema:
         select_array: list[str] = []
         group_array: list[str] = []
         for exp in export:
-            alias = exp['as'] if 'as' in exp else  query.select[exp['name']]
+            alias = exp['as'] if 'as' in exp else query.select[exp['name']]
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
             if exp['type'] != 'constant':
                 # Labkey does not support GROUP BY <constant>
-                group_array.append(query.select[alias])
+                group_array.append(alias)
 
         select_string = ", ".join(select_array)
 
         sql = with_sql + "\n\n"
-        sql += "SELECT\n    {},\n".format(select_string)
+
+        if add_participant_id:
+            select_string += " , {}.{} as participant_id".format(participantTable, participantIdField)
 
         if distribution:
+            sql += "SELECT\n    {},\n".format(select_string)
             sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participantTable, participantIdField)
         else:
-            sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
+            # distinct is useful, as without participant_id may be a lot of duplicates
+            sql += "SELECT\n    DISTINCT {}\n".format(select_string)
+            # sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
 
-        sql +="FROM {}\n".format(participantTable)
+        sql += "FROM {}\n".format(participantTable)
 
         for j in joins:
             sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
-            sql += "GROUP BY {} \n".format(", ".join(map(str, group_array))) + \
-                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField, self.min_count)
+            sql += 'GROUP BY "{}" \n'.format('", "'.join(map(str, group_array))) + \
+                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField,
+                                                                     self.min_count)
 
         if not limit is None:
             sql += "\nLIMIT {}".format(limit)
@@ -178,13 +187,13 @@ class DataSchema:
         # if pid == 0:
         #     # child process
         #     try:
+        #         logging.info("Tty start debugging")
         #         import pydevd_pycharm
         #         pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
         #         logging.info("Debug server connection established for pid {}".format(pid))
-        #     except:
-        #         logging.info("Debug server connection was not established for pid {}".format(pid))
+        #     except Exception as e:
+        #         logging.info("Debug server connection was not established for pid {}, error {}".format(pid, e))
         #         pass
-
 
         api.api_instance.api_client.close()
         api.api_instance.api_client.rest_client.pool_manager.clear()
@@ -210,7 +219,12 @@ class DataSchema:
             cohort_definition.cohort_definition['export'],
             cohort_definition.cohort_definition['limit'],
             cohort_definition.cohort_definition['withTables'],
-            True
+            True,
+            False,
+        )
+        api.set_cohort_sql_query(
+            cohort_definition.cohort_api_request_id,
+            sql
         )
         pid = self.fork(api)
         if pid != 0:
@@ -222,7 +236,13 @@ class DataSchema:
             api.set_car_status(cohort_definition.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(result, sql, cohort_definition.reply_channel, key, cohort_definition.raw_only)
+            api.set_cohort_definition_aggregation(
+                result,
+                sql,
+                cohort_definition.reply_channel,
+                key,
+                cohort_definition.raw_only
+            )
             api.set_car_status(cohort_definition.cohort_api_request_id, "success", child_pid)
         except Exception as e:
             logging.error("SQL query error: {}".format(e))
@@ -236,6 +256,10 @@ class DataSchema:
                 cohort_definition.raw_only
             )
             api.set_car_status(cohort_definition.cohort_api_request_id, "error", child_pid)
+            api.set_cohort_error(
+                cohort_definition.cohort_api_request_id,
+                "SQL query error: {}".format(e)
+            )
         finally:
             logging.debug("Exiting child process {}".format(child_pid))
             sys.exit(0)
@@ -260,8 +284,6 @@ class DataSchema:
             print(f"Error while killing PID {kill_message.pid} : {e}")
             api.set_car_status(kill_message.cohort_api_request_id, "error")
 
-
-
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
         logging.debug("Statement got {}".format(json.dumps(statement)))
 
@@ -281,16 +303,19 @@ class DataSchema:
                 return "null"
             return "'{}'".format(escape_string(str(value)))
 
+        if statement['type'] == 'array':
+            expressions = []
+            for const in statement['nodes']:
+                expressions.append(self.build_sql_expression(const, query, mapper))
+            return '({})'.format(', '.join(expressions))
         if statement['type'] == 'binary':
             operator = statement['operator']
             if operator == 'in' or operator == 'not in':
-                constants = []
-                for const in statement['right']['nodes']:
-                    constants.append(self.build_sql_expression(const, query, mapper))
-                return "{} {} ({})".format(
+                right = self.build_sql_expression(statement['right'], query, mapper)
+                return "{} {} {}".format(
                     self.add_staples_around_statement(statement['left'], query, mapper),
                     operator.upper(),
-                    ','.join(constants)
+                    right,
                 )
 
             if operator == "==":
@@ -312,20 +337,21 @@ class DataSchema:
             )
 
         if statement['type'] == 'function':
+            logging.info('Function call got: {}'.format(statement['name']))
             if statement['name'] == 'ifelse':
                 condition = statement['nodes'][0]
                 result1 = statement['nodes'][1]
                 result2 = statement['nodes'][2]
-                return  "\n    CASE \n"+ \
-                    "        WHEN " + self.build_sql_expression(condition, query, mapper) +" "+ \
-                    "THEN " + self.build_sql_expression(result1, query, mapper) +" \n"+ \
-                    "        ELSE " + self.build_sql_expression(result2, query, mapper) +" \n"+ \
+                return "\n    CASE \n" + \
+                    "        WHEN " + self.build_sql_expression(condition, query, mapper) + " " + \
+                    "THEN " + self.build_sql_expression(result1, query, mapper) + " \n" + \
+                    "        ELSE " + self.build_sql_expression(result2, query, mapper) + " \n" + \
                     "    END"
             if statement['name'] in ['hours', 'days', 'weeks', 'months', 'years']:
                 count = json.loads(statement['nodes'][0]['json'])
                 return self.schema.sql_expression_interval(count, statement['name'])
 
-            if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar']:
+            if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar', 'timestamp']:
                 return self.schema.sql_expression_cast_data_type(
                     self.build_sql_expression(statement['nodes'][0], query, mapper),
                     statement['name']
@@ -333,7 +359,8 @@ class DataSchema:
 
             # known functions
             if statement['name'] in self.schema.known_functions:
-                sql = statement['name']+"("+", ".join(str(self.build_sql_expression(node, query, mapper)) for node in statement['nodes'])+")"
+                sql = statement['name'] + "(" + ", ".join(
+                    str(self.build_sql_expression(node, query, mapper)) for node in statement['nodes']) + ")"
                 return sql
 
             raise NotImplementedError("Unknown function {}".format(statement['name']))
@@ -364,7 +391,6 @@ class DataSchema:
             result.append(table)
         api.set_tables_list(result)
 
-
     def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protected_columns: List[str]):
         table_name = message.table_name
         logging.info("Update tables columns list packet got for table {}".format(table_name))
@@ -381,7 +407,8 @@ class DataSchema:
             nullable_result.append(column['nullable'])
         api.set_table_stats(table_name, rows_count, result, types_result, nullable_result)
 
-    def update_table_column_stats(self, api: Api, message: UpdateTableColumnStats, min_count, protected_tables: List[str], protected_columns: List[str]):
+    def update_table_column_stats(self, api: Api, message: UpdateTableColumnStats, min_count,
+                                  protected_tables: List[str], protected_columns: List[str]):
         table_name = message.table_name
         column_name = message.column_name
         logging.info("Update table column stats packet got for column {}.{}".format(table_name, column_name))
@@ -390,7 +417,7 @@ class DataSchema:
             logging.error("Skip column {}.{}, as it's listed in protected_tables".format(table_name, column_name))
             return
 
-        if table_name+"."+column_name in protected_columns:
+        if table_name + "." + column_name in protected_columns:
             logging.error("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column_name))
             return
         stat = self.schema.get_table_column_stats(table_name, column_name)
@@ -402,14 +429,15 @@ class DataSchema:
         if stat.values:
             values = [d['value'] for d in stat.values]
             counts = [d['cnt'] for d in stat.values]
-            logging.info("Sending frequent values for {}.{}: {}".format(table_name, column_name, ','.join([str(val) for val in values])))
-            api.set_table_column_values(stat.table_name,  stat.column_name,  values, counts)
+            logging.info("Sending frequent values for {}.{}: {}".format(table_name, column_name,
+                                                                        ','.join([str(val) for val in values])))
+            api.set_table_column_values(stat.table_name, stat.column_name, values, counts)
         else:
             logging.info("No frequent values found for {}.{}".format(table_name, column_name))
         api.set_table_column_stats(stat.table_name, stat.column_name,
                                    stat.unique_count, stat.nulls_count,
                                    stat.min_value, stat.max_value, stat.avg_value,
-                                   stat.median12_value,stat.median25_value, stat.median37_value, stat.median50_value,
+                                   stat.median12_value, stat.median25_value, stat.median37_value, stat.median50_value,
                                    stat.median63_value, stat.median75_value, stat.median88_value)
 
     def reconnect(self):
