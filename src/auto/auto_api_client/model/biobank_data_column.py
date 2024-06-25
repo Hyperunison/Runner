@@ -110,6 +110,8 @@ class BiobankDataColumn(ModelNormal):
             'median75_value': (float,),  # noqa: E501
             'median88_value': (float,),  # noqa: E501
             'update_status': (str,),  # noqa: E501
+            'is_mapping_ignored': (bool,),  # noqa: E501
+            'mapping_rule_count': (int,),  # noqa: E501
         }
 
     @cached_property
@@ -141,6 +143,8 @@ class BiobankDataColumn(ModelNormal):
         'median75_value': 'median75Value',  # noqa: E501
         'median88_value': 'median88Value',  # noqa: E501
         'update_status': 'updateStatus',  # noqa: E501
+        'is_mapping_ignored': 'isMappingIgnored',  # noqa: E501
+        'mapping_rule_count': 'mappingRuleCount',  # noqa: E501
     }
 
     read_only_vars = {
@@ -207,6 +211,8 @@ class BiobankDataColumn(ModelNormal):
             median75_value (float): [optional]  # noqa: E501
             median88_value (float): [optional]  # noqa: E501
             update_status (str): [optional]  # noqa: E501
+            is_mapping_ignored (bool): [optional]  # noqa: E501
+            mapping_rule_count (int): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -315,6 +321,8 @@ class BiobankDataColumn(ModelNormal):
             median75_value (float): [optional]  # noqa: E501
             median88_value (float): [optional]  # noqa: E501
             update_status (str): [optional]  # noqa: E501
+            is_mapping_ignored (bool): [optional]  # noqa: E501
+            mapping_rule_count (int): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

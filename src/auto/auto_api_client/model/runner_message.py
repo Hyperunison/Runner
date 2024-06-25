@@ -88,7 +88,7 @@ class RunnerMessage(ModelNormal):
             'data': ({str: (bool, date, datetime, dict, float, int, list, str, none_type)},),  # noqa: E501
             'status': (str,),  # noqa: E501
             'runner_instance': (str,),  # noqa: E501
-            'text': (str,),  # noqa: E501
+            'error': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -104,7 +104,7 @@ class RunnerMessage(ModelNormal):
         'data': 'data',  # noqa: E501
         'status': 'status',  # noqa: E501
         'runner_instance': 'runnerInstance',  # noqa: E501
-        'text': 'text',  # noqa: E501
+        'error': 'error',  # noqa: E501
     }
 
     read_only_vars = {
@@ -155,7 +155,7 @@ class RunnerMessage(ModelNormal):
             data ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
             status (str): [optional]  # noqa: E501
             runner_instance (str): [optional]  # noqa: E501
-            text (str): [optional]  # noqa: E501
+            error (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -248,7 +248,7 @@ class RunnerMessage(ModelNormal):
             data ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
             status (str): [optional]  # noqa: E501
             runner_instance (str): [optional]  # noqa: E501
-            text (str): [optional]  # noqa: E501
+            error (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

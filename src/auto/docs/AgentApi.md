@@ -14,10 +14,12 @@ Method | HTTP request | Description
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
 [**set_car_status**](AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 [**set_cohort_definition_aggregation**](AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
+[**set_error_for_cohort_api_request**](AgentApi.md#set_error_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/error | 
 [**set_job_state**](AgentApi.md#set_job_state) | **PUT** /api/agent/v{version}/{token}/job/runner-message/{runId}/set-state | 
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
+[**set_sql_query_for_cohort_api_request**](AgentApi.md#set_sql_query_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/sql-query | 
 [**set_table_column_freequent_values**](AgentApi.md#set_table_column_freequent_values) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values | 
 [**set_table_column_stats**](AgentApi.md#set_table_column_stats) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column} | 
 [**set_table_info**](AgentApi.md#set_table_info) | **PUT** /api/agent/v{version}/{token}/ucdm/tables/{table} | 
@@ -52,7 +54,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     id = "id_example" # str | 
 
     # example passing only required values which don't have defaults set
@@ -121,7 +123,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     add_run_log_chunk_request = AddRunLogChunkRequest(
         chunk="",
     ) # AddRunLogChunkRequest |  (optional)
@@ -199,7 +201,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     id = "id_example" # str | 
     runner_instance = "" # str | uid of runner instance (optional) if omitted the server will use the default value of ""
 
@@ -276,7 +278,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
 
     # example passing only required values which don't have defaults set
     try:
@@ -342,7 +344,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
 
     # example passing only required values which don't have defaults set
     try:
@@ -410,7 +412,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     key = "key_example" # str | 
     get_mappings_request = GetMappingsRequest(
         input="",
@@ -490,7 +492,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
 
     # example passing only required values which don't have defaults set
     try:
@@ -557,7 +559,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
 
     # example passing only required values which don't have defaults set
     try:
@@ -623,7 +625,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     id = 1 # int | Cohort API Request ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     pid = "" # str | New pid (optional) if omitted the server will use the default value of ""
     status = "success" # str | New Cohort API Request status (optional) if omitted the server will use the default value of "success"
 
@@ -702,7 +704,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     key = "key_example" # str | 
     channel = "channel_example" # str | WS channel to send reply (optional)
     raw_only = "rawOnly_example" # str | Is raw only, converting to UPDM will be skipped (optional)
@@ -761,6 +763,86 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **set_error_for_cohort_api_request**
+> str set_error_for_cohort_api_request(version, token, id)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "z" # str | 
+    id = "id_example" # str | 
+    set_task_error_request = SetTaskErrorRequest(
+        error="",
+    ) # SetTaskErrorRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_error_for_cohort_api_request(version, token, id)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_error_for_cohort_api_request: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_error_for_cohort_api_request(version, token, id, set_task_error_request=set_task_error_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_error_for_cohort_api_request: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **id** | **str**|  |
+ **set_task_error_request** | [**SetTaskErrorRequest**](SetTaskErrorRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Result |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **set_job_state**
 > set_job_state(version, token, run_id)
 
@@ -787,7 +869,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     run_id = "runId_example" # str | 
     set_job_state_request = SetJobStateRequest(
         state="state_example",
@@ -866,7 +948,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     channel = "channel_example" # str | WS channel to send reply (optional)
 
     # example passing only required values which don't have defaults set
@@ -944,7 +1026,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     process_id = "z" # str | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     channel = "channel_example" # str | WS channel to send reply (optional)
     set_process_logs_request = SetProcessLogsRequest(
         logs="",
@@ -1025,7 +1107,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     status = "success" # str | New run status (optional) if omitted the server will use the default value of "success"
 
     # example passing only required values which don't have defaults set
@@ -1076,6 +1158,86 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **set_sql_query_for_cohort_api_request**
+> str set_sql_query_for_cohort_api_request(version, token, id)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_sql_query_for_cohort_api_request_request import SetSQLQueryForCohortApiRequestRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "z" # str | 
+    id = "id_example" # str | 
+    set_sql_query_for_cohort_api_request_request = SetSQLQueryForCohortApiRequestRequest(
+        sql="",
+    ) # SetSQLQueryForCohortApiRequestRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_sql_query_for_cohort_api_request(version, token, id)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_sql_query_for_cohort_api_request: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_sql_query_for_cohort_api_request(version, token, id, set_sql_query_for_cohort_api_request_request=set_sql_query_for_cohort_api_request_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_sql_query_for_cohort_api_request: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **id** | **str**|  |
+ **set_sql_query_for_cohort_api_request_request** | [**SetSQLQueryForCohortApiRequestRequest**](SetSQLQueryForCohortApiRequestRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Result |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **set_table_column_freequent_values**
 > str set_table_column_freequent_values(version, token, table, column)
 
@@ -1102,7 +1264,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     table = "z" # str | 
     column = "2" # str | 
     set_table_column_freequent_values_request = SetTableColumnFreequentValuesRequest(
@@ -1185,7 +1347,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     table = "z" # str | 
     column = "2" # str | 
     set_table_column_stats_request = SetTableColumnStatsRequest(
@@ -1279,7 +1441,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     table = "z" # str | 
     set_table_info_request = SetTableInfoRequest(
         abandoned="abandoned_example",
@@ -1359,7 +1521,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     table = "z" # str | 
     set_table_stats_request = SetTableStatsRequest(
         columns=[],
@@ -1443,7 +1605,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     set_tables_list_request = SetTablesListRequest(
         tables=[],
     ) # SetTablesListRequest |  (optional)
@@ -1521,7 +1683,7 @@ with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
     id = "id_example" # str | 
     set_task_error_request = SetTaskErrorRequest(
         error="",
@@ -1601,7 +1763,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
-    token = "f" # str | 
+    token = "z" # str | 
 
     # example passing only required values which don't have defaults set
     try:

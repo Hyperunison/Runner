@@ -23,6 +23,7 @@ auto_api_client/model/runner_message.py
 auto_api_client/model/set_cohort_definition_aggregation_request.py
 auto_api_client/model/set_job_state_request.py
 auto_api_client/model/set_process_logs_request.py
+auto_api_client/model/set_sql_query_for_cohort_api_request_request.py
 auto_api_client/model/set_table_column_freequent_values_request.py
 auto_api_client/model/set_table_column_stats_request.py
 auto_api_client/model/set_table_info_request.py
@@ -46,6 +47,7 @@ docs/RunnerMessage.md
 docs/SetCohortDefinitionAggregationRequest.md
 docs/SetJobStateRequest.md
 docs/SetProcessLogsRequest.md
+docs/SetSQLQueryForCohortApiRequestRequest.md
 docs/SetTableColumnFreequentValuesRequest.md
 docs/SetTableColumnStatsRequest.md
 docs/SetTableInfoRequest.md
@@ -72,6 +74,7 @@ test/test_runner_message.py
 test/test_set_cohort_definition_aggregation_request.py
 test/test_set_job_state_request.py
 test/test_set_process_logs_request.py
+test/test_set_sql_query_for_cohort_api_request_request.py
 test/test_set_table_column_freequent_values_request.py
 test/test_set_table_column_stats_request.py
 test/test_set_table_info_request.py
