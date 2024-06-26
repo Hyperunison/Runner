@@ -393,8 +393,13 @@ class DataSchema:
 
     def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protected_columns: List[str]):
         table_name = message.table_name
-        logging.info("Update tables columns list packet got for table {}".format(table_name))
-        rows_count, columns = self.schema.get_table_columns(table_name)
+        cte = message.cte
+        if cte:
+            logging.info("Update tables columns list packet got for complex expression alias = {}, with CTE".format(table_name))
+            rows_count, columns = self.schema.get_cte_columns(table_name, cte)
+        else:
+            logging.info("Update tables columns list packet got for table {}".format(table_name))
+            rows_count, columns = self.schema.get_table_columns(table_name)
         result: List[str] = []
         types_result: List[str] = []
         nullable_result: List[str] = []

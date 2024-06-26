@@ -51,6 +51,29 @@ class Postgres(BaseSchema):
 
         return count, columns
 
+    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
+        sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
+        sql_count = "WITH {} AS ({}) SELECT COUNT(*) AS cnt from {}".format(table_name, cte, table_name)
+
+        count = self.fetch_row(sql_count)['cnt']
+        columns: List[Dict[str, str]] = []
+        row = self.fetch_row(sql_columns)
+
+        if row:
+            for col in row:
+                sql_column_info = "WITH {} AS ({}) SELECT pg_typeof({}) AS pg_typeof, {} FROM {}".format(
+                    table_name, cte, col, col, table_name
+                )
+                type_row = self.fetch_row(sql_column_info)
+
+                item: Dict[str, str] = {}
+                item['column'] = col
+                item['type'] = type_row['pg_typeof']
+                item['nullable'] = True
+                columns.append(item)
+
+        return count, columns
+
     def get_table_column_stats(self, table_name: str, column_name: str) -> TableStat:
         sql = "SELECT count(distinct \"{v}\") as unique_count from {table}".format(v=column_name, table=table_name)
         try:
