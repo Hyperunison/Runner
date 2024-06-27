@@ -22,7 +22,13 @@ class BaseSchema:
     def get_table_column_stats(self, table_name: str, column_name: str) -> TableStat:
         raise NotImplementedError()
 
+    def get_table_cte_column_stats(self, table_name: str, cte: str, column_name: str) -> TableStat:
+        raise NotImplementedError()
+
     def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
+        raise NotImplementedError()
+
+    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
         raise NotImplementedError()
 
     def get_tables_list(self) -> List[str]:
