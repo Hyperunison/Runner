@@ -416,29 +416,49 @@ class DataSchema:
                                   protected_tables: List[str], protected_columns: List[str]):
         table_name = message.table_name
         column_name = message.column_name
-        logging.info("Update table column stats packet got for column {}.{}".format(table_name, column_name))
+        with_cte_label = 'with CTE' if message.cte else ''
+        logging.info("Update table column stats packet got for column {}.{} {}".format(
+            table_name,
+            column_name,
+            with_cte_label
+        ))
 
         if table_name in protected_tables or ('.' in table_name and table_name.split('.')[1] in protected_tables):
-            logging.error("Skip column {}.{}, as it's listed in protected_tables".format(table_name, column_name))
+            logging.error("Skip column {}.{} {}, as it's listed in protected_tables".format(
+                table_name,
+                column_name,
+                with_cte_label
+            ))
             return
 
         if table_name + "." + column_name in protected_columns:
-            logging.error("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column_name))
+            logging.error("Skip column {}.{} {}, as it's listed in protected_columns".format(
+                table_name,
+                column_name,
+                with_cte_label
+            ))
             return
-        stat = self.schema.get_table_column_stats(table_name, column_name)
+        if message.cte:
+            stat = self.schema.get_table_cte_column_stats(table_name, message.cte, column_name)
+        else:
+            stat = self.schema.get_table_column_stats(table_name, column_name)
 
         api.set_table_info(stat.table_name, stat.abandoned)
         if stat.abandoned:
-            logging.error("Table {} not exists, mark is as abandoned".format(table_name))
+            logging.error("Table {} {} not exists, mark is as abandoned".format(table_name, with_cte_label))
             return
         if stat.values:
             values = [d['value'] for d in stat.values]
             counts = [d['cnt'] for d in stat.values]
-            logging.info("Sending frequent values for {}.{}: {}".format(table_name, column_name,
-                                                                        ','.join([str(val) for val in values])))
+            logging.info("Sending frequent values for {}.{} {}: {}".format(
+                table_name,
+                column_name,
+                with_cte_label,
+                ','.join([str(val) for val in values])
+            ))
             api.set_table_column_values(stat.table_name, stat.column_name, values, counts)
         else:
-            logging.info("No frequent values found for {}.{}".format(table_name, column_name))
+            logging.info("No frequent values found for {}.{} {}".format(table_name, column_name, with_cte_label))
         api.set_table_column_stats(stat.table_name, stat.column_name,
                                    stat.unique_count, stat.nulls_count,
                                    stat.min_value, stat.max_value, stat.avg_value,
