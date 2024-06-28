@@ -49,6 +49,20 @@ class Labkey (BaseSchema):
             columns.append(item)
         return count, columns
 
+    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
+        sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
+        rows = self.engine.query.execute_sql(self.schema, sql=sql_columns)
+        fields = rows['metaData']['fields']
+        count = rows['rowCount']
+        columns: List[Dict[str, str]] = []
+        for i in fields:
+            item: Dict[str, str] = {}
+            item['column'] = i['name']
+            item['type'] = i['type']
+            item['nullable'] = i['isNullable'] == 'YES'
+            columns.append(item)
+        return count, columns
+
     def get_table_column_stats(self, table_name: str, column_name: str, cte: str) -> TableStat:
         with_cte_label = 'with CTE' if cte else ''
         try:
