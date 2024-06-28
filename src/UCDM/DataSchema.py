@@ -438,10 +438,7 @@ class DataSchema:
                 with_cte_label
             ))
             return
-        if message.cte:
-            stat = self.schema.get_table_cte_column_stats(table_name, message.cte, column_name)
-        else:
-            stat = self.schema.get_table_column_stats(table_name, column_name)
+        stat = self.schema.get_table_column_stats(table_name, column_name, message.cte)
 
         api.set_table_info(stat.table_name, stat.abandoned)
         if stat.abandoned:

@@ -19,10 +19,7 @@ class BaseSchema:
     def rollback(self):
         raise NotImplementedError()
 
-    def get_table_column_stats(self, table_name: str, column_name: str) -> TableStat:
-        raise NotImplementedError()
-
-    def get_table_cte_column_stats(self, table_name: str, cte: str, column_name: str) -> TableStat:
+    def get_table_column_stats(self, table_name: str, column_name: str, cte: str) -> TableStat:
         raise NotImplementedError()
 
     def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
@@ -34,7 +31,7 @@ class BaseSchema:
     def get_tables_list(self) -> List[str]:
         raise NotImplementedError()
 
-    def get_median(self, table: str, column: str, min, max):
+    def get_median(self, table: str, column: str, min, max, cte: str):
         raise NotImplementedError()
 
     def fetch_row(self, sql: str) -> Dict:
@@ -51,3 +48,14 @@ class BaseSchema:
 
     def statement_callback(self, statement) -> Dict:
         return statement
+
+    def wrap_sql_by_cte(self, sql: str, table_name: str, cte: str) -> str:
+
+        if cte:
+            return "WITH {table_name} AS ({cte}) {origin_sql}".format(
+                table_name=table_name,
+                cte=cte,
+                origin_sql=sql
+            )
+
+        return sql
