@@ -14,7 +14,7 @@ type: k8s
 idle_delay: 5.0
 check_runs_status_interval: 30.0
 sentry_dsn: "http://5456fe4ea5f29f4220513a965b25ce15@18.185.189.107:9000/3"
-allow_private_upload_data_to_unison: 0
+allow_private_upload_data_to_unison: 1
 log:
   level: 10 # 10 - debug, 50 - critical
   filename: "" #filename or empty for stdout
