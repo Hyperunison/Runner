@@ -35,28 +35,34 @@ class OMOPofication(WorkflowBase):
 
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
 
-        for table_name, val in message.queries.items():
-            query = val['query']
-            fields_map = val['fieldsMap']
-            if table_name == "":
-                table_name = "person"
-            step += 1
-            ucdm = self.resolver.get_ucdm_result(query)
-            if ucdm is None:
-                logging.error("Can't export {}".format(table_name))
-                continue
+        try:
+            for table_name, val in message.queries.items():
+                query = val['query']
+                fields_map = val['fieldsMap']
+                if table_name == "":
+                    table_name = "person"
+                step += 1
+                ucdm = self.resolver.get_ucdm_result(query)
+                if ucdm is None:
+                    logging.error("Can't export {}".format(table_name))
+                    continue
 
-            if len(ucdm) > 0:
-                filename = self.build(table_name, ucdm, fields_map)
-                if self.may_upload_private_data:
-                    s3_path = s3_folder + table_name + '.csv'
-                    if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
-                        logging.critical("Can't upload result file to S3, abort pipeline execution")
-                        self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
-                        return
-            self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
+                if len(ucdm) > 0:
+                    filename = self.build(table_name, ucdm, fields_map)
+                    if self.may_upload_private_data:
+                        s3_path = s3_folder + table_name + '.csv'
+                        if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
+                            logging.critical("Can't upload result file to S3, abort pipeline execution")
+                            self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
+                            return
+                self.send_notification_to_api(id=message.id, length=length, step=step, state='process',
+                                              path=result_path)
 
-        self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
+            self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
+        except Exception as e:
+            logging.error("Can't finish export, sending error")
+            self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
+            raise e
         logging.info("Writing OMOP CSV files finished successfully")
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):

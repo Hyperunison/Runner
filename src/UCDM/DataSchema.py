@@ -98,6 +98,7 @@ class DataSchema:
                     cohort_definition['join'],
                     cohort_definition['where'],
                     cohort_definition['export'],
+                    cohort_definition['cte'],
                     None,
                     cohort_definition['withTables'],
                     False,
@@ -118,6 +119,7 @@ class DataSchema:
             joins,
             where,
             export,
+            cte_list: List[Dict[str, str]],
             limit: Optional[int],
             with_tables: any,
             distribution: bool,
@@ -126,10 +128,12 @@ class DataSchema:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
 
-        if isinstance(with_tables, dict):
+        if not isinstance(with_tables, dict):
             with_sql = self.build_with_sql(with_tables)
         else:
             with_sql = ''
+
+        with_sql = self.attach_cte(with_sql, cte_list)
 
         for exp in where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
@@ -180,6 +184,21 @@ class DataSchema:
 
         return sql
 
+    def attach_cte(self, sql: str, cte_list: List[Dict[str, str]]) -> str:
+        if len(cte_list) == 0:
+            return sql
+
+        if sql == '':
+            sql = 'WITH '
+
+        first: bool = True
+        for cte in cte_list:
+            if not first:
+                sql += ',\n'
+            sql += '{} AS {}'.format(cte['tableName'], cte['cte'])
+
+        return sql
+
     def fork(self, api: Api) -> int:
         pid = os.fork()
         logging.info("Forked, pid={}".format(pid))
@@ -217,6 +236,7 @@ class DataSchema:
             cohort_definition.cohort_definition['join'],
             cohort_definition.cohort_definition['where'],
             cohort_definition.cohort_definition['export'],
+            cohort_definition.cohort_definition['cte'],
             cohort_definition.cohort_definition['limit'],
             cohort_definition.cohort_definition['withTables'],
             True,
@@ -348,8 +368,11 @@ class DataSchema:
                     "        ELSE " + self.build_sql_expression(result2, query, mapper) + " \n" + \
                     "    END"
             if statement['name'] in ['hours', 'days', 'weeks', 'months', 'years']:
-                count = json.loads(statement['nodes'][0]['json'])
-                return self.schema.sql_expression_interval(count, statement['name'])
+                sql_exp = self.build_sql_expression(statement['nodes'][0], query, mapper)
+                return self.schema.sql_expression_interval(
+                    sql_exp,
+                    statement['name']
+                )
 
             if statement['name'] in ['date', 'datetime', 'real', 'bigint', 'varchar', 'timestamp']:
                 return self.schema.sql_expression_cast_data_type(
