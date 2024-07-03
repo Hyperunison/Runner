@@ -49,9 +49,25 @@ class Labkey (BaseSchema):
             columns.append(item)
         return count, columns
 
-    def get_table_column_stats(self, table_name: str, column_name: str) -> TableStat:
+    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
+        sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
+        rows = self.engine.query.execute_sql(self.schema, sql=sql_columns)
+        fields = rows['metaData']['fields']
+        count = rows['rowCount']
+        columns: List[Dict[str, str]] = []
+        for i in fields:
+            item: Dict[str, str] = {}
+            item['column'] = i['name']
+            item['type'] = i['type']
+            item['nullable'] = i['isNullable'] == 'YES'
+            columns.append(item)
+        return count, columns
+
+    def get_table_column_stats(self, table_name: str, column_name: str, cte: str) -> TableStat:
+        with_cte_label = 'with CTE' if cte else ''
         try:
             sql = "SELECT count(distinct \"{v}\") as unique_count from {table}".format(v=column_name, table=table_name)
+            sql = self.wrap_sql_by_cte(sql, table_name, cte)
             result = self.engine.query.execute_sql(self.schema, sql=sql)
             unique_count = result['rows'][0]['unique_count']
         except ProgrammingError as e:
@@ -63,22 +79,23 @@ class Labkey (BaseSchema):
 
         try:
             sql = "SELECT min(\"{v}\") as min_value, max(\"{v}\") as max_value, avg(\"{v}\") as avg_value from {table}".format(v=column_name, table=table_name)
+            sql = self.wrap_sql_by_cte(sql, table_name, cte)
             logging.info(sql)
             result = self.engine.query.execute_sql(self.schema, sql=sql)
 
             min_value = result['rows'][0]['min_value']
             max_value = result['rows'][0]['max_value']
             avg_value = result['rows'][0]['avg_value']
-            median50_value = self.get_median(table_name, column_name, min_value, max_value)
-            median25_value = self.get_median(table_name, column_name, min_value, median50_value)
-            median12_value = self.get_median(table_name, column_name, min_value, median25_value)
-            median37_value = self.get_median(table_name, column_name, median25_value, median50_value)
-            median75_value = self.get_median(table_name, column_name, median50_value, max_value)
-            median63_value = self.get_median(table_name, column_name, median50_value, median75_value)
-            median88_value = self.get_median(table_name, column_name, median75_value, max_value)
+            median50_value = self.get_median(table_name, column_name, min_value, max_value, cte)
+            median25_value = self.get_median(table_name, column_name, min_value, median50_value, cte)
+            median12_value = self.get_median(table_name, column_name, min_value, median25_value, cte)
+            median37_value = self.get_median(table_name, column_name, median25_value, median50_value, cte)
+            median75_value = self.get_median(table_name, column_name, median50_value, max_value, cte)
+            median63_value = self.get_median(table_name, column_name, median50_value, median75_value, cte)
+            median88_value = self.get_median(table_name, column_name, median75_value, max_value, cte)
             values_counts = []
         except Exception as e:
-            logging.debug("Can't get min/max values for {}.{}".format(table_name, column_name))
+            logging.debug("Can't get min/max values for {}.{} {}".format(table_name, column_name, with_cte_label))
             min_value=None
             max_value=None
             avg_value=None
@@ -93,11 +110,19 @@ class Labkey (BaseSchema):
 
         sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) >= {min} ORDER BY 1 DESC LIMIT 100".format(
             column=column_name, table=table_name, min=self.min_count)
+        sql = self.wrap_sql_by_cte(sql, table_name, cte)
         logging.debug(sql)
         values_counts = self.fetch_all(sql)
-        logging.info("Frequent values counts for {}.{}: {}".format(table_name, column_name, (values_counts)))
+        logging.info("Frequent values counts for {}.{} {}: {}".format(
+            table_name,
+            column_name,
+            with_cte_label,
+            (values_counts)
+        ))
 
-        nulls_count = self.fetch_row("SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name))['cnt']
+        nulls_count_sql = "SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name)
+        nulls_count_sql = self.wrap_sql_by_cte(nulls_count_sql, table_name, cte)
+        nulls_count = self.fetch_row(nulls_count_sql)['cnt']
 
         stat = TableStat()
         stat.table_name = table_name
@@ -118,10 +143,16 @@ class Labkey (BaseSchema):
         stat.values = values_counts
         return stat
 
-    def get_median(self, table: str, column: str, min, max):
+    def get_median(self, table: str, column: str, min, max, cte: str):
         if min is None or max is None:
             return None
-        sql = "SELECT median({column}) as med  FROM {table} WHERE {column} > {min} and {column} < {max}".format(column=column, table=table, min=min, max=max)
+        sql = "SELECT median({column}) as med  FROM {table} WHERE {column} > {min} and {column} < {max}".format(
+            column=column,
+            table=table,
+            min=min,
+            max=max
+        )
+        sql = self.wrap_sql_by_cte(sql, table, cte)
         return self.fetch_row(sql)['med']
 
     def fetch_row(self, sql: str) -> Dict:
