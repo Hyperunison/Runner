@@ -128,7 +128,7 @@ class DataSchema:
         logging.info("Cohort request got: {}".format(json.dumps(where)))
         query = SQLQuery()
 
-        if not isinstance(with_tables, dict):
+        if isinstance(with_tables, dict):
             with_sql = self.build_with_sql(with_tables)
         else:
             with_sql = ''
