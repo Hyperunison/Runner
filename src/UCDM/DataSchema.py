@@ -195,7 +195,7 @@ class DataSchema:
         for cte in cte_list:
             if not first:
                 sql += ',\n'
-            sql += '{} AS {}'.format(cte['tableName'], cte['cte'])
+            sql += '{} AS ({})'.format(cte['tableName'], cte['cte'])
 
         return sql
 

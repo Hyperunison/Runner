@@ -41,6 +41,7 @@ class OMOPofication(WorkflowBase):
                 fields_map = val['fieldsMap']
                 if table_name == "":
                     table_name = "person"
+                self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
                 step += 1
                 ucdm = self.resolver.get_ucdm_result(query)
                 if ucdm is None:
