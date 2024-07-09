@@ -41,7 +41,8 @@ class OMOPofication(WorkflowBase):
                 fields_map = val['fieldsMap']
                 if table_name == "":
                     table_name = "person"
-                self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
+                self.send_notification_to_api(id=message.id, length=length, step=step, state='process',
+                                              path=result_path)
                 step += 1
                 ucdm = self.resolver.get_ucdm_result(query)
                 if ucdm is None:
@@ -49,7 +50,8 @@ class OMOPofication(WorkflowBase):
                     continue
 
                 if len(ucdm) > 0:
-                    filename = self.build(table_name, ucdm, fields_map)
+                    filename = self.dir + "{}.csv".format(table_name)
+                    self.build(filename, ucdm, fields_map)
                     if self.may_upload_private_data:
                         s3_path = s3_folder + table_name + '.csv'
                         if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
@@ -70,18 +72,20 @@ class OMOPofication(WorkflowBase):
         percent = int(round(step / length * 100, 0))
         self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
 
-    def build(self, table_name: str, ucdm: List[Dict[str, UCDMConvertedField]], fields_map: Dict[str, str]) -> str:
-        filename = self.dir + "{}.csv".format(table_name)
+    def build(self, filename: str, ucdm: List[Dict[str, UCDMConvertedField]], fields_map: Dict[str, Dict[str, str]]):
         with open(filename, 'w', newline='') as file:
-            header = list(fields_map.values())
+            header = [item['name'] for item in fields_map.values()]
             writer = csv.DictWriter(file, fieldnames=header)
-            writer.writeheader()  # Writes the keys as headers
+            writer.writeheader()
             for row in ucdm:
                 output = {}
+                skip = False
                 for key, val in row.items():
                     value = val.export_value
-                    field_name = fields_map[key]
+                    if (value == '' or value is None or value == 0) and fields_map[key]['isRequired']:
+                        skip = True
+                    field_name = fields_map[key]['name']
                     output[field_name] = value if value is not None else ''
 
-                writer.writerow(output)
-        return filename
+                if not skip:
+                    writer.writerow(output)
