@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 from typing import List, Dict, Tuple
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
@@ -182,6 +183,8 @@ class Postgres(BaseSchema):
             for key, value in item.items():
                 if isinstance(value, datetime.date):
                     item[key] = value.strftime('%Y-%m-%d')
+                if isinstance(value, Decimal):
+                    item[key] = float(value)
 
         return result
 
