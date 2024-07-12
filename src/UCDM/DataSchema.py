@@ -114,8 +114,8 @@ class DataSchema:
     def build_cohort_definition_sql_query(
             self,
             mapper,
-            participantTable,
-            participantIdField,
+            participant_table,
+            participant_id_field,
             joins,
             where,
             export,
@@ -157,17 +157,17 @@ class DataSchema:
         sql = with_sql + "\n\n"
 
         if add_participant_id:
-            select_string += " , {}.{} as participant_id".format(participantTable, participantIdField)
+            select_string += " , {}.{} as participant_id".format(participant_table, participant_id_field)
 
         if distribution:
             sql += "SELECT\n    {},\n".format(select_string)
-            sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participantTable, participantIdField)
+            sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participant_table, participant_id_field)
         else:
             # distinct is useful, as without participant_id may be a lot of duplicates
             sql += "SELECT\n    DISTINCT {}\n".format(select_string)
             # sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
 
-        sql += "FROM {}\n".format(participantTable)
+        sql += "FROM {}\n".format(participant_table)
 
         for j in joins:
             sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
@@ -175,7 +175,7 @@ class DataSchema:
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
             sql += 'GROUP BY "{}" \n'.format('", "'.join(map(str, group_array))) + \
-                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participantTable, participantIdField,
+                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participant_table, participant_id_field,
                                                                      self.min_count)
 
         if not limit is None:
@@ -225,15 +225,15 @@ class DataSchema:
 
     def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
         key = cohort_definition.cohort_definition['key']
-        participantTable = cohort_definition.cohort_definition['participantTableName']
-        participantIdField = cohort_definition.cohort_definition['participantIdField']
+        participant_table = cohort_definition.cohort_definition['participantTableName']
+        participant_id_field = cohort_definition.cohort_definition['participantIdField']
 
         mapper = VariableMapper(cohort_definition.cohort_definition['fields'])
 
         sql = self.build_cohort_definition_sql_query(
             mapper,
-            participantTable,
-            participantIdField,
+            participant_table,
+            participant_id_field,
             cohort_definition.cohort_definition['join'],
             cohort_definition.cohort_definition['where'],
             cohort_definition.cohort_definition['export'],

@@ -82,7 +82,7 @@ class OMOPofication(WorkflowBase):
                 skip = False
                 for key, val in row.items():
                     value = val.export_value
-                    if (value == '' or value is None or value == 0 or value == '0') and fields_map[key]['isRequired']:
+                    if (value == '' or value is None) and fields_map[key]['isRequired']:
                         skip = True
                     field_name = fields_map[key]['name']
                     output[field_name] = value if value is not None else ''

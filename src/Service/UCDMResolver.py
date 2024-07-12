@@ -105,16 +105,24 @@ class UCDMResolver:
 
         return self.api.resolve_mapping(key, request)
 
-    def build_index(self, res: List[MappingResolveResponse]) -> Dict[str, Dict[str, Tuple[str, str]]]:
-        index: Dict[str, Dict[str, Tuple[str, str]]] = {}
+    def build_index(self, res: List[MappingResolveResponse]) -> Dict[str, Dict[str, List[Tuple[str, str]]]]:
+        index: Dict[str, Dict[str, List[Tuple[str, str]]]] = {}
         for row in res:
             if not row['var_name'] in index:
                 index[row['var_name']] = {}
-            index[row['var_name']][row['biobank_value']] = (row['export_value'], row['automation_strategy'])
+            if not row['biobank_value'] in index[row['var_name']]:
+                index[row['var_name']][row['biobank_value']] = []
+            index[row['var_name']][row['biobank_value']].append((row['export_value'], row['automation_strategy']))
         # logging.info("Index: {}".format(json.dumps(index)))
+
+        # deduplicate
+        for key, val in index.items():
+            for key2, val2 in val.items():
+                index[key][key2] = list(set(val2))
+
         return index
 
-    def convert_to_ucdm(self, result: List[Dict[str, str]], mapping_index: Dict[str, Dict[str, Tuple[str, str]]]) -> List[Dict[str, UCDMConvertedField]]:
+    def convert_to_ucdm(self, result: List[Dict[str, str]], mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]]) -> List[Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
@@ -122,11 +130,8 @@ class UCDMResolver:
         str_to_int: Dict[str, StrToIntGenerator] = {}
         for row in result:
             converted = self.convert_row(mapping_index, row, serials, str_to_int)
-            if converted is not None:
-                output.append(converted)
-            else:
-                pass
-                # logging.info("Skip writing row={}, as it's not converted".format(json.dumps(row)))
+            for converted_row in converted:
+                output.append(converted_row)
 
         return output
 
@@ -151,7 +156,7 @@ class UCDMResolver:
             for row in ucdm_result:
                 writer.writerow(row)
 
-    def convert_row(
+    def convert_row2(
             self,
             mapping_index: Dict[str, Dict[str, Tuple[str, str]]],
             row: Dict[str, str],
@@ -183,3 +188,61 @@ class UCDMResolver:
             converted[field] = UCDMConvertedField(result)
 
         return converted
+
+    def convert_row(
+            self,
+            mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]],
+            row: Dict[str, str],
+            serials: Dict[str, SerialGenerator],
+            str_to_int: Dict[str, StrToIntGenerator],
+    ) -> List[Dict[str, UCDMConvertedField]]:
+        input_matrix: Dict[str, List[any]] = {}
+        for field, value in row.items():
+            if not field in mapping_index or not str(value) in mapping_index[field]:
+                values = [(value, '')]
+            else:
+                values = mapping_index[field][str(value)]
+            input_matrix[field] = values
+
+        multiplied = decartes_multiply_array(input_matrix)
+
+        result: List[Dict[str, UCDMConvertedField]] = []
+        for row_converted in multiplied:
+            result_row: Dict[str, UCDMConvertedField] = {}
+            for field, val in row_converted.items():
+                export_value: str = val[0] if val[0] is not None else ''
+                mapping_strategy = val[1]
+
+                if mapping_strategy == 'convertStringToInt':
+                    if not field in str_to_int:
+                        str_to_int[field] = StrToIntGenerator()
+                    export_value = str(str_to_int[field].get_int(export_value))
+
+                if mapping_strategy == 'serial':
+                    if not field in serials:
+                        serials[field] = SerialGenerator()
+                    export_value = str(serials[field].get_next_value())
+                result_row[field] = UCDMConvertedField(export_value)
+            result.append(result_row)
+
+        return result
+
+def decartes_multiply_array(array: Dict[str, List[any]]) -> List[Dict[str, str]]:
+    if not array:
+        return []
+
+    result = []
+    for key, values in array.items():
+        if not result:
+            result = [{key: val} for val in values]
+            continue
+
+        result2 = []
+        for val in values:
+            for row in result:
+                new_row = row.copy()
+                new_row[key] = val
+                result2.append(new_row)
+        result = result2
+
+    return result
