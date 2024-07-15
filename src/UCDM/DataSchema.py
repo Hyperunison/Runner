@@ -116,6 +116,8 @@ class DataSchema:
         cte_part = self.get_cte_sql(parts[1])
         sql = '{} {}'.format(cte_part, parts[0])
 
+        logging.info("Generated SQL query: \n{}".format(sql))
+
         return sql
 
     def build_cohort_definition_sql_query_internal(
@@ -194,7 +196,6 @@ class DataSchema:
 
         if not cohort_definition.limit is None:
             sql += "\nLIMIT {}".format(cohort_definition.limit)
-        logging.info("Generated SQL query: \n{}".format(sql))
 
         return (sql, cte_list)
 
