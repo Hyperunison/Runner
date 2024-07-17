@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**get_mappings**](AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
 [**get_next_task**](AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 [**get_types_map**](AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
+[**post_app_agent_addjoblogs**](AgentApi.md#post_app_agent_addjoblogs) | **POST** /api/agent/v{version}/{token}/job/runner-message/{runId}/add-logs | 
 [**set_car_status**](AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 [**set_cohort_definition_aggregation**](AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
 [**set_error_for_cohort_api_request**](AgentApi.md#set_error_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/error | 
@@ -596,6 +597,84 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Map of data types |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **post_app_agent_addjoblogs**
+> post_app_agent_addjoblogs(version, token, run_id)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "z" # str | 
+    run_id = "runId_example" # str | 
+    post_app_agent_addjoblogs_request = PostAppAgentAddjoblogsRequest(
+        logs="logs_example",
+    ) # PostAppAgentAddjoblogsRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_instance.post_app_agent_addjoblogs(version, token, run_id)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->post_app_agent_addjoblogs: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_instance.post_app_agent_addjoblogs(version, token, run_id, post_app_agent_addjoblogs_request=post_app_agent_addjoblogs_request)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->post_app_agent_addjoblogs: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **run_id** | **str**|  |
+ **post_app_agent_addjoblogs_request** | [**PostAppAgentAddjoblogsRequest**](PostAppAgentAddjoblogsRequest.md)|  | [optional]
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**0** |  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

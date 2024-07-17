@@ -71,6 +71,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_post_app_agent_addjoblogs(self):
+        """Test case for post_app_agent_addjoblogs
+
+        """
+        pass
+
     def test_set_car_status(self):
         """Test case for set_car_status
 

@@ -7,6 +7,7 @@ class CohortAPIRequest(BaseMessage):
     reply_channel: str
     biobank_id: int
     cohort_api_request_id: int
+    id: int
 
     def __init__(self, message: RunnerMessage):
         self.type = 'CohortAPIRequest'
@@ -15,3 +16,4 @@ class CohortAPIRequest(BaseMessage):
         self.biobank_id = message.data['biobankId']
         self.raw_only = message.data['rawOnly']
         self.cohort_api_request_id = message.data['cohortApiRequestId']
+        self.id = message.id
