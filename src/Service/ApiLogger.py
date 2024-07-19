@@ -7,6 +7,9 @@ class ApiLogger:
     def __init__(self, api: Api):
         self.api = api
 
-    def write(self, job_id: int, line: str):
+    def write(self, runner_message_id: int, line: str):
         logging.info(line)
-        self.api.add_job_logs(job_id, line)
+        try:
+            self.api.add_job_logs(runner_message_id, line)
+        except Exception as e:
+            pass
