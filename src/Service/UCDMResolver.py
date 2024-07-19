@@ -8,6 +8,7 @@ from typing import List, Dict, Tuple
 import csv
 from typing import Optional
 
+from src.Message.partial import CohortDefinition
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.UCDM.DataSchema import DataSchema, VariableMapper
@@ -29,19 +30,12 @@ class UCDMResolver:
         self.api = api
         self.schema = schema
 
-    def get_ucdm_result(self, cohort_definition) -> List[Dict[str, UCDMConvertedField]]:
-        mapper = VariableMapper(cohort_definition['fields'])
+    def get_ucdm_result(self, cohort_definition: CohortDefinition) -> List[Dict[str, UCDMConvertedField]]:
+        mapper = VariableMapper(cohort_definition.fields)
 
         sql_with_distribution = self.schema.build_cohort_definition_sql_query(
             mapper,
-            cohort_definition['participantTableName'],
-            cohort_definition['participantIdField'],
-            cohort_definition['join'],
-            cohort_definition['where'],
-            cohort_definition['export'],
-            cohort_definition['cte'],
-            None,
-            cohort_definition['withTables'],
+            cohort_definition,
             True,
             False,
         )
@@ -54,19 +48,12 @@ class UCDMResolver:
             result_without_count = [{k: v for k, v in d.items() if k != 'count_uniq_participants'} for d in result]
 
             # logging.info("SQL result: {}".format(json.dumps(result_without_count)))
-            mapping = self.resolve_mapping(result_without_count, cohort_definition['key'])
+            mapping = self.resolve_mapping(result_without_count, cohort_definition.key)
             mapping_index = self.build_index(mapping)
 
             sql_final = self.schema.build_cohort_definition_sql_query(
                 mapper,
-                cohort_definition['participantTableName'],
-                cohort_definition['participantIdField'],
-                cohort_definition['join'],
-                cohort_definition['where'],
-                cohort_definition['export'],
-                cohort_definition['cte'],
-                cohort_definition['limit'],
-                cohort_definition['withTables'],
+                cohort_definition,
                 False,
                 False,
             )

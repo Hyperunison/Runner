@@ -6,6 +6,7 @@ from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.ApiLogger import ApiLogger
+from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.Adapters.BaseAdapter import BaseAdapter
@@ -39,7 +40,7 @@ class OMOPofication(WorkflowBase):
 
         try:
             for table_name, val in message.queries.items():
-                query = val['query']
+                query = CohortDefinition(val['query'])
                 fields_map = val['fieldsMap']
                 if table_name == "":
                     table_name = "person"

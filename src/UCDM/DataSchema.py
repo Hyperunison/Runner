@@ -11,6 +11,7 @@ from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
 from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
 from src.Service.ApiLogger import ApiLogger
+from src.Message.partial import CohortDefinition
 from src.UCDM.Schema.Labkey import Labkey
 from src.UCDM.Schema.Postgres import Postgres
 from src.UCDM.Schema.BaseSchema import BaseSchema
@@ -79,64 +80,70 @@ class DataSchema:
             return Postgres(dsn, min_count)
         raise Exception("Unknown schema {}".format(schema))
 
-    def build_with_sql(self, with_tables: Dict) -> str:
+    def build_with_cte_list(self, with_tables: Dict) -> Dict[str, str]:
         if len(with_tables) == 0:
-            return ''
-        first_table: bool = True
-        sql: str = "WITH "
+            return {}
+        result: Dict[str, str] = {}
         for table_name in with_tables:
-            if not first_table:
-                sql += ", "
-            first_table = False
-            sql += "{} AS (\n".format(table_name)
+            sql = ''
             first: bool = True
             for cohort_definition in with_tables[table_name]:
-                mapper = VariableMapper(cohort_definition['fields'])
-                sql_part = self.build_cohort_definition_sql_query(
+                mapper = VariableMapper(cohort_definition.fields)
+                cohort_definition.limit = None
+                parts = self.build_cohort_definition_sql_query_internal(
                     mapper,
-                    cohort_definition['participantTableName'],
-                    cohort_definition['participantIdField'],
-                    cohort_definition['join'],
-                    cohort_definition['where'],
-                    cohort_definition['export'],
-                    cohort_definition['cte'],
-                    None,
-                    cohort_definition['withTables'],
+                    cohort_definition,
                     False,
                     True,
                 )
+                sql_part = parts[0]
+                result = dict(list(result.items()) + list(parts[1].items()))
                 if not first:
                     sql += "\nUNION ALL\n"
                 first = False
                 sql += sql_part
-            sql += ")\n"
-        return sql
+            result[table_name] = sql
+        return result
 
     def build_cohort_definition_sql_query(
             self,
             mapper,
-            participant_table,
-            participant_id_field,
-            joins,
-            where,
-            export,
-            cte_list: List[Dict[str, str]],
-            limit: Optional[int],
-            with_tables: any,
+            cohort_definition: CohortDefinition,
             distribution: bool,
             add_participant_id: bool = False,
     ) -> str:
-        logging.info("Cohort request got: {}".format(json.dumps(where)))
+        parts = self.build_cohort_definition_sql_query_internal(mapper, cohort_definition, distribution, add_participant_id)
+
+        cte_part = self.get_cte_sql(parts[1])
+        sql = '{} {}'.format(cte_part, parts[0])
+
+        logging.info("Generated SQL query: \n{}".format(sql))
+
+        return sql
+
+    def build_cohort_definition_sql_query_internal(
+            self,
+            mapper,
+            cohort_definition: CohortDefinition,
+            distribution: bool,
+            add_participant_id: bool = False,
+    ) -> Tuple[str, Dict[str, str]]:
+        logging.info("Cohort request got: {}".format(json.dumps(cohort_definition.where)))
         query = SQLQuery()
 
-        if isinstance(with_tables, dict):
-            with_sql = self.build_with_sql(with_tables)
+        cte_list = {}
+        for cte in cohort_definition.cte:
+            cte_list[cte['tableName']] = cte['cte']
+
+        if len(cohort_definition.with_tables) > 0:
+            with_cte_list = self.build_with_cte_list(cohort_definition.with_tables)
         else:
-            with_sql = ''
+            with_cte_list: Dict[str, str] = {}
+        cte_list = dict(list(cte_list.items()) + list(with_cte_list.items()))
 
-        with_sql = self.attach_cte(with_sql, cte_list)
 
-        for exp in where:
+
+        for exp in cohort_definition.where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
         if len(query.conditions) > 0:
             sql_where = "    (" + (")\nAND\n    (".join(query.conditions)) + ")"
@@ -145,7 +152,7 @@ class DataSchema:
 
         select_array: list[str] = []
         group_array: list[str] = []
-        for exp in export:
+        for exp in cohort_definition.export:
             alias = exp['as'] if 'as' in exp else query.select[exp['name']]
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
@@ -155,53 +162,61 @@ class DataSchema:
 
         select_string = ", ".join(select_array)
 
-        sql = with_sql + "\n\n"
+        sql = ''
 
         if add_participant_id:
-            select_string += " , {}.{} as participant_id".format(participant_table, participant_id_field)
+            select_string += " , {}.{} as participant_id".format(
+                cohort_definition.participant_table,
+                cohort_definition.participant_id_field
+            )
 
         if distribution:
             sql += "SELECT\n    {},\n".format(select_string)
-            sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(participant_table, participant_id_field)
+            sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(
+                cohort_definition.participant_table,
+                cohort_definition.participant_id_field
+            )
         else:
             # distinct is useful, as without participant_id may be a lot of duplicates
             sql += "SELECT\n    DISTINCT {}\n".format(select_string)
             # sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
 
-        sql += "FROM {}\n".format(participant_table)
+        sql += "FROM {}\n".format(cohort_definition.participant_table)
 
-        for j in joins:
+        for j in cohort_definition.joins:
             sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
             sql += 'GROUP BY "{}" \n'.format('", "'.join(map(str, group_array))) + \
-                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(participant_table, participant_id_field,
-                                                                     self.min_count)
+                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(
+                       cohort_definition.participant_table,
+                       cohort_definition.participant_id_field,
+                       self.min_count
+                   )
 
-        if not limit is None:
-            sql += "\nLIMIT {}".format(limit)
-        logging.info("Generated SQL query: \n{}".format(sql))
+        if not cohort_definition.limit is None:
+            sql += "\nLIMIT {}".format(cohort_definition.limit)
 
-        return sql
+        return (sql, cte_list)
 
-    def attach_cte(self, sql: str, cte_list: List[Dict[str, str]]) -> str:
+    def get_cte_sql(self, cte_list: Dict[str, str]) -> str:
         if len(cte_list) == 0:
-            return sql
+            return ''
 
-        if sql == '':
-            sql = 'WITH '
+        sql = 'WITH '
 
         first: bool = True
-        for cte in cte_list:
+        for table_name, cte in cte_list.items():
             if not first:
                 sql += ',\n'
-            sql += '{} AS ({})'.format(cte['tableName'], cte['cte'])
+            sql += '{} AS ({})'.format(table_name, cte)
+            first = False
 
         return sql
 
     def fork(self, api: Api) -> int:
-        # return 0
+        return 0
         pid = os.fork()
         logging.info("Forked, pid={}".format(pid))
 
@@ -224,29 +239,19 @@ class DataSchema:
 
         return pid
 
-    def execute_cohort_definition(self, cohort_definition: CohortAPIRequest, api: Api):
+    def execute_cohort_definition(self, cohort_api_request: CohortAPIRequest, api: Api):
         api_logger = ApiLogger(api)
-        key = cohort_definition.cohort_definition['key']
-        participant_table = cohort_definition.cohort_definition['participantTableName']
-        participant_id_field = cohort_definition.cohort_definition['participantIdField']
-
-        mapper = VariableMapper(cohort_definition.cohort_definition['fields'])
+        key = cohort_api_request.cohort_definition['key']
+        mapper = VariableMapper(cohort_api_request.cohort_definition.fields)
 
         sql = self.build_cohort_definition_sql_query(
             mapper,
-            participant_table,
-            participant_id_field,
-            cohort_definition.cohort_definition['join'],
-            cohort_definition.cohort_definition['where'],
-            cohort_definition.cohort_definition['export'],
-            cohort_definition.cohort_definition['cte'],
-            cohort_definition.cohort_definition['limit'],
-            cohort_definition.cohort_definition['withTables'],
+            cohort_api_request.cohort_definition,
             True,
             False,
         )
         api.set_cohort_sql_query(
-            cohort_definition.cohort_api_request_id,
+            cohort_api_request.cohort_api_request_id,
             sql
         )
         pid = self.fork(api)
@@ -254,37 +259,37 @@ class DataSchema:
             # Master process, continue working
             return
         child_pid = os.getpid()
-        api_logger.write(cohort_definition.id, "Processing request in child process: {}".format(child_pid))
+        api_logger.write(cohort_api_request.id, "Processing request in child process: {}".format(child_pid))
         try:
-            api.set_car_status(cohort_definition.cohort_api_request_id, "process", child_pid)
+            api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
-            api_logger.write(cohort_definition.id, "Cohort definition result: {}".format(str(result)))
+            api_logger.write(cohort_api_request.id, "Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(
                 result,
                 sql,
-                cohort_definition.reply_channel,
+                cohort_api_request.reply_channel,
                 key,
-                cohort_definition.raw_only
+                cohort_api_request.raw_only
             )
-            api.set_car_status(cohort_definition.cohort_api_request_id, "success", child_pid)
+            api.set_car_status(cohort_api_request.cohort_api_request_id, "success", child_pid)
         except Exception as e:
-            api_logger.write(cohort_definition.id, "SQL query error: {}".format(e))
+            api_logger.write(cohort_api_request.id, "SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
             self.schema.rollback()
             api.set_cohort_definition_aggregation(
                 {},
                 "/*\n{}*/\n\n{}\n".format(e, sql),
-                cohort_definition.reply_channel,
+                cohort_api_request.reply_channel,
                 key,
-                cohort_definition.raw_only
+                cohort_api_request.raw_only
             )
-            api.set_car_status(cohort_definition.cohort_api_request_id, "error", child_pid)
+            api.set_car_status(cohort_api_request.cohort_api_request_id, "error", child_pid)
             api.set_cohort_error(
-                cohort_definition.cohort_api_request_id,
+                cohort_api_request.cohort_api_request_id,
                 "SQL query error: {}".format(e)
             )
         finally:
-            api_logger.write(cohort_definition.id, "Exiting child process {}".format(child_pid))
+            api_logger.write(cohort_api_request.id, "Exiting child process {}".format(child_pid))
             sys.exit(0)
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
