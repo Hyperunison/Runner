@@ -54,6 +54,7 @@ from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkReques
 from auto_api_client.model.biobank_data_table import BiobankDataTable
 from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
+from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
@@ -103,6 +104,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**get_mappings**](docs/AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
 *AgentApi* | [**get_next_task**](docs/AgentApi.md#get_next_task) | **GET** /api/agent/v{version}/{token}/task | 
 *AgentApi* | [**get_types_map**](docs/AgentApi.md#get_types_map) | **GET** /api/agent/v{version}/{token}/next-run/types | 
+*AgentApi* | [**post_app_agent_addjoblogs**](docs/AgentApi.md#post_app_agent_addjoblogs) | **POST** /api/agent/v{version}/{token}/job/runner-message/{runId}/add-logs | 
 *AgentApi* | [**set_car_status**](docs/AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 *AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
 *AgentApi* | [**set_error_for_cohort_api_request**](docs/AgentApi.md#set_error_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/error | 
@@ -130,6 +132,7 @@ Class | Method | HTTP request | Description
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [MappingResolveResponse](docs/MappingResolveResponse.md)
  - [NextflowRun](docs/NextflowRun.md)
+ - [PostAppAgentAddjoblogsRequest](docs/PostAppAgentAddjoblogsRequest.md)
  - [RunnerMessage](docs/RunnerMessage.md)
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
  - [SetJobStateRequest](docs/SetJobStateRequest.md)

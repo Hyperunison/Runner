@@ -17,6 +17,7 @@ from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.get_process_logs import GetProcessLogs
 from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.nextflow_run import NextflowRun
+from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest

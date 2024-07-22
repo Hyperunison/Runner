@@ -6,6 +6,7 @@ from src.auto.auto_api_client.api.agent_api import AgentApi
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 
 from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
+from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from src.auto.auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 
@@ -53,6 +54,14 @@ class Api:
             channel=channel,
             token=self.token,
             set_process_logs_request=SetProcessLogsRequest(logs=logs)
+        )
+
+    def add_job_logs(self, id: int, logs: str):
+        self.api_instance.post_app_agent_addjoblogs(
+            version=self.version,
+            token=self.token,
+            run_id=str(id),
+            post_app_agent_addjoblogs_request=PostAppAgentAddjoblogsRequest(logs=logs)
         )
 
     def set_kill_result(self, run_id: int, channel: str):

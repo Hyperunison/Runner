@@ -5,6 +5,7 @@ import os
 from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
+from src.Service.ApiLogger import ApiLogger
 from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
 from src.Service.Workflows.WorkflowBase import WorkflowBase
@@ -25,8 +26,9 @@ class OMOPofication(WorkflowBase):
         super().__init__(api, adapter, schema)
 
     def execute(self, message: StartOMOPoficationWorkflow):
+        api_logger = ApiLogger(self.api)
         self.resolver = UCDMResolver(self.api, self.schema)
-        logging.info("Workflow execution task")
+        api_logger.write(message.id, "Workflow execution task")
         logging.info(message)
         length = len(message.queries.items())
         step = 0
@@ -47,7 +49,7 @@ class OMOPofication(WorkflowBase):
                 step += 1
                 ucdm = self.resolver.get_ucdm_result(query)
                 if ucdm is None:
-                    logging.error("Can't export {}".format(table_name))
+                    api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
 
                 if len(ucdm) > 0:
@@ -56,7 +58,7 @@ class OMOPofication(WorkflowBase):
                     if self.may_upload_private_data:
                         s3_path = s3_folder + table_name + '.csv'
                         if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
-                            logging.critical("Can't upload result file to S3, abort pipeline execution")
+                            api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
                             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
                             return
                 self.send_notification_to_api(id=message.id, length=length, step=step, state='process',
@@ -64,10 +66,10 @@ class OMOPofication(WorkflowBase):
 
             self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
         except Exception as e:
-            logging.error("Can't finish export, sending error")
+            api_logger.write(message.id, "ERROR: Can't finish export, sending error")
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
-        logging.info("Writing OMOP CSV files finished successfully")
+        api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))

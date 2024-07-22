@@ -10,6 +10,7 @@ from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
 from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
+from src.Service.ApiLogger import ApiLogger
 from src.Message.partial import CohortDefinition
 from src.UCDM.Schema.Labkey import Labkey
 from src.UCDM.Schema.Postgres import Postgres
@@ -239,8 +240,8 @@ class DataSchema:
         return pid
 
     def execute_cohort_definition(self, cohort_api_request: CohortAPIRequest, api: Api):
-        key = cohort_api_request.cohort_definition.key
-
+        api_logger = ApiLogger(api)
+        key = cohort_api_request.cohort_definition['key']
         mapper = VariableMapper(cohort_api_request.cohort_definition.fields)
 
         sql = self.build_cohort_definition_sql_query(
@@ -258,11 +259,11 @@ class DataSchema:
             # Master process, continue working
             return
         child_pid = os.getpid()
-        logging.info("Processing request in child process: {}".format(child_pid))
+        api_logger.write(cohort_api_request.id, "Processing request in child process: {}".format(child_pid))
         try:
             api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
-            logging.info("Cohort definition result: {}".format(str(result)))
+            api_logger.write(cohort_api_request.id, "Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(
                 result,
                 sql,
@@ -272,7 +273,7 @@ class DataSchema:
             )
             api.set_car_status(cohort_api_request.cohort_api_request_id, "success", child_pid)
         except Exception as e:
-            logging.error("SQL query error: {}".format(e))
+            api_logger.write(cohort_api_request.id, "SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
             self.schema.rollback()
             api.set_cohort_definition_aggregation(
@@ -288,7 +289,7 @@ class DataSchema:
                 "SQL query error: {}".format(e)
             )
         finally:
-            logging.debug("Exiting child process {}".format(child_pid))
+            api_logger.write(cohort_api_request.id, "Exiting child process {}".format(child_pid))
             sys.exit(0)
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
