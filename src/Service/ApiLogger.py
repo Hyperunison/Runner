@@ -1,5 +1,6 @@
 import logging
 from src.Api import Api
+from datetime import datetime
 
 class ApiLogger:
     api: Api
@@ -7,8 +8,10 @@ class ApiLogger:
     def __init__(self, api: Api):
         self.api = api
 
-    def write(self, runner_message_id: int, line: str):
-        logging.info(line)
+    def write(self, runner_message_id: int, message: str):
+        time: str = datetime.now().strftime("%Y:%m:%d %H:%M:%S")
+        logging.info(message)
+        line = "[{}] {}".format(time, message)
         try:
             self.api.add_job_logs(runner_message_id, line)
         except Exception as e:
