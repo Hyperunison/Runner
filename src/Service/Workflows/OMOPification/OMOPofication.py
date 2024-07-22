@@ -48,11 +48,11 @@ class OMOPofication(WorkflowBase):
                 self.send_notification_to_api(id=message.id, length=length, step=step, state='process',
                                               path=result_path)
                 step += 1
-                ucdm = self.resolver.get_ucdm_result(query)
+                ucdm = self.resolver.get_ucdm_result(query, api_logger, message.id)
                 if ucdm is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
-                api_logger.write(message.id, "Data fetched: {} rows".format(len(ucdm)))
+                api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:
                     filename = self.dir + "{}.csv".format(table_name)

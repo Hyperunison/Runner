@@ -9,6 +9,7 @@ import csv
 from typing import Optional
 
 from src.Message.partial import CohortDefinition
+from src.Service.ApiLogger import ApiLogger
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.UCDM.DataSchema import DataSchema, VariableMapper
@@ -30,7 +31,9 @@ class UCDMResolver:
         self.api = api
         self.schema = schema
 
-    def get_ucdm_result(self, cohort_definition: CohortDefinition) -> List[Dict[str, UCDMConvertedField]]:
+    def get_ucdm_result(
+            self, cohort_definition: CohortDefinition, api_logger: Optional[ApiLogger], message_id: Optional[int]
+    ) -> List[Dict[str, UCDMConvertedField]]:
         mapper = VariableMapper(cohort_definition.fields)
 
         sql_with_distribution = self.schema.build_cohort_definition_sql_query(
@@ -40,10 +43,17 @@ class UCDMResolver:
             False,
         )
 
+        if api_logger is not None:
+            api_logger.write(message_id, "Distribution SQL query generated: {}".format(sql_with_distribution))
+
         # logging.info("Model train task got: {}".format(json.dumps(sql)))
 
         try:
             result = self.schema.fetch_all(sql_with_distribution)
+
+            if api_logger is not None:
+                api_logger.write(message_id, "Rows fetched: {}".format(len(result)))
+
             result = self.normalize(result)
             result_without_count = [{k: v for k, v in d.items() if k != 'count_uniq_participants'} for d in result]
 
@@ -57,10 +67,17 @@ class UCDMResolver:
                 False,
                 False,
             )
+            if api_logger is not None:
+                api_logger.write(message_id, "Final SQL query generated: {}".format(sql_with_distribution))
+
             result = self.schema.fetch_all(sql_final)
+            if api_logger is not None:
+                api_logger.write(message_id, "Rows fetched: {}".format(len(result)))
             result = self.normalize(result)
 
             ucdm_result = self.convert_to_ucdm(result, mapping_index)
+            if api_logger is not None:
+                api_logger.write(message_id, "Values harmonized")
 
             return ucdm_result
         except ProgrammingError as e:
@@ -109,7 +126,9 @@ class UCDMResolver:
 
         return index
 
-    def convert_to_ucdm(self, result: List[Dict[str, str]], mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]]) -> List[Dict[str, UCDMConvertedField]]:
+    def convert_to_ucdm(self, result: List[Dict[str, str]],
+                        mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]]) -> List[
+        Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
@@ -213,6 +232,7 @@ class UCDMResolver:
             result.append(result_row)
 
         return result
+
 
 def decartes_multiply_array(array: Dict[str, List[any]]) -> List[Dict[str, str]]:
     if not array:

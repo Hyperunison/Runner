@@ -3,12 +3,14 @@ import logging
 from typing import List, Dict
 
 from src.Message.StartWorkflow import StartWorkflow
+from src.Service.ApiLogger import ApiLogger
 from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 
 
 class GwasFederated(WorkflowBase):
     def execute(self, message: StartWorkflow):
+        api_logger = ApiLogger(self.api)
         logging.info("Workflow execution task")
         logging.info(message)
         logging.info("Parameters: {}".format(message.parameters))
@@ -16,7 +18,7 @@ class GwasFederated(WorkflowBase):
         variables: List[str] = message.parameters['variables']
 
         resolver = UCDMResolver(self.api, self.schema)
-        ucdm = resolver.get_ucdm_result(message.cohort_definition)
+        ucdm = resolver.get_ucdm_result(message.cohort_definition, None, None)
         csv_content = self.build_phenotype(ucdm, variables)
         nextflow_config = self.get_nextflow_config(variables, bool(message.parameters['isBinary']))
 
