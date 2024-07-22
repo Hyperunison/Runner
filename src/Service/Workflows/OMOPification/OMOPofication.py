@@ -40,6 +40,7 @@ class OMOPofication(WorkflowBase):
 
         try:
             for table_name, val in message.queries.items():
+                api_logger.write(message.id, "Start exporting {}".format(table_name))
                 query = CohortDefinition(val['query'])
                 fields_map = val['fieldsMap']
                 if table_name == "":
@@ -51,10 +52,12 @@ class OMOPofication(WorkflowBase):
                 if ucdm is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
+                api_logger.write(message.id, "Data fetched: {} rows".format(len(ucdm)))
 
                 if len(ucdm) > 0:
                     filename = self.dir + "{}.csv".format(table_name)
                     self.build(filename, ucdm, fields_map)
+                    api_logger.write(message.id, "{}.csv file was written".format(table_name))
                     if self.may_upload_private_data:
                         s3_path = s3_folder + table_name + '.csv'
                         if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
