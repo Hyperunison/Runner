@@ -241,7 +241,7 @@ class DataSchema:
 
     def execute_cohort_definition(self, cohort_api_request: CohortAPIRequest, api: Api):
         api_logger = ApiLogger(api)
-        key = cohort_api_request.cohort_definition['key']
+        key = cohort_api_request.cohort_definition.key
         mapper = VariableMapper(cohort_api_request.cohort_definition.fields)
 
         sql = self.build_cohort_definition_sql_query(
