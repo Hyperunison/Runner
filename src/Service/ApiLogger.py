@@ -11,6 +11,7 @@ class ApiLogger:
     def write(self, runner_message_id: int, message: str):
         time: str = datetime.now().strftime("%Y:%m:%d %H:%M:%S")
         logging.info(message)
+        logging.info("Sending logs to {}".format(runner_message_id))
         line = "[{}] {}".format(time, message)
         try:
             self.api.add_job_logs(runner_message_id, line)

@@ -216,7 +216,7 @@ class DataSchema:
         return sql
 
     def fork(self, api: Api) -> int:
-        return 0
+        # return 0
         pid = os.fork()
         logging.info("Forked, pid={}".format(pid))
 
@@ -259,11 +259,11 @@ class DataSchema:
             # Master process, continue working
             return
         child_pid = os.getpid()
-        api_logger.write(cohort_api_request.id, "Processing request in child process: {}".format(child_pid))
+        logging.info("Processing request in child process: {}".format(child_pid))
         try:
             api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
-            api_logger.write(cohort_api_request.id, "Cohort definition result: {}".format(str(result)))
+            logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(
                 result,
                 sql,
@@ -273,7 +273,7 @@ class DataSchema:
             )
             api.set_car_status(cohort_api_request.cohort_api_request_id, "success", child_pid)
         except Exception as e:
-            api_logger.write(cohort_api_request.id, "SQL query error: {}".format(e))
+            logging.info("SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
             self.schema.rollback()
             api.set_cohort_definition_aggregation(
@@ -289,7 +289,7 @@ class DataSchema:
                 "SQL query error: {}".format(e)
             )
         finally:
-            api_logger.write(cohort_api_request.id, "Exiting child process {}".format(child_pid))
+            logging.info("Exiting child process {}".format(child_pid))
             sys.exit(0)
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
