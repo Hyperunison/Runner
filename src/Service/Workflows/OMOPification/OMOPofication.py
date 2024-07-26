@@ -69,7 +69,7 @@ class OMOPofication(WorkflowBase):
 
             self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
         except Exception as e:
-            api_logger.write(message.id, "ERROR: Can't finish export, sending error")
+            api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")

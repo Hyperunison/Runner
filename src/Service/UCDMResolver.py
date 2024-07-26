@@ -133,7 +133,7 @@ class UCDMResolver:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
         serials: Dict[str, SerialGenerator] = {}
-        str_to_int: Dict[str, StrToIntGenerator] = {}
+        str_to_int = StrToIntGenerator()
         for row in result:
             converted = self.convert_row(mapping_index, row, serials, str_to_int)
             for converted_row in converted:
@@ -162,45 +162,12 @@ class UCDMResolver:
             for row in ucdm_result:
                 writer.writerow(row)
 
-    def convert_row2(
-            self,
-            mapping_index: Dict[str, Dict[str, Tuple[str, str]]],
-            row: Dict[str, str],
-            serials: Dict[str, SerialGenerator],
-            str_to_int: Dict[str, StrToIntGenerator],
-    ) -> Optional[Dict[str, UCDMConvertedField]]:
-        converted: Dict[str, UCDMConvertedField] = {}
-        for field, value in row.items():
-            if not field in mapping_index:
-                result = str(value)
-            else:
-                if not str(value) in mapping_index[field]:
-                    # logging.info("Cant find in mapping field={}, value={}".format(field, value))
-                    return None
-                val = mapping_index[field][str(value)][0]
-                export_value: str = val if val is not None else ''
-                mapping_strategy = mapping_index[field][str(value)][1]
-
-                if mapping_strategy == 'convertStringToInt':
-                    if not field in str_to_int:
-                        str_to_int[field] = StrToIntGenerator()
-                    export_value = str(str_to_int[field].get_int(export_value))
-
-                if mapping_strategy == 'serial':
-                    if not field in serials:
-                        serials[field] = SerialGenerator()
-                    export_value = str(serials[field].get_next_value())
-                result = export_value
-            converted[field] = UCDMConvertedField(result)
-
-        return converted
-
     def convert_row(
             self,
             mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]],
             row: Dict[str, str],
             serials: Dict[str, SerialGenerator],
-            str_to_int: Dict[str, StrToIntGenerator],
+            str_to_int: StrToIntGenerator,
     ) -> List[Dict[str, UCDMConvertedField]]:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
@@ -220,9 +187,7 @@ class UCDMResolver:
                 mapping_strategy = val[1]
 
                 if mapping_strategy == 'convertStringToInt':
-                    if not field in str_to_int:
-                        str_to_int[field] = StrToIntGenerator()
-                    export_value = str(str_to_int[field].get_int(export_value))
+                    export_value = str(str_to_int.get_int(export_value))
 
                 if mapping_strategy == 'serial':
                     if not field in serials:

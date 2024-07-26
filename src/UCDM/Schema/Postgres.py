@@ -184,7 +184,10 @@ class Postgres(BaseSchema):
                 if isinstance(value, datetime.date):
                     item[key] = value.strftime('%Y-%m-%d')
                 if isinstance(value, Decimal):
-                    item[key] = float(value)
+                    if int(value) == float(value):
+                        item[key] = int(value)
+                    else:
+                        item[key] = float(value)
 
         return result
 
