@@ -108,4 +108,5 @@ class OMOPofication(WorkflowBase):
                     for k, v in row.items():
                         row_str[k] = v.export_value
                     skip_rows.append("Skip row as [{}]. Row={}".format(", ".join(skip_reasons), str(row_str)))
-            api_logger.write(runner_message_id, '\n'.join(skip_rows))
+            if len(skip_rows) > 0:
+                api_logger.write(runner_message_id, '\n'.join(skip_rows))
