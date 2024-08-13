@@ -5,6 +5,7 @@ from typing import List, Dict
 from src.Message.StartWorkflow import StartWorkflow
 from src.Service.ApiLogger import ApiLogger
 from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
+from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 
 
@@ -18,7 +19,12 @@ class GwasFederated(WorkflowBase):
         variables: List[str] = message.parameters['variables']
 
         resolver = UCDMResolver(self.api, self.schema)
-        ucdm = resolver.get_ucdm_result(message.cohort_definition, None, None)
+        ucdm = resolver.get_ucdm_result(
+            message.cohort_definition,
+            None,
+            None,
+            StrToIntGenerator()
+        )
         csv_content = self.build_phenotype(ucdm, variables)
         nextflow_config = self.get_nextflow_config(variables, bool(message.parameters['isBinary']))
 

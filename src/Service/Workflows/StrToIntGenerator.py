@@ -6,6 +6,10 @@ class StrToIntGenerator:
     map: Dict[str, int] = {}
     counter: int = 0
 
+    def __init__(self):
+        self.counter = 0
+        self.map = {}
+
     def get_int(self, string: any) -> int:
         string: str = str(string)
         if string in self.map:

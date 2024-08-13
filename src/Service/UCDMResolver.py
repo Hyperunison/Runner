@@ -32,7 +32,11 @@ class UCDMResolver:
         self.schema = schema
 
     def get_ucdm_result(
-            self, cohort_definition: CohortDefinition, api_logger: Optional[ApiLogger], message_id: Optional[int]
+            self,
+            cohort_definition: CohortDefinition,
+            api_logger: Optional[ApiLogger],
+            message_id: Optional[int],
+            str_to_int: StrToIntGenerator
     ) -> List[Dict[str, UCDMConvertedField]]:
         mapper = VariableMapper(cohort_definition.fields)
 
@@ -75,7 +79,7 @@ class UCDMResolver:
                 api_logger.write(message_id, "Rows fetched: {}".format(len(result)))
             result = self.normalize(result)
 
-            ucdm_result = self.convert_to_ucdm(result, mapping_index)
+            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int)
             if api_logger is not None:
                 api_logger.write(message_id, "Values harmonized")
 
@@ -126,14 +130,17 @@ class UCDMResolver:
 
         return index
 
-    def convert_to_ucdm(self, result: List[Dict[str, str]],
-                        mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]]) -> List[
-        Dict[str, UCDMConvertedField]]:
+    def convert_to_ucdm(
+            self,
+            result: List[Dict[str, str]],
+            mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]],
+            str_to_int: StrToIntGenerator
+    ) -> List[Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
         serials: Dict[str, SerialGenerator] = {}
-        str_to_int = StrToIntGenerator()
+
         for row in result:
             converted = self.convert_row(mapping_index, row, serials, str_to_int)
             for converted_row in converted:
