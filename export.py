@@ -1,9 +1,13 @@
 import sys
 import os
 import logging
+from src.auto.auto_api_client.api import agent_api
+from src.auto.auto_api_client.api_client import ApiClient
 from src.Service.ConfigurationLoader import ConfigurationLoader
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
+from src.Service.UCDMMappingResolver import UCDMMappingResolver
+from src.Api import Api
 
 try:
     import pydevd_pycharm
@@ -36,3 +40,8 @@ mapping_abspath = os.path.abspath(argv[2])
 
 t = CsvToMappingTransformer()
 rows = t.transform_with_file_path(mapping_abspath)
+
+with ApiClient(configuration) as api_client:
+    api_instance = agent_api.AgentApi(api_client)
+    api = Api(api_instance, config['api_version'], config['agent_token'])
+    ucdm_mapping_resolver = UCDMMappingResolver(api)

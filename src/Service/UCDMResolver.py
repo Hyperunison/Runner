@@ -1,7 +1,6 @@
 from io import StringIO
 
 from src.Api import Api
-import json
 import logging
 from sqlalchemy.exc import ProgrammingError
 from typing import List, Dict, Tuple
@@ -14,14 +13,7 @@ from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.UCDM.DataSchema import DataSchema, VariableMapper
 from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
-
-
-class UCDMConvertedField:
-    export_value: str
-
-    def __init__(self, export_value: str):
-        self.export_value = export_value
-
+from src.Service.UCDMConvertedField import UCDMConvertedField
 
 class UCDMResolver:
     api: Api
@@ -50,8 +42,6 @@ class UCDMResolver:
         if api_logger is not None:
             api_logger.write(message_id, "Distribution SQL query generated: {}".format(sql_with_distribution))
 
-        # logging.info("Model train task got: {}".format(json.dumps(sql)))
-
         try:
             result = self.schema.fetch_all(sql_with_distribution)
 
@@ -61,7 +51,6 @@ class UCDMResolver:
             result = self.normalize(result)
             result_without_count = [{k: v for k, v in d.items() if k != 'count_uniq_participants'} for d in result]
 
-            # logging.info("SQL result: {}".format(json.dumps(result_without_count)))
             mapping = self.resolve_mapping(result_without_count, cohort_definition.key)
             mapping_index = self.build_index(mapping)
 
@@ -109,8 +98,6 @@ class UCDMResolver:
                 request[field].append(value)
                 request[field] = list(set(request[field]))
 
-        # logging.info("Mapping resolution request: {}".format(json.dumps(request)))
-
         return self.api.resolve_mapping(key, request)
 
     def build_index(self, res: List[MappingResolveResponse]) -> Dict[str, Dict[str, List[Tuple[str, str]]]]:
@@ -121,7 +108,6 @@ class UCDMResolver:
             if not row['biobank_value'] in index[row['var_name']]:
                 index[row['var_name']][row['biobank_value']] = []
             index[row['var_name']][row['biobank_value']].append((row['export_value'], row['automation_strategy']))
-        # logging.info("Index: {}".format(json.dumps(index)))
 
         # deduplicate
         for key, val in index.items():

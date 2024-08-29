@@ -1,3 +1,4 @@
+from typing import List
 from src.Api import Api
 
 class UCDMMappingResolver:
@@ -6,5 +7,8 @@ class UCDMMappingResolver:
     def __init__(self, api: Api):
         self.api = api
 
-    def resolve(self, runner_message_id: int):
+    def set_mapping(self, mapping: List):
+        pass
+
+    def resolve(self):
         pass
