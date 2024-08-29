@@ -3,6 +3,7 @@ import os
 import logging
 from src.Service.ConfigurationLoader import ConfigurationLoader
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
+from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
 
 try:
     import pydevd_pycharm
@@ -31,3 +32,7 @@ manager = ConsoleApplicationManager()
 configuration = manager.initialize(config)
 
 sql_query = open(argv[1], 'r').read()
+mapping_abspath = os.path.abspath(argv[2])
+
+t = CsvToMappingTransformer()
+rows = t.transform_with_file_path(mapping_abspath)

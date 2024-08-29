@@ -7,3 +7,4 @@ class UCDMMappingResolver:
         self.api = api
 
     def resolve(self, runner_message_id: int):
+        pass
