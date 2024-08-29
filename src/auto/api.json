@@ -6,7 +6,7 @@
         "version": "1.0.0"
     },
     "paths": {
-        "\/api\/agent\/v{version}\/{token}\/task": {
+        "/api/agent/v{version}/{token}/task": {
             "get": {
                 "tags": [
                     "Agent"
@@ -36,9 +36,9 @@
                     "200": {
                         "description": "Get next task for runner agent",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
-                                    "$ref": "#\/components\/schemas\/RunnerMessage"
+                                    "$ref": "#/components/schemas/RunnerMessage"
                                 }
                             }
                         }
@@ -46,7 +46,7 @@
                     "204": {
                         "description": "No tasks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -56,7 +56,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/agent-id": {
+        "/api/agent/v{version}/{token}/agent-id": {
             "get": {
                 "tags": [
                     "Agent"
@@ -86,7 +86,7 @@
                     "200": {
                         "description": "Get agent_id",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "integer"
                                 }
@@ -96,7 +96,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/task\/{id}\/error": {
+        "/api/agent/v{version}/{token}/task/{id}/error": {
             "post": {
                 "tags": [
                     "Agent"
@@ -132,7 +132,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "error"
@@ -152,7 +152,7 @@
                     "200": {
                         "description": "Result",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -162,7 +162,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/cohort\/{id}\/sql-query": {
+        "/api/agent/v{version}/{token}/cohort/{id}/sql-query": {
             "put": {
                 "tags": [
                     "Agent"
@@ -198,7 +198,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "sql"
@@ -218,7 +218,7 @@
                     "200": {
                         "description": "Result",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -228,7 +228,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/cohort\/{id}\/error": {
+        "/api/agent/v{version}/{token}/cohort/{id}/error": {
             "put": {
                 "tags": [
                     "Agent"
@@ -264,7 +264,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "error"
@@ -284,7 +284,7 @@
                     "200": {
                         "description": "Result",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -294,7 +294,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/task\/{id}\/block": {
+        "/api/agent/v{version}/{token}/task/{id}/block": {
             "post": {
                 "tags": [
                     "Agent"
@@ -343,7 +343,7 @@
                     "200": {
                         "description": "Result",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -353,7 +353,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/task\/{id}": {
+        "/api/agent/v{version}/{token}/task/{id}": {
             "post": {
                 "tags": [
                     "Agent"
@@ -391,7 +391,7 @@
                     "200": {
                         "description": "Mark task as completed, not showing it again next time",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -401,7 +401,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/next-run\/types": {
+        "/api/agent/v{version}/{token}/next-run/types": {
             "get": {
                 "tags": [
                     "Agent"
@@ -431,9 +431,9 @@
                     "200": {
                         "description": "Map of data types",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
-                                    "$ref": "#\/components\/schemas\/TypesMap"
+                                    "$ref": "#/components/schemas/TypesMap"
                                 }
                             }
                         }
@@ -441,7 +441,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/log-chunk": {
+        "/api/agent/v{version}/{token}/run/{id}/log-chunk": {
             "post": {
                 "tags": [
                     "Agent"
@@ -451,7 +451,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -478,7 +478,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "chunk"
@@ -498,7 +498,7 @@
                     "200": {
                         "description": "List all bricks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -508,7 +508,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/cohort\/aggregation\/{key}": {
+        "/api/agent/v{version}/{token}/cohort/aggregation/{key}": {
             "post": {
                 "tags": [
                     "Agent"
@@ -566,7 +566,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "result",
@@ -591,7 +591,7 @@
                     "200": {
                         "description": "Just OK",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -601,7 +601,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/status": {
+        "/api/agent/v{version}/{token}/run/{id}/status": {
             "post": {
                 "tags": [
                     "Agent"
@@ -611,7 +611,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -651,7 +651,7 @@
                     "200": {
                         "description": "List all bricks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -661,7 +661,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/kill-result": {
+        "/api/agent/v{version}/{token}/run/{id}/kill-result": {
             "post": {
                 "tags": [
                     "Agent"
@@ -671,7 +671,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -711,7 +711,7 @@
                     "200": {
                         "description": "List all bricks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -721,7 +721,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/process\/{processId}\/logs": {
+        "/api/agent/v{version}/{token}/process/{processId}/logs": {
             "post": {
                 "tags": [
                     "Agent"
@@ -731,7 +731,7 @@
                     {
                         "name": "processId",
                         "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -770,7 +770,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "logs"
@@ -790,7 +790,7 @@
                     "200": {
                         "description": "List all bricks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -800,7 +800,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/mapping\/resolve\/{key}": {
+        "/api/agent/v{version}/{token}/mapping/resolve/{key}": {
             "post": {
                 "tags": [
                     "Agent"
@@ -836,7 +836,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "input"
@@ -856,11 +856,11 @@
                     "200": {
                         "description": "Resolve all mappings for all variables in single key",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#\/components\/schemas\/MappingResolveResponse"
+                                        "$ref": "#/components/schemas/MappingResolveResponse"
                                     }
                                 }
                             }
@@ -869,7 +869,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/run\/{id}\/process": {
+        "/api/agent/v{version}/{token}/run/{id}/process": {
             "get": {
                 "tags": [
                     "Agent"
@@ -879,7 +879,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -908,7 +908,7 @@
                     "200": {
                         "description": "List all bricks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -926,7 +926,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -955,7 +955,7 @@
                     "200": {
                         "description": "List all bricks",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -965,7 +965,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables": {
+        "/api/agent/v{version}/{token}/ucdm/tables": {
             "post": {
                 "tags": [
                     "Agent"
@@ -993,7 +993,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "tables"
@@ -1014,11 +1014,11 @@
                     "200": {
                         "description": "Upsert list of tables available in biobank for cohort API",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#\/components\/schemas\/BiobankDataTable"
+                                        "$ref": "#/components/schemas/BiobankDataTable"
                                     }
                                 }
                             }
@@ -1027,7 +1027,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}": {
+        "/api/agent/v{version}/{token}/ucdm/tables/{table}": {
             "put": {
                 "tags": [
                     "Agent"
@@ -1064,7 +1064,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "abandoned"
@@ -1084,7 +1084,7 @@
                     "200": {
                         "description": "Update table info, like abandon status",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -1094,7 +1094,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}\/columns": {
+        "/api/agent/v{version}/{token}/ucdm/tables/{table}/columns": {
             "post": {
                 "tags": [
                     "Agent"
@@ -1131,7 +1131,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "columns",
@@ -1169,7 +1169,7 @@
                     "200": {
                         "description": "Set columns in a table and number of rows",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -1179,7 +1179,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}\/columns\/{column}": {
+        "/api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}": {
             "post": {
                 "tags": [
                     "Agent"
@@ -1225,7 +1225,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "isPrivate"
@@ -1293,7 +1293,7 @@
                     "200": {
                         "description": "Set columns in a table and number of rows",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -1303,7 +1303,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/ucdm\/tables\/{table}\/columns\/{column}\/values": {
+        "/api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values": {
             "post": {
                 "tags": [
                     "Agent"
@@ -1349,7 +1349,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "values",
@@ -1376,7 +1376,7 @@
                     "200": {
                         "description": "Set columns in a table and number of rows",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -1386,7 +1386,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/car\/{id}\/status": {
+        "/api/agent/v{version}/{token}/car/{id}/status": {
             "post": {
                 "tags": [
                     "Agent"
@@ -1396,7 +1396,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Cohort API Request ID, example: 1234. It may be taken from \/next-task API method",
+                        "description": "Cohort API Request ID, example: 1234. It may be taken from /next-task API method",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1447,7 +1447,7 @@
                     "200": {
                         "description": "Set cohort api request status",
                         "content": {
-                            "application\/json": {
+                            "application/json": {
                                 "schema": {
                                     "type": "string"
                                 }
@@ -1457,7 +1457,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/job\/runner-message\/{runId}\/set-state": {
+        "/api/agent/v{version}/{token}/job/runner-message/{runId}/set-state": {
             "put": {
                 "tags": [
                     "Agent"
@@ -1493,7 +1493,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "state",
@@ -1521,7 +1521,7 @@
                 }
             }
         },
-        "\/api\/agent\/v{version}\/{token}\/job\/runner-message\/{runId}\/add-logs": {
+        "/api/agent/v{version}/{token}/job/runner-message/{runId}/add-logs": {
             "post": {
                 "tags": [
                     "Agent"
@@ -1557,7 +1557,7 @@
                 ],
                 "requestBody": {
                     "content": {
-                        "application\/json": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "logs"
@@ -1573,6 +1573,39 @@
                         }
                     }
                 },
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/agent/v{version}/{token}/export-mapping/short": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportMappingShortForSpecificBiobank",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    }
+                ],
                 "responses": {
                     "default": {
                         "description": ""
@@ -1616,10 +1649,10 @@
             "TypesMap": {
                 "properties": {
                     "getProcessLogs": {
-                        "$ref": "#\/components\/schemas\/GetProcessLogs"
+                        "$ref": "#/components/schemas/GetProcessLogs"
                     },
                     "nextflowRun": {
-                        "$ref": "#\/components\/schemas\/NextflowRun"
+                        "$ref": "#/components/schemas/NextflowRun"
                     }
                 },
                 "type": "object"
@@ -1649,7 +1682,7 @@
                     "columns": {
                         "type": "array",
                         "items": {
-                            "$ref": "#\/components\/schemas\/BiobankDataColumn"
+                            "$ref": "#/components/schemas/BiobankDataColumn"
                         }
                     },
                     "tableName": {
@@ -1722,7 +1755,7 @@
                         "type": "integer"
                     },
                     "foreignKey": {
-                        "$ref": "#\/components\/schemas\/BiobankDataColumn"
+                        "$ref": "#/components/schemas/BiobankDataColumn"
                     },
                     "foreignKeyId": {
                         "type": "integer"
@@ -1730,7 +1763,7 @@
                     "values": {
                         "type": "array",
                         "items": {
-                            "$ref": "#\/components\/schemas\/BiobankDataColumnFrequentValue"
+                            "$ref": "#/components/schemas/BiobankDataColumnFrequentValue"
                         }
                     },
                     "columnName": {
@@ -1822,5 +1855,11 @@
                 "type": "object"
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Agent",
+            "description": "Agent"
+        }
+    ]
 }
