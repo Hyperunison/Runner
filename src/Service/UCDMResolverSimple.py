@@ -27,8 +27,13 @@ class UCDMResolverSimple:
         try:
             result = self.schema.fetch_all(sql)
             result = self.normalize(result)
+            mapping_index = self.ucdm_mapping_resolver.transform_mapping_to_resolve_result()
 
-            return self.convert_to_ucdm(result)
+            return self.convert_to_ucdm(
+                result,
+                mapping_index,
+                str_to_int
+            )
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
 

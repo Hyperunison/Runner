@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 
+from src.Service.Csv.UCDMResultToCsvTransformer import UCDMResultToCsvTransformer
 from src.auto.auto_api_client.api import agent_api
 from src.auto.auto_api_client.api_client import ApiClient
 
@@ -64,7 +65,18 @@ with ApiClient(configuration) as api_client:
         schema,
         ucdm_mapping_resolver
     )
-    ucdm_resolver.get_ucdm_result(
+    result = ucdm_resolver.get_ucdm_result(
         sql_query,
         str_to_int
     )
+
+    if result is None:
+        print('Invalid UCDM result!')
+        exit(1)
+
+    if len(result) < 1:
+        print('Empty UCDM result!')
+        exit(1)
+
+    csv_transformer = UCDMResultToCsvTransformer()
+    print(csv_transformer.transform(result))
