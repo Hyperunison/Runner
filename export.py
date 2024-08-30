@@ -1,12 +1,17 @@
 import sys
 import os
 import logging
+
 from src.auto.auto_api_client.api import agent_api
 from src.auto.auto_api_client.api_client import ApiClient
+
+from src.Service.UCDMResolverSimple import UCDMResolverSimple
+from src.UCDM.DataSchema import DataSchema
 from src.Service.ConfigurationLoader import ConfigurationLoader
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
+from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Api import Api
 
 try:
@@ -44,4 +49,22 @@ rows = t.transform_with_file_path(mapping_abspath)
 with ApiClient(configuration) as api_client:
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
+    schema = DataSchema(
+        config['phenoenotypicDb']['dsn'],
+        config['phenoenotypicDb']['schema'],
+        config['phenoenotypicDb']['min_count']
+    )
+    str_to_int = StrToIntGenerator()
+
     ucdm_mapping_resolver = UCDMMappingResolver(api)
+    ucdm_mapping_resolver.set_mapping(rows)
+
+    ucdm_resolver = UCDMResolverSimple(
+        api,
+        schema,
+        ucdm_mapping_resolver
+    )
+    ucdm_resolver.get_ucdm_result(
+        sql_query,
+        str_to_int
+    )

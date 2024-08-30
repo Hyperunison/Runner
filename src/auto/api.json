@@ -1580,7 +1580,7 @@
                 }
             }
         },
-        "/api/agent/v{version}/{token}/export-mapping/short": {
+        "/api/agent/v{version}/{token}/export-mapping": {
             "get": {
                 "tags": [
                     "Agent"
@@ -1607,8 +1607,8 @@
                     }
                 ],
                 "responses": {
-                    "default": {
-                        "description": ""
+                    "200": {
+                        "description": "Export biobank mappings to USAGI csv file"
                     }
                 }
             }

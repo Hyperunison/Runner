@@ -99,7 +99,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**accept_task**](docs/AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**block_task**](docs/AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
-*AgentApi* | [**export_mapping_short_for_specific_biobank**](docs/AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/short | 
+*AgentApi* | [**export_mapping_short_for_specific_biobank**](docs/AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 
 *AgentApi* | [**get_agent_id**](docs/AgentApi.md#get_agent_id) | **GET** /api/agent/v{version}/{token}/agent-id | 
 *AgentApi* | [**get_app_agent_updateprocessitem**](docs/AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 *AgentApi* | [**get_mappings**](docs/AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 

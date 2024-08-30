@@ -7,7 +7,7 @@ Method | HTTP request | Description
 [**accept_task**](AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 [**add_run_log_chunk**](AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 [**block_task**](AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
-[**export_mapping_short_for_specific_biobank**](AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/short | 
+[**export_mapping_short_for_specific_biobank**](AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 
 [**get_agent_id**](AgentApi.md#get_agent_id) | **GET** /api/agent/v{version}/{token}/agent-id | 
 [**get_app_agent_updateprocessitem**](AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 [**get_mappings**](AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
@@ -315,7 +315,7 @@ No authorization required
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**0** |  |  -  |
+**200** | Export biobank mappings to USAGI csv file |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

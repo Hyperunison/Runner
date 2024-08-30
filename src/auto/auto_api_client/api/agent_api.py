@@ -291,7 +291,7 @@ class AgentApi(object):
             settings={
                 'response_type': None,
                 'auth': [],
-                'endpoint_path': '/api/agent/v{version}/{token}/export-mapping/short',
+                'endpoint_path': '/api/agent/v{version}/{token}/export-mapping',
                 'operation_id': 'export_mapping_short_for_specific_biobank',
                 'http_method': 'GET',
                 'servers': None,

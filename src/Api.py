@@ -126,6 +126,12 @@ class Api:
             )
         )
 
+    def export_mapping(self):
+        self.api_instance.export_mapping_short_for_specific_biobank(
+            version=self.version,
+            token=self.token
+        )
+
     def add_log_chunk(self, id: int, chunk: str):
         logging.info("Adding logs to run={}, len={}".format(id, len(chunk)))
         try:
