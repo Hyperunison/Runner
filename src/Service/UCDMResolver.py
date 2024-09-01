@@ -9,6 +9,7 @@ from typing import Optional
 
 from src.Message.partial import CohortDefinition
 from src.Service.ApiLogger import ApiLogger
+from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.UCDM.DataSchema import DataSchema, VariableMapper
@@ -18,10 +19,14 @@ from src.Service.UCDMConvertedField import UCDMConvertedField
 class UCDMResolver:
     api: Api
     schema: DataSchema
+    ucdm_mapping_resolver: UCDMMappingResolver
 
     def __init__(self, api: Api, schema: DataSchema):
         self.api = api
         self.schema = schema
+
+    def set_ucdm_mapping_resolver(self, ucdm_mapping_resolver: UCDMMappingResolver):
+        self.ucdm_mapping_resolver = ucdm_mapping_resolver
 
     def get_ucdm_result(
             self,
@@ -75,6 +80,15 @@ class UCDMResolver:
             return ucdm_result
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
+
+    def build_mapping_index(self, result, key: str) -> Dict[str, Dict[str, List[Tuple[str, str]]]]:
+        if self.ucdm_mapping_resolver is None:
+            mapping = self.resolve_mapping(result, key)
+            mapping_index = self.build_index(mapping)
+
+            return mapping_index
+        else:
+            return self.ucdm_mapping_resolver.transform_mapping_to_resolve_result()
 
     def normalize(self, input_list: List[Dict[str, any]]) -> List[Dict[str, str]]:
         result: List[Dict[str, str]] = []

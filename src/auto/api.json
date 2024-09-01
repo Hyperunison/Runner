@@ -1612,6 +1612,49 @@
                     }
                 }
             }
+        },
+        "/api/agent/v{version}/{token}/export-mapping/json": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportMappingShortForSpecificBiobankJson",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Export biobank mappings to JSON",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/DataItemDictionaryBiobankExportItemResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1698,6 +1741,68 @@
                         "type": "integer"
                     },
                     "cte": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "DataItemDictionaryBiobankExportItemResponse": {
+                "properties": {
+                    "sourceCode": {
+                        "type": "string"
+                    },
+                    "sourceName": {
+                        "type": "string"
+                    },
+                    "sourceFrequency": {
+                        "type": "string"
+                    },
+                    "sourceAutoAssignedConceptIds": {
+                        "type": "string"
+                    },
+                    "matchScore": {
+                        "type": "string"
+                    },
+                    "mappingStatus": {
+                        "type": "string"
+                    },
+                    "equivalence": {
+                        "type": "string"
+                    },
+                    "statusSetBy": {
+                        "type": "string"
+                    },
+                    "statusSetOn": {
+                        "type": "string"
+                    },
+                    "conceptId": {
+                        "type": "string"
+                    },
+                    "conceptName": {
+                        "type": "string"
+                    },
+                    "domainId": {
+                        "type": "string"
+                    },
+                    "mappingType": {
+                        "type": "string"
+                    },
+                    "comment": {
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "createdOn": {
+                        "type": "string"
+                    },
+                    "assignedReviewer": {
+                        "type": "string"
+                    },
+                    "automationStrategy": {
+                        "type": "string"
+                    },
+                    "varName": {
                         "type": "string"
                     }
                 },

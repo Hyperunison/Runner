@@ -7,6 +7,8 @@ from typing import List, Dict
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.ApiLogger import ApiLogger
 from src.Message.partial.CohortDefinition import CohortDefinition
+from src.Service.Csv.ListToCsvTransformer import ListToCsvTransformer
+from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Service.Workflows.WorkflowBase import WorkflowBase
@@ -17,7 +19,9 @@ from src.UCDM.DataSchema import DataSchema
 
 class OMOPofication(WorkflowBase):
     resolver: UCDMResolver
+    mapping_resolver: UCDMMappingResolver
     dir: str = "var/"
+    mapping_file_name: str = "var/mapping-values.csv"
     api: Api
     schema: DataSchema
     may_upload_private_data: bool
@@ -28,7 +32,10 @@ class OMOPofication(WorkflowBase):
 
     def execute(self, message: StartOMOPoficationWorkflow):
         api_logger = ApiLogger(self.api)
+        self.mapping_resolver = UCDMMappingResolver(self.api)
+        self.download_mapping()
         self.resolver = UCDMResolver(self.api, self.schema)
+        self.resolver.set_ucdm_mapping_resolver(self.mapping_resolver)
         api_logger.write(message.id, "Workflow execution task")
         logging.info(message)
         length = len(message.queries.items())
@@ -75,6 +82,14 @@ class OMOPofication(WorkflowBase):
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
+
+    def download_mapping(self):
+        response = self.api.export_mapping_json()
+        transformer = ListToCsvTransformer()
+        transformer.convert(
+            response,
+            os.path.abspath(self.mapping_file_name)
+        )
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))

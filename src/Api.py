@@ -5,6 +5,8 @@ from typing import List, Dict
 from src.auto.auto_api_client.api.agent_api import AgentApi
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 
+from src.auto.auto_api_client.model.data_item_dictionary_biobank_export_item_response import \
+    DataItemDictionaryBiobankExportItemResponse
 from src.auto.auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from src.auto.auto_api_client.model.runner_message import RunnerMessage
@@ -127,7 +129,17 @@ class Api:
         )
 
     def export_mapping(self):
-        self.api_instance.export_mapping_short_for_specific_biobank(
+        logging.info("Export mapping in CSV file")
+
+        return self.api_instance.export_mapping_short_for_specific_biobank(
+            version=self.version,
+            token=self.token
+        )
+
+    def export_mapping_json(self) -> List[DataItemDictionaryBiobankExportItemResponse]:
+        logging.info("Export mapping json")
+
+        return self.api_instance.export_mapping_short_for_specific_biobank_json(
             version=self.version,
             token=self.token
         )
