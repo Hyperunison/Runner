@@ -88,12 +88,19 @@ class OMOPofication(WorkflowBase):
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
 
     def download_mapping(self):
-        response = self.api.export_mapping_json()
-        transformer = ListToCsvTransformer()
-        transformer.convert(
-            response,
-            os.path.abspath(self.mapping_file_name)
-        )
+        response = self.api.export_mapping()
+        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                file.write(chunk)
+
+        # transformer = ListToCsvTransformer()
+        # transformer.convert(
+        #     response,
+        #     os.path.abspath(self.mapping_file_name)
+        # )
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))

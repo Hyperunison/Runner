@@ -290,7 +290,7 @@ class AgentApi(object):
         )
         self.export_mapping_short_for_specific_biobank_endpoint = _Endpoint(
             settings={
-                'response_type': None,
+                'response_type': (file_type,),
                 'auth': [],
                 'endpoint_path': '/api/agent/v{version}/{token}/export-mapping',
                 'operation_id': 'export_mapping_short_for_specific_biobank',
@@ -350,7 +350,9 @@ class AgentApi(object):
                 }
             },
             headers_map={
-                'accept': [],
+                'accept': [
+                    'application/octet-stream'
+                ],
                 'content_type': [],
             },
             api_client=api_client
@@ -2469,7 +2471,7 @@ class AgentApi(object):
             async_req (bool): execute request asynchronously
 
         Returns:
-            None
+            file_type
                 If the method is called asynchronously, returns the request
                 thread.
         """

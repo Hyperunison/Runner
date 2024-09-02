@@ -257,7 +257,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_mapping_short_for_specific_biobank**
-> export_mapping_short_for_specific_biobank(version, token)
+> file_type export_mapping_short_for_specific_biobank(version, token)
 
 
 
@@ -285,7 +285,8 @@ with auto_api_client.ApiClient() as api_client:
 
     # example passing only required values which don't have defaults set
     try:
-        api_instance.export_mapping_short_for_specific_biobank(version, token)
+        api_response = api_instance.export_mapping_short_for_specific_biobank(version, token)
+        pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->export_mapping_short_for_specific_biobank: %s\n" % e)
 ```
@@ -300,7 +301,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-void (empty response body)
+**file_type**
 
 ### Authorization
 
@@ -309,7 +310,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/octet-stream
 
 
 ### HTTP response details

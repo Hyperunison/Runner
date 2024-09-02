@@ -1608,7 +1608,15 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Export biobank mappings to USAGI csv file"
+                        "description": "Export biobank mappings to USAGI csv file",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
                     }
                 }
             }
