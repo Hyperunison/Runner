@@ -7,6 +7,7 @@ from typing import List, Dict
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.ApiLogger import ApiLogger
 from src.Message.partial.CohortDefinition import CohortDefinition
+from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
 from src.Service.Csv.ListToCsvTransformer import ListToCsvTransformer
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
@@ -34,6 +35,9 @@ class OMOPofication(WorkflowBase):
         api_logger = ApiLogger(self.api)
         self.mapping_resolver = UCDMMappingResolver(self.api)
         self.download_mapping()
+        csv_transformer = CsvToMappingTransformer()
+        csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
+        self.mapping_resolver.set_mapping(csv_mapping)
         self.resolver = UCDMResolver(self.api, self.schema)
         self.resolver.set_ucdm_mapping_resolver(self.mapping_resolver)
         api_logger.write(message.id, "Workflow execution task")

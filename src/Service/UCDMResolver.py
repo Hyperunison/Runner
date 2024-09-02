@@ -55,9 +55,7 @@ class UCDMResolver:
 
             result = self.normalize(result)
             result_without_count = [{k: v for k, v in d.items() if k != 'count_uniq_participants'} for d in result]
-
-            mapping = self.resolve_mapping(result_without_count, cohort_definition.key)
-            mapping_index = self.build_index(mapping)
+            mapping_index = self.build_mapping_index(result_without_count, cohort_definition.key)
 
             sql_final = self.schema.build_cohort_definition_sql_query(
                 mapper,
