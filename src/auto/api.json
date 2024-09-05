@@ -1663,6 +1663,47 @@
                     }
                 }
             }
+        },
+        "/api/agent/v{version}/{token}/export-mapping/docs": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportDocsForSpecificBiobank",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Export biobank mappings to USAGI csv file",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {

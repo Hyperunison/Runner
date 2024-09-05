@@ -100,6 +100,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**accept_task**](docs/AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**block_task**](docs/AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
+*AgentApi* | [**export_docs_for_specific_biobank**](docs/AgentApi.md#export_docs_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/docs | 
 *AgentApi* | [**export_mapping_short_for_specific_biobank**](docs/AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 
 *AgentApi* | [**export_mapping_short_for_specific_biobank_json**](docs/AgentApi.md#export_mapping_short_for_specific_biobank_json) | **GET** /api/agent/v{version}/{token}/export-mapping/json | 
 *AgentApi* | [**get_agent_id**](docs/AgentApi.md#get_agent_id) | **GET** /api/agent/v{version}/{token}/agent-id | 

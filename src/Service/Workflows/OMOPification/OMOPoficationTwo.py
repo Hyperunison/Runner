@@ -20,6 +20,7 @@ class OMOPofication(WorkflowBase):
     resolver: UCDMResolver
     dir: str = "var/"
     mapping_file_name: str = "var/mapping-values.csv"
+    manual_file_name: str = "var/manual.pdf"
     api: Api
 
     def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema, may_upload_private_data: bool):
@@ -43,6 +44,7 @@ class OMOPofication(WorkflowBase):
         result_path = s3_folder if self.may_upload_private_data else (os.path.abspath('.') + '/' + self.dir)
 
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
+        self.download_manual()
 
         str_to_int = StrToIntGenerator()
         try:
@@ -65,6 +67,7 @@ class OMOPofication(WorkflowBase):
                     sql_final,
                     str_to_int
                 )
+                self.save_sql_query(table_name, sql_final)
                 if ucdm is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
@@ -97,6 +100,19 @@ class OMOPofication(WorkflowBase):
                 if not chunk:
                     break
                 file.write(chunk)
+
+    def download_manual(self):
+        response = self.api.export_mapping_docs()
+        with open(os.path.abspath(self.manual_file_name), 'wb') as file:
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                file.write(chunk)
+
+    def save_sql_query(self, table_name: str, query: str):
+        with open(os.path.abspath(self.dir + table_name + ".sql"), 'wb') as file:
+            file.write(bytes(query, 'utf-8'))
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))

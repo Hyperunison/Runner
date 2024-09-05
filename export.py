@@ -1,12 +1,11 @@
 import sys
 import os
-import logging
 
 from src.Service.Csv.UCDMResultToCsvTransformer import UCDMResultToCsvTransformer
+from src.Service.UCDMResolverTwo import UCDMResolver
 from src.auto.auto_api_client.api import agent_api
 from src.auto.auto_api_client.api_client import ApiClient
 
-from src.Service.UCDMResolverSimple import UCDMResolverSimple
 from src.UCDM.DataSchema import DataSchema
 from src.Service.ConfigurationLoader import ConfigurationLoader
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
@@ -60,8 +59,7 @@ with ApiClient(configuration) as api_client:
     ucdm_mapping_resolver = UCDMMappingResolver(api)
     ucdm_mapping_resolver.set_mapping(rows)
 
-    ucdm_resolver = UCDMResolverSimple(
-        api,
+    ucdm_resolver = UCDMResolver(
         schema,
         ucdm_mapping_resolver
     )
