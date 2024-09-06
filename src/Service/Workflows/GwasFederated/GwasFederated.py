@@ -1,28 +1,33 @@
-import json
 import logging
+import os
 from typing import List, Dict
 
+from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Message.StartWorkflow import StartWorkflow
-from src.Service.ApiLogger import ApiLogger
-from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
+from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
+from src.Service.UCDMMappingResolver import UCDMMappingResolver
+from src.Service.UCDMResolverTwo import UCDMResolver, UCDMConvertedField
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Service.Workflows.WorkflowBase import WorkflowBase
-
+from src.UCDM.DataSchema import VariableMapper
 
 class GwasFederated(WorkflowBase):
+    mapping_file_name: str = "var/gwas-mapping-values.csv"
+
     def execute(self, message: StartWorkflow):
-        api_logger = ApiLogger(self.api)
         logging.info("Workflow execution task")
         logging.info(message)
         logging.info("Parameters: {}".format(message.parameters))
 
         variables: List[str] = message.parameters['variables']
+        csv_transformer = CsvToMappingTransformer()
+        csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
+        ucdm_mapping_resolver = UCDMMappingResolver(csv_mapping)
 
-        resolver = UCDMResolver(self.api, self.schema)
+        resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
+        sql_final = self.get_sql_final(message.cohort_definition)
         ucdm = resolver.get_ucdm_result(
-            message.cohort_definition,
-            None,
-            None,
+            sql_final,
             StrToIntGenerator()
         )
         csv_content = self.build_phenotype(ucdm, variables)
@@ -51,6 +56,15 @@ class GwasFederated(WorkflowBase):
                 "output/": "/output/",
             }
         )
+
+    def download_mapping(self):
+        response = self.api.export_mapping()
+        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                file.write(chunk)
 
     def build_phenotype(self, ucdm: List[Dict[str, UCDMConvertedField]], variables: List[str]) -> str:
         if len(ucdm) == 0:
@@ -100,3 +114,13 @@ class GwasFederated(WorkflowBase):
         config += "}\n"
 
         return config
+
+    def get_sql_final(self, cohort_definition: CohortDefinition) -> str:
+        mapper = VariableMapper(cohort_definition.fields)
+
+        return self.schema.build_cohort_definition_sql_query(
+            mapper,
+            cohort_definition,
+            False,
+            False,
+        )

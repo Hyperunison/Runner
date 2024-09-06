@@ -15,6 +15,7 @@ auto_api_client/model/add_run_log_chunk_request.py
 auto_api_client/model/biobank_data_column.py
 auto_api_client/model/biobank_data_column_frequent_value.py
 auto_api_client/model/biobank_data_table.py
+auto_api_client/model/data_item_dictionary_biobank_export_item_response.py
 auto_api_client/model/get_mappings_request.py
 auto_api_client/model/get_process_logs.py
 auto_api_client/model/mapping_resolve_response.py
@@ -40,6 +41,7 @@ docs/AgentApi.md
 docs/BiobankDataColumn.md
 docs/BiobankDataColumnFrequentValue.md
 docs/BiobankDataTable.md
+docs/DataItemDictionaryBiobankExportItemResponse.md
 docs/GetMappingsRequest.md
 docs/GetProcessLogs.md
 docs/MappingResolveResponse.md
@@ -68,6 +70,7 @@ test/test_agent_api.py
 test/test_biobank_data_column.py
 test/test_biobank_data_column_frequent_value.py
 test/test_biobank_data_table.py
+test/test_data_item_dictionary_biobank_export_item_response.py
 test/test_get_mappings_request.py
 test/test_get_process_logs.py
 test/test_mapping_resolve_response.py

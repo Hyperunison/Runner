@@ -41,6 +41,24 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_export_docs_for_specific_biobank(self):
+        """Test case for export_docs_for_specific_biobank
+
+        """
+        pass
+
+    def test_export_mapping_short_for_specific_biobank(self):
+        """Test case for export_mapping_short_for_specific_biobank
+
+        """
+        pass
+
+    def test_export_mapping_short_for_specific_biobank_json(self):
+        """Test case for export_mapping_short_for_specific_biobank_json
+
+        """
+        pass
+
     def test_get_agent_id(self):
         """Test case for get_agent_id
 

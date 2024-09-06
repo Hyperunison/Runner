@@ -1,26 +1,27 @@
 import csv
 import logging
 import os
-
 from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
-from src.Service.ApiLogger import ApiLogger
-from src.Message.partial.CohortDefinition import CohortDefinition
-from src.Service.UCDMResolver import UCDMResolver, UCDMConvertedField
-from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Service.Workflows.WorkflowBase import WorkflowBase
-from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
-from src.UCDM.DataSchema import DataSchema
-
+from src.Message.partial.CohortDefinition import CohortDefinition
+from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
+from src.Service.UCDMMappingResolver import UCDMMappingResolver
+from src.Service.UCDMResolverTwo import UCDMResolver
+from src.Service.UCDMConvertedField import UCDMConvertedField
+from src.Adapters.BaseAdapter import BaseAdapter
+from src.UCDM.DataSchema import DataSchema, VariableMapper
+from src.Service.ApiLogger import ApiLogger
+from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 
 class OMOPofication(WorkflowBase):
     resolver: UCDMResolver
     dir: str = "var/"
+    mapping_file_name: str = "var/mapping-values.csv"
+    manual_file_name: str = "var/manual.pdf"
     api: Api
-    schema: DataSchema
-    may_upload_private_data: bool
 
     def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema, may_upload_private_data: bool):
         self.may_upload_private_data = may_upload_private_data
@@ -28,7 +29,11 @@ class OMOPofication(WorkflowBase):
 
     def execute(self, message: StartOMOPoficationWorkflow):
         api_logger = ApiLogger(self.api)
-        self.resolver = UCDMResolver(self.api, self.schema)
+        self.download_mapping()
+        csv_transformer = CsvToMappingTransformer()
+        csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
+        self.mapping_resolver = UCDMMappingResolver(csv_mapping)
+        self.resolver = UCDMResolver(self.schema, self.mapping_resolver)
         api_logger.write(message.id, "Workflow execution task")
         logging.info(message)
         length = len(message.queries.items())
@@ -38,6 +43,7 @@ class OMOPofication(WorkflowBase):
         result_path = s3_folder if self.may_upload_private_data else (os.path.abspath('.') + '/' + self.dir)
 
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
+        self.download_manual()
 
         str_to_int = StrToIntGenerator()
         try:
@@ -47,10 +53,20 @@ class OMOPofication(WorkflowBase):
                 fields_map = val['fieldsMap']
                 if table_name == "":
                     table_name = "person"
-                self.send_notification_to_api(id=message.id, length=length, step=step, state='process',
-                                              path=result_path)
+                self.send_notification_to_api(
+                    id=message.id,
+                    length=length,
+                    step=step,
+                    state='process',
+                    path=result_path
+                )
                 step += 1
-                ucdm = self.resolver.get_ucdm_result(query, api_logger, message.id, str_to_int)
+                sql_final = self.get_sql_final(query)
+                ucdm = self.resolver.get_ucdm_result(
+                    sql_final,
+                    str_to_int
+                )
+                self.save_sql_query(table_name, sql_final)
                 if ucdm is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
@@ -66,19 +82,50 @@ class OMOPofication(WorkflowBase):
                             api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
                             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
                             return
-                self.send_notification_to_api(id=message.id, length=length, step=step, state='process',
-                                              path=result_path)
 
             self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
+
         except Exception as e:
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
 
+    def download_mapping(self):
+        response = self.api.export_mapping()
+        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                file.write(chunk)
+
+    def download_manual(self):
+        response = self.api.export_mapping_docs()
+        with open(os.path.abspath(self.manual_file_name), 'wb') as file:
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                file.write(chunk)
+
+    def save_sql_query(self, table_name: str, query: str):
+        with open(os.path.abspath(self.dir + table_name + ".sql"), 'wb') as file:
+            file.write(bytes(query, 'utf-8'))
+
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))
         self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
+
+    def get_sql_final(self, cohort_definition: CohortDefinition) -> str:
+        mapper = VariableMapper(cohort_definition.fields)
+
+        return self.schema.build_cohort_definition_sql_query(
+            mapper,
+            cohort_definition,
+            False,
+            False,
+        )
 
     def build(
             self,
