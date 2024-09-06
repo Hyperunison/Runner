@@ -46,35 +46,25 @@ mapping_abspath = os.path.abspath(argv[2])
 t = CsvToMappingTransformer()
 rows = t.transform_with_file_path(mapping_abspath)
 
-with ApiClient(configuration) as api_client:
-    api_instance = agent_api.AgentApi(api_client)
-    api = Api(api_instance, config['api_version'], config['agent_token'])
-    schema = DataSchema(
-        config['phenoenotypicDb']['dsn'],
-        config['phenoenotypicDb']['schema'],
-        config['phenoenotypicDb']['min_count']
-    )
-    str_to_int = StrToIntGenerator()
+schema = DataSchema(
+    config['phenoenotypicDb']['dsn'],
+    config['phenoenotypicDb']['schema'],
+    config['phenoenotypicDb']['min_count']
+)
+str_to_int = StrToIntGenerator()
 
-    ucdm_mapping_resolver = UCDMMappingResolver(api)
-    ucdm_mapping_resolver.set_mapping(rows)
+ucdm_mapping_resolver = UCDMMappingResolver(rows)
 
-    ucdm_resolver = UCDMResolver(
-        schema,
-        ucdm_mapping_resolver
-    )
-    result = ucdm_resolver.get_ucdm_result(
-        sql_query,
-        str_to_int
-    )
+ucdm_resolver = UCDMResolver(schema, ucdm_mapping_resolver)
+result = ucdm_resolver.get_ucdm_result(sql_query, str_to_int)
 
-    if result is None:
-        print('Invalid UCDM result!')
-        exit(1)
+if result is None:
+    print('Invalid UCDM result!')
+    exit(1)
 
-    if len(result) < 1:
-        print('Empty UCDM result!')
-        exit(1)
+if len(result) < 1:
+    print('Empty UCDM result!')
+    exit(1)
 
-    csv_transformer = UCDMResultToCsvTransformer()
-    print(csv_transformer.transform(result))
+csv_transformer = UCDMResultToCsvTransformer()
+print(csv_transformer.transform(result))

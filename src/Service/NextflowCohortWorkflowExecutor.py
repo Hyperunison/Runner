@@ -2,7 +2,7 @@ from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
 from src.Message.StartWorkflow import StartWorkflow
 from src.Service.Workflows.GwasFederated.GwasFederated import GwasFederated
-from src.Service.Workflows.OMOPification.OMOPoficationTwo import OMOPofication
+from src.Service.Workflows.OMOPification.OMOPofication import OMOPofication
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.UCDM.DataSchema import DataSchema
 

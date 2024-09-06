@@ -1,14 +1,11 @@
 from typing import List, Dict, Tuple
 from src.Api import Api
 
+
 class UCDMMappingResolver:
-    api: Api
     mapping: List
 
-    def __init__(self, api: Api):
-        self.api = api
-
-    def set_mapping(self, mapping: List):
+    def __init__(self, mapping: List):
         self.mapping = mapping
 
     def resolve(self) -> Dict[str, Dict[str, List[Tuple[str, str]]]]:

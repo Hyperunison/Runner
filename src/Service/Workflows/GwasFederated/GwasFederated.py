@@ -20,10 +20,9 @@ class GwasFederated(WorkflowBase):
         logging.info("Parameters: {}".format(message.parameters))
 
         variables: List[str] = message.parameters['variables']
-        ucdm_mapping_resolver = UCDMMappingResolver(self.api)
         csv_transformer = CsvToMappingTransformer()
         csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
-        ucdm_mapping_resolver.set_mapping(csv_mapping)
+        ucdm_mapping_resolver = UCDMMappingResolver(csv_mapping)
 
         resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
         sql_final = self.get_sql_final(message.cohort_definition)
