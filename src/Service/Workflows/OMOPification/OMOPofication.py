@@ -42,8 +42,13 @@ class OMOPofication(WorkflowBase):
         s3_folder = 's3://' + message.s3_bucket + message.s3_path
         result_path = s3_folder if self.may_upload_private_data else (os.path.abspath('.') + '/' + self.dir)
 
+        if self.may_upload_private_data:
+            s3_path = s3_folder + 'mapping-values.csv'
+            if not self.adapter.upload_local_file_to_s3(os.path.abspath(self.mapping_file_name), s3_path, message.aws_id, message.aws_key):
+                api_logger.write(message.id, "Can't upload mapping-values.csv file to S3")
+
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
-        self.download_manual()
+        self.download_manual(s3_folder, message, api_logger)
 
         str_to_int = StrToIntGenerator()
         try:
@@ -66,7 +71,7 @@ class OMOPofication(WorkflowBase):
                     sql_final,
                     str_to_int
                 )
-                self.save_sql_query(table_name, sql_final)
+                self.save_sql_query(table_name, sql_final, s3_folder, message, api_logger)
                 if ucdm is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
@@ -100,7 +105,7 @@ class OMOPofication(WorkflowBase):
                     break
                 file.write(chunk)
 
-    def download_manual(self):
+    def download_manual(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         response = self.api.export_mapping_docs()
         with open(os.path.abspath(self.manual_file_name), 'wb') as file:
             while True:
@@ -109,9 +114,22 @@ class OMOPofication(WorkflowBase):
                     break
                 file.write(chunk)
 
-    def save_sql_query(self, table_name: str, query: str):
-        with open(os.path.abspath(self.dir + table_name + ".sql"), 'wb') as file:
+        if self.may_upload_private_data:
+            s3_path = s3_folder + 'manual.pdf'
+            if not self.adapter.upload_local_file_to_s3(self.manual_file_name, s3_path, message.aws_id, message.aws_key):
+                api_logger.write(message.id, "Can't upload manual.pdf file to S3")
+                return
+
+    def save_sql_query(self, table_name: str, query: str, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
+        filename = os.path.abspath(self.dir + table_name + ".sql")
+        with open(filename, 'wb') as file:
             file.write(bytes(query, 'utf-8'))
+
+        if self.may_upload_private_data:
+            s3_path = s3_folder + table_name + '.sql'
+            if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
+                api_logger.write(message.id, "Can't upload {}.sql file to S3".format(table_name))
+                return
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))
