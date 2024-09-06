@@ -3,8 +3,6 @@ import os
 
 from src.Service.Csv.UCDMResultToCsvTransformer import UCDMResultToCsvTransformer
 from src.Service.UCDMResolverTwo import UCDMResolver
-from src.auto.auto_api_client.api import agent_api
-from src.auto.auto_api_client.api_client import ApiClient
 
 from src.UCDM.DataSchema import DataSchema
 from src.Service.ConfigurationLoader import ConfigurationLoader
@@ -12,7 +10,6 @@ from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
-from src.Api import Api
 
 try:
     import pydevd_pycharm
