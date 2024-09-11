@@ -78,6 +78,9 @@ class UCDMResolver:
                 values = [(value, '')]
             else:
                 values = mapping_index[field][str(value)]
+                for first, second in values:
+                    if first == "":
+                        values = [(value, second)]
             input_matrix[field] = values
 
         multiplied = decartes_multiply_array(input_matrix)
