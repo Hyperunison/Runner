@@ -75,7 +75,10 @@ class UCDMResolver:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             if not field in mapping_index or not str(value) in mapping_index[field]:
-                values = [(value, '')]
+                if field in mapping_index:
+                    values = [('', '')]
+                else:
+                    values = [(value, '')]
             else:
                 values = mapping_index[field][str(value)]
             input_matrix[field] = values
