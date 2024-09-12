@@ -7,24 +7,31 @@
 #```
 
 api_version: 1.0
-api_url: "http://localhost:8082"
-agent_token: "63478ac069b96f79b9d97c9"
-work_dir: "/data/nextflow/pipelines"
-type: k8s
-idle_delay: 5.0
+api_url: "https://api.hyperunison.com"
+agent_token: "<copy it from your biobank>"
+work_dir: "/data/nextflow/pipelines"    # Used for k8s only
+idle_delay: 5.0                         # delay between requests to Hyperunison backend to get new tasks
 check_runs_status_interval: 30.0
-sentry_dsn: "http://5456fe4ea5f29f4220513a965b25ce15@18.185.189.107:9000/3"
-allow_private_upload_data_to_unison: 1
-log:
-  level: 10 # 10 - debug, 50 - critical
-  filename: "" #filename or empty for stdout
-k8s:
-  namespace: "dev"
-  master_pod: "nextflow-dev"
-  pod_prefix: "unison-worker"
-  volume: "ebs-claim-prod-10"
+sentry_dsn: ""                          # Generate sentryDSN in https://sentry.io/ and use in here to monitor errors
 
+# may be 0 or 1. If 1 - export files will be uploaded to Unison S3 storage and available for download from Unison platform
+# if 0 - no private data will be exported
+allow_private_upload_data_to_unison: 1
+
+log:
+  level: 20 # 10 - debug, 50 - critical. I recommend level=20 for most users
+  filename: "" #filename or empty for stdout
+
+type: k8s                               # cluster type. Now only k8s is supported
+# settings for k8s HPC
+k8s:
+  namespace: "dev"                      # namespace to use for pods
+  master_pod: "nextflow-dev"            # the pod for upload pipeline results files to S3
+  pod_prefix: "unison-worker"           # the prefix for Unison pods
+  volume: "ebs-claim-prod-10"           # volume name for shared files between pods. Should be mounter to $work_dir
+
+# endpoint to SQL database with patients phenoenotypic data
 phenoenotypicDb:
-  dsn: postgresql+psycopg2://***:***@***:***/***
-  schema: Omop
-  min_count: 3
+  dsn: postgresql+psycopg2://***:***@***:***/***    # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
+  schema: postgres                                  # SQL engine used. May be postgres or labkey
+  min_count: 3                                      # Minimum number of unique patients with list of properties to allow system to export this properties
