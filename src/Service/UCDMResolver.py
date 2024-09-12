@@ -64,7 +64,7 @@ class UCDMResolver:
                 False,
             )
             if api_logger is not None:
-                api_logger.write(message_id, "Final SQL query generated: {}".format(sql_with_distribution))
+                api_logger.write(message_id, "Final SQL query generated: {}".format(sql_final))
 
             result = self.schema.fetch_all(sql_final)
             if api_logger is not None:
