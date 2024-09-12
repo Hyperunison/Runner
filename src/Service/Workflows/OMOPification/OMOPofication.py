@@ -31,9 +31,6 @@ class OMOPofication(WorkflowBase):
         api_logger = ApiLogger(self.api)
         self.download_mapping()
         csv_transformer = CsvToMappingTransformer()
-        csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
-        self.mapping_resolver = UCDMMappingResolver(csv_mapping)
-        self.resolver = UCDMResolver(self.schema, self.mapping_resolver)
         api_logger.write(message.id, "Workflow execution task")
         logging.info(message)
         length = len(message.queries.items())
@@ -67,6 +64,12 @@ class OMOPofication(WorkflowBase):
                 )
                 step += 1
                 sql_final = self.get_sql_final(query)
+                csv_mapping = csv_transformer.transform_with_file_path(
+                    os.path.abspath(self.mapping_file_name),
+                    table_name,
+                )
+                self.mapping_resolver = UCDMMappingResolver(csv_mapping)
+                self.resolver = UCDMResolver(self.schema, self.mapping_resolver)
                 ucdm = self.resolver.get_ucdm_result(
                     sql_final,
                     str_to_int
