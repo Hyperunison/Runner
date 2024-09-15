@@ -17,6 +17,12 @@ try:
 except:
     pass
 
+def get_table_name(file_path: str) -> str:
+    file_name = os.path.basename(file_path)
+    parts = file_name.split('.')
+
+    return parts[0]
+
 argv = sys.argv
 
 if len(argv) != 3:
@@ -30,6 +36,13 @@ if not os.path.isfile(argv[1]):
 
 if not os.path.isfile(argv[2]):
     print('File with mapping does not exist!')
+    exit(1)
+
+table_name = get_table_name(argv[1])
+field_map_path = "var/" + table_name + "-fields-map.json"
+
+if not os.path.isfile(field_map_path):
+    print('Field map file does not exist!')
     exit(1)
 
 config = ConfigurationLoader("config.yaml").get_config()
@@ -49,9 +62,9 @@ schema = DataSchema(
     config['phenoenotypicDb']['min_count']
 )
 str_to_int = StrToIntGenerator()
+str_to_int.load_from_file()
 
 ucdm_mapping_resolver = UCDMMappingResolver(rows)
-
 ucdm_resolver = UCDMResolver(schema, ucdm_mapping_resolver)
 result = ucdm_resolver.get_ucdm_result(sql_query, str_to_int)
 
@@ -63,5 +76,6 @@ if len(result) < 1:
     print('Empty UCDM result!')
     exit(1)
 
+str_to_int.save_to_file()
 csv_transformer = UCDMResultToCsvTransformer()
 print(csv_transformer.transform(result))

@@ -44,13 +44,13 @@ class UCDMResolver:
             result.append(row_result)
         return result
 
-    def build_mapping_index(self) -> Dict[str, Dict[str, List[Tuple[str, str]]]]:
+    def build_mapping_index(self) -> Dict[str, Dict[str, List[Tuple[str, str, str]]]]:
         return self.ucdm_mapping_resolver.transform_mapping_to_resolve_result()
 
     def convert_to_ucdm(
             self,
             result: List[Dict[str, str]],
-            mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]],
+            mapping_index: Dict[str, Dict[str, List[Tuple[str, str, str]]]],
             str_to_int: StrToIntGenerator
     ) -> List[Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
@@ -67,7 +67,7 @@ class UCDMResolver:
 
     def convert_row(
             self,
-            mapping_index: Dict[str, Dict[str, List[Tuple[str, str]]]],
+            mapping_index: Dict[str, Dict[str, List[Tuple[str, str, str]]]],
             row: Dict[str, str],
             serials: Dict[str, SerialGenerator],
             str_to_int: StrToIntGenerator,
@@ -75,12 +75,14 @@ class UCDMResolver:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             if not field in mapping_index or not str(value) in mapping_index[field]:
-                if field in mapping_index:
-                    values = [('', '')]
-                else:
-                    values = [(value, '')]
+                values = [(value, '')]
             else:
                 values = mapping_index[field][str(value)]
+
+                if values[0][2] == 'Yes':
+                    values = [(values[0][0], values[0][1])]
+                else:
+                    values = [(value, values[0][1])]
             input_matrix[field] = values
 
         multiplied = decartes_multiply_array(input_matrix)

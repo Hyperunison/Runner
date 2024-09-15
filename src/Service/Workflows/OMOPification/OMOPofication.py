@@ -1,4 +1,5 @@
 import csv
+import json
 import logging
 import os
 from typing import List, Dict
@@ -48,6 +49,7 @@ class OMOPofication(WorkflowBase):
         self.download_manual(s3_folder, message, api_logger)
 
         str_to_int = StrToIntGenerator()
+        str_to_int.load_from_file()
         try:
             for table_name, val in message.queries.items():
                 api_logger.write(message.id, "Start exporting {}".format(table_name))
@@ -55,6 +57,7 @@ class OMOPofication(WorkflowBase):
                 fields_map = val['fieldsMap']
                 if table_name == "":
                     table_name = "person"
+                self.save_fields_map(fields_map, table_name)
                 self.send_notification_to_api(
                     id=message.id,
                     length=length,
@@ -82,7 +85,9 @@ class OMOPofication(WorkflowBase):
 
                 if len(ucdm) > 0:
                     filename = self.dir + "{}.csv".format(table_name)
-                    self.build(filename, ucdm, fields_map, message.id, api_logger)
+                    skipped_rows = self.build(filename, ucdm, fields_map)
+                    if len(skipped_rows) > 0:
+                        api_logger.write(message.id, '\n'.join(skipped_rows))
                     api_logger.write(message.id, "{}.csv file was written".format(table_name))
                     if self.may_upload_private_data:
                         s3_path = s3_folder + table_name + '.csv'
@@ -92,6 +97,7 @@ class OMOPofication(WorkflowBase):
                             return
 
             self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
+            str_to_int.save_to_file()
 
         except Exception as e:
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
@@ -134,6 +140,12 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Can't upload {}.sql file to S3".format(table_name))
                 return
 
+    def save_fields_map(self, fields_map, table_name: str):
+        filename = os.path.abspath(self.dir + table_name + "-fields-map.json")
+        with open(filename, 'w') as file:
+            json.dump(fields_map, file, indent=4)
+
+
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))
         self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
@@ -152,10 +164,8 @@ class OMOPofication(WorkflowBase):
             self,
             filename: str,
             ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]],
-            runner_message_id: int,
-            api_logger: ApiLogger
-    ):
+            fields_map: Dict[str, Dict[str, str]]
+    ) -> List[str]:
         with open(filename, 'w', newline='') as file:
             header = [item['name'] for item in fields_map.values()]
             writer = csv.DictWriter(file, fieldnames=header)
@@ -178,5 +188,5 @@ class OMOPofication(WorkflowBase):
                     for k, v in row.items():
                         row_str[k] = v.export_value
                     skip_rows.append("Skip row as [{}]. Row={}".format(", ".join(skip_reasons), str(row_str)))
-            if len(skip_rows) > 0:
-                api_logger.write(runner_message_id, '\n'.join(skip_rows))
+
+            return skip_rows
