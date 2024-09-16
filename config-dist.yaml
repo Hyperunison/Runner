@@ -35,3 +35,9 @@ phenoenotypicDb:
   dsn: postgresql+psycopg2://***:***@***:***/***    # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
   schema: postgres                                  # SQL engine used. May be postgres or labkey
   min_count: 3                                      # Minimum number of unique patients with list of properties to allow system to export this properties
+
+# You may describe data forbidden to access by Runner
+data_protected:
+  schemas: []                                       # List of protected schemes. For example: ["public", "personal"]
+  tables: []                                        # List of protected tables. For example: ["public.participant", "personal.addresses"]
+  columns: []
