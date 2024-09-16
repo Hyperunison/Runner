@@ -29,7 +29,7 @@ class UCDMMappingResolver:
                 (
                     row['export_value'],
                     row['automation_strategy'],
-                    row['is_mapped']
+                    row['is_concept_id']
                 )
             )
 
