@@ -59,7 +59,7 @@ mapping_abspath = os.path.abspath(argv[2])
 t = CsvToMappingTransformer()
 rows = t.transform_with_file_path(
     mapping_abspath,
-    table_name
+    '' if table_name == 'person' else table_name
 )
 
 schema = DataSchema(
