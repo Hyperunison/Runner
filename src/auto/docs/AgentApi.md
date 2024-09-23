@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**add_run_log_chunk**](AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 [**block_task**](AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
 [**export_docs_for_specific_biobank**](AgentApi.md#export_docs_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/docs | 
+[**export_docs_for_specific_biobank_in_csv_format**](AgentApi.md#export_docs_for_specific_biobank_in_csv_format) | **GET** /api/agent/v{version}/{token}/export-mapping/docs/csv | 
 [**export_mapping_short_for_specific_biobank**](AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 
 [**export_mapping_short_for_specific_biobank_json**](AgentApi.md#export_mapping_short_for_specific_biobank_json) | **GET** /api/agent/v{version}/{token}/export-mapping/json | 
 [**get_agent_id**](AgentApi.md#get_agent_id) | **GET** /api/agent/v{version}/{token}/agent-id | 
@@ -318,7 +319,72 @@ No authorization required
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Export biobank mappings to USAGI csv file |  -  |
+**200** | Export biobank mappings docs |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **export_docs_for_specific_biobank_in_csv_format**
+> file_type export_docs_for_specific_biobank_in_csv_format(version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "z" # str | 
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.export_docs_for_specific_biobank_in_csv_format(version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->export_docs_for_specific_biobank_in_csv_format: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+
+### Return type
+
+**file_type**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/octet-stream
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Export biobank mappings docs for CSV |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

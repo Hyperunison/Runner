@@ -144,6 +144,14 @@ class Api:
             token=self.token
         )
 
+    def export_mapping_docs_csv(self):
+        logging.info("Export mapping docs csv")
+
+        return self.api_instance.export_docs_for_specific_biobank_in_csv_format(
+            version=self.version,
+            token=self.token
+        )
+
     def export_mapping_json(self) -> List[DataItemDictionaryBiobankExportItemResponse]:
         logging.info("Export mapping json")
 
