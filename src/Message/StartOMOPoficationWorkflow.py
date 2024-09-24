@@ -11,6 +11,8 @@ class StartOMOPoficationWorkflow(BaseMessage):
     aws_key: str
     s3_bucket: str
     s3_path: str
+    format: str
+    connection_string: str
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartOMOPoficationWorkflow'
@@ -22,5 +24,7 @@ class StartOMOPoficationWorkflow(BaseMessage):
         self.aws_key = message.data['awsKey']
         self.s3_bucket = message.data['s3Bucket']
         self.s3_path = message.data['s3Path']
+        self.format = message.data['format']
+        self.connection_string = message.data['connectionString']
 
 

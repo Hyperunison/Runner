@@ -203,3 +203,6 @@ class Postgres(BaseSchema):
 
     def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
         return "({})::{}".format(expression, data_type)
+
+    def execute_sql(self, sql: str):
+        self.engine.execute(sql)

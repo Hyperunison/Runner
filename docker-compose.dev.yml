@@ -1,5 +1,9 @@
 version: '3'
 
+networks:
+  default-network:
+    driver: bridge
+
 services:
   unison-agent:
     platform: linux/amd64
@@ -11,7 +15,21 @@ services:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube
       - ./Resources/.aws:/root/.aws
+    networks:
+      - default-network
 
   filebeat:
     profiles: [ "filebeat" ]
 
+  pgsql:
+    image: postgres:16.4
+    ports:
+      - "${EXPORT_PGSQL_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${EXPORT_PGSQL_DATABASE}
+      POSTGRES_USER: ${EXPORT_PGSQL_USERNAME}
+      POSTGRES_PASSWORD: ${EXPORT_PGSQL_PASSWORD}
+    volumes:
+      - ./var/pgsql:/var/lib/postgresql/data
+    networks:
+      - default-network
