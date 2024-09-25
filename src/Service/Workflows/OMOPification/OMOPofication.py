@@ -53,6 +53,11 @@ class OMOPofication(WorkflowBase):
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
         try:
+            if message.format == 'postgresql':
+                exporter = PostgresqlExporter(
+                    connection_string=message.connection_string
+                )
+                exporter.create_all_tables(message.all_tables)
             for table_name, val in message.queries.items():
                 api_logger.write(message.id, "Start exporting {}".format(table_name))
                 query = CohortDefinition(val['query'])
@@ -88,10 +93,14 @@ class OMOPofication(WorkflowBase):
                 if len(ucdm) > 0:
                     if message.format == 'postgresql':
                         skipped_rows = self.save_rows_to_database(
-                            table_name,
-                            ucdm,
-                            fields_map,
-                            message.connection_string
+                            table_name=table_name,
+                            ucdm=ucdm,
+                            fields_map=fields_map,
+                            connection_string=message.connection_string,
+                            columns=self.get_columns(
+                                table_name=table_name,
+                                tables=message.all_tables
+                            )
                         )
                         api_logger.write(message.id, "Table {} was filled".format(table_name))
                     else:
@@ -186,11 +195,16 @@ class OMOPofication(WorkflowBase):
             table_name: str,
             ucdm: List[Dict[str, UCDMConvertedField]],
             fields_map: Dict[str, Dict[str, str]],
-            connection_string: str
+            connection_string: str,
+            columns: List[Dict[str, str]]
     ) -> List[str]:
         exporter = PostgresqlExporter(
-            connection_string=connection_string,
-            table_name=table_name
+            connection_string=connection_string
         )
 
-        return exporter.export(ucdm, fields_map)
+        return exporter.export(table_name=table_name, ucdm=ucdm, fields_map=fields_map, columns=columns)
+
+    def get_columns(self, table_name: str, tables: List[Dict[str, any]]) -> List[Dict[str, str]]:
+        for table in tables:
+            if table['tableName'] == table_name:
+                return table['columns']

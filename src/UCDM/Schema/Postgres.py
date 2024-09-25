@@ -205,4 +205,4 @@ class Postgres(BaseSchema):
         return "({})::{}".format(expression, data_type)
 
     def execute_sql(self, sql: str):
-        self.engine.execute(sql)
+        self.engine.execute(text(sql))

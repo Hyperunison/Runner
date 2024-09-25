@@ -9,59 +9,54 @@ from src.UCDM.DataSchema import DataSchema
 class PostgresqlExporter:
     lines_filter: LinesFilter
     connection_string: str
-    table_name: str
     data_schema: DataSchema
     sql_builder: SqlBuilder
 
-    def __init__(self, connection_string: str, table_name: str):
+    def __init__(self, connection_string: str):
         self.lines_filter = LinesFilter()
         self.connection_string = connection_string
-        self.table_name = table_name
         self.data_schema = DataSchema(
             dsn=connection_string,
             schema="postgres",
             min_count=0
         )
+        self.sql_builder = SqlBuilder()
 
     def export(
             self,
+            table_name: str,
             ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]]
+            fields_map: Dict[str, Dict[str, str]],
+            columns: List[Dict[str, str]]
     ) -> List[str]:
-        self.build_database_structure(
-            ucdm=ucdm,
-            fields_map=fields_map
-        )
-
         return self.save_rows(
+            table_name=table_name,
             ucdm=ucdm,
-            fields_map=fields_map
+            fields_map=fields_map,
+            columns=columns
         )
-
-    def build_database_structure(
-            self,
-            ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]]
-    ):
-        field_names = self.get_field_names(ucdm, fields_map)
-        if len(fields_map) == 0:
-            return
-
-        sql = self.sql_builder.build_create_table(table_name=self.table_name, field_names=field_names)
-        self.data_schema.execute_sql(sql=sql)
 
     def save_rows(
             self,
+            table_name: str,
             ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]]
+            fields_map: Dict[str, Dict[str, str]],
+            columns: List[Dict[str, str]]
     ) -> List[str]:
         skip_rows: List[str] = []
-        correct_rows: List[Dict[str, str]] = []
+        correct_rows: List[Dict[str, any]] = []
 
         for row in ucdm:
             skip_reasons: List[str] = self.lines_filter.get_line_errors(row, fields_map)
             if len(skip_reasons) == 0:
-                pass
+                correct_row = {}
+
+                for key, val in row.items():
+                    value = val.export_value
+                    field_name = fields_map[key]['name']
+                    correct_row[field_name] = value if value is not None else ''
+
+                correct_rows.append(correct_row)
             else:
                 row_str: Dict[str, str] = {}
                 for k, v in row.items():
@@ -69,15 +64,28 @@ class PostgresqlExporter:
                 skip_rows.append("Skip row as [{}]. Row={}".format(", ".join(skip_reasons), str(row_str)))
 
         if len(correct_rows) > 0:
-            self.insert_rows(correct_rows)
+            self.insert_rows(
+                table_name=table_name,
+                rows=correct_rows,
+                fields_map=fields_map,
+                columns=columns
+            )
 
         return skip_rows
 
     def insert_rows(
             self,
-            rows: List[Dict[str, str]]
+            table_name: str,
+            rows: List[Dict[str, str]],
+            fields_map: Dict[str, Dict[str, str]],
+            columns: List[Dict[str, str]]
     ):
-        sql = self.sql_builder.build_insert(table_name=self.table_name, rows=rows)
+        database_rows = self.transform_rows_by_fields_map(rows, fields_map)
+        sql = self.sql_builder.build_insert(
+            table_name=table_name,
+            rows=database_rows,
+            columns=columns
+        )
         self.data_schema.execute_sql(sql=sql)
 
     def get_field_names(
@@ -90,9 +98,55 @@ class PostgresqlExporter:
         for row in rows:
             skip_reasons: List[str] = self.lines_filter.get_line_errors(row, fields_map)
             if len(skip_reasons) == 0:
+                result = []
                 for key, val in row.items():
                     field_name = fields_map[key]['name']
                     result.append(field_name)
                 break
 
+        return list(set(result))
+
+    def create_all_tables(self, tables: List[Dict[str, any]]):
+        for table in tables:
+            self.create_table(table)
+
+    def create_table(self, table: Dict[str, any]):
+        sql = self.sql_builder.build_create_table_with_field_types(
+            table_name=table['tableName'],
+            fields=table['columns']
+        )
+        self.data_schema.execute_sql(sql=sql)
+
+    def transform_rows_by_fields_map(
+            self,
+            rows: List[Dict[str, any]],
+            fields_map: Dict[str, Dict[str, str]]
+    ) -> List[Dict[str, any]]:
+        result: List[Dict[str, any]] = []
+        database_fields_map = self.transform_fields_map_to_database_fields_map(fields_map)
+
+        for row in rows:
+            result_row: Dict[str, any] = {}
+
+            for key, val in row.items():
+                result_row[database_fields_map[key]] = val
+
+            result.append(result_row)
+
         return result
+
+    def transform_fields_map_to_database_fields_map(
+            self,
+            fields_map: Dict[str, Dict[str, str]]
+    ) -> Dict[str, str]:
+        result: Dict[str, str] = {}
+
+        for field, value in fields_map.items():
+            field_name = self.get_field_name(field)
+            result[value['name']] = field_name
+
+        return result
+
+    def get_field_name(self, field) -> str:
+        parts = field.split('.')
+        return parts[-1]
