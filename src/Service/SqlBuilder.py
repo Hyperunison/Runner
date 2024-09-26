@@ -22,12 +22,12 @@ class SqlBuilder:
         return create_table_query
 
     def build_create_table_with_field_types(self, table_name: str, fields: List[Dict[str, any]]) -> str:
-        create_statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} ("
+        create_statement = f"DROP TABLE IF EXISTS \"{table_name}\"; CREATE TABLE \"{table_name}\" ("
         field_definitions = []
 
         for field in fields:
             field_type = self.get_field_type(field['type'])
-            field_def = f"{field['name']} {field_type} NULL"
+            field_def = f"\"{field['name']}\" {field_type} NULL"
 
             # if field['required']:
             #     field_def += " NOT NULL"
