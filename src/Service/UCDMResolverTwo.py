@@ -65,6 +65,11 @@ class UCDMResolver:
 
         return output
 
+    def get_field_alias(self, origin: str) -> str:
+        if not origin.startswith("c."):
+            return "c." + origin
+        return origin
+
     def convert_row(
             self,
             mapping_index: Dict[str, Dict[str, List[Tuple[str, str, str]]]],
@@ -74,10 +79,11 @@ class UCDMResolver:
     ) -> List[Dict[str, UCDMConvertedField]]:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
-            if not field in mapping_index or not str(value) in mapping_index[field]:
+            field_alias = self.get_field_alias(field)
+            if not field_alias in mapping_index or not str(value) in mapping_index[field_alias]:
                 values = [(value, '')]
             else:
-                values = mapping_index[field][str(value)]
+                values = mapping_index[field_alias][str(value)]
 
                 if values[0][2] == 'Yes':
                     values = [(values[0][0], values[0][1])]
