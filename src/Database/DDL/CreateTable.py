@@ -10,18 +10,26 @@ class CreateTable(BaseDatabase):
 
     def execute(self, table: CreateTableDTO):
         metadata = MetaData()
+        metadata.bind = self.engine
         columns: List[Column] = []
 
         for column in table.columns:
             columns.append(self.create_table_column(column))
 
-        table = Table(table.table_name, metadata, *columns)
-        metadata.create_all(self.engine)
+        table = Table(
+            table.table_name,
+            metadata,
+            *columns,
+            schema = "public"
+        )
+        with self.engine.connect() as connection:
+            with connection.begin():
+                metadata.create_all(connection, checkfirst=False)
 
     def create_table_column(self, column: CreateTableColumnDTO) -> Column:
-        type = self.get_column_type_object(column.type)
+        column_type = self.get_column_type_object(column.type)
         
-        return Column(name=column.name, type=type, nullable=column.nullable)
+        return Column(column.name, column_type, nullable=column.nullable)
 
     def get_column_type_object(self, column_type: str) -> any:
         if column_type == "integer":
