@@ -1,0 +1,14 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": false
+    },
+    {
+      "name": "name",
+      "type": "varchar(50)",
+      "nullable": false
+    }
+  ]
+}
