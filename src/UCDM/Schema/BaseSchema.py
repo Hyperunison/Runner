@@ -59,3 +59,6 @@ class BaseSchema:
             )
 
         return sql
+
+    def execute_sql(self, sql: str) -> str:
+        raise NotImplementedError()

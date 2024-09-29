@@ -1,8 +1,14 @@
 from typing import List, Dict
 import csv
 from src.Service.UCDMConvertedField import UCDMConvertedField
+from src.Service.Workflows.OMOPification.LinesFilter import LinesFilter
+
 
 class CsvWritter:
+    lines_filter: LinesFilter
+
+    def __init__(self):
+        self.lines_filter = LinesFilter()
 
     def build(
             self,
@@ -17,15 +23,14 @@ class CsvWritter:
             skip_rows: List[str] = []
             for row in ucdm:
                 output = {}
-                skip_reasons: List[str] = []
-                for key, val in row.items():
-                    value = val.export_value
-                    if (value == '' or value is None or value == '0' or value == 0) and fields_map[key]['isRequired']:
-                        skip_reasons.append("{} is empty, but required (value={})".format(key, value))
-                    field_name = fields_map[key]['name']
-                    output[field_name] = value if value is not None else ''
-
+                skip_reasons: List[str] = self.lines_filter.get_line_errors(row, fields_map)
+                
                 if len(skip_reasons) == 0:
+                    for key, val in row.items():
+                        value = val.export_value
+                        field_name = fields_map[key]['name']
+                        output[field_name] = value if value is not None else ''
+
                     writer.writerow(output)
                 else:
                     row_str: Dict[str, str] = {}

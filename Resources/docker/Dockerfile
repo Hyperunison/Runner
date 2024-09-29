@@ -23,13 +23,14 @@ RUN unzip awscliv2.zip
 RUN sudo ./aws/install
 RUN rm -rf awscliv2.zip aws
 
+RUN pip install "pip==23.3"
 RUN pip install "click==8.1.3"
-RUN pip install "certifi>=14.5.14"
+RUN pip install "certifi>=2024.7.4"
 RUN pip install "frozendict~=2.3.4"
 RUN pip install "python-dateutil~=2.7.0"
-RUN pip install "setuptools>=21.0.0"
+RUN pip install "setuptools>=65.5.1"
 RUN pip install "typing_extensions~=4.3.0"
-RUN pip install "urllib3~=2.1.0"
+RUN pip install "urllib3~=2.2.2"
 RUN pip install "pyyaml==6.0"
 RUN pip install "setproctitle==1.3.2"
 RUN pip install "sqlalchemy>=2.0.0"

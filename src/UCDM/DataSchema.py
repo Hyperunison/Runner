@@ -495,3 +495,6 @@ class DataSchema:
 
     def reconnect(self):
         self.schema.reconnect()
+
+    def execute_sql(self, sql: str):
+        self.schema.execute_sql(sql)

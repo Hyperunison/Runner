@@ -3,5 +3,6 @@
 config.yaml
 test.py
 var/tmp
+var/pgsql
 .env
 .run
