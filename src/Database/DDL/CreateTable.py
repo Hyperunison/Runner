@@ -29,7 +29,12 @@ class CreateTable(BaseDatabase):
     def create_table_column(self, column: CreateTableColumnDTO) -> Column:
         column_type = self.get_column_type_object(column.type)
         
-        return Column(column.name, column_type, nullable=column.nullable)
+        return Column(
+            column.name,
+            column_type,
+            nullable=column.nullable,
+            primary_key=column.primary_key
+        )
 
     def get_column_type_object(self, column_type: str) -> any:
         if column_type == "integer":

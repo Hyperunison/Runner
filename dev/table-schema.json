@@ -3,12 +3,14 @@
     {
       "name": "id",
       "type": "integer",
-      "nullable": false
+      "nullable": false,
+      "primary_key": true
     },
     {
       "name": "name",
       "type": "varchar(50)",
-      "nullable": false
+      "nullable": false,
+      "primary_key": false
     }
   ]
 }
