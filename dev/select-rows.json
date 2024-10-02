@@ -1,0 +1,20 @@
+{
+  "join":[],
+  "fields":{
+    "c.id":"allergies.patients.id"
+  },
+  "participantTableName":"allergies.patients",
+  "participantIdField":"id",
+  "where":[],
+  "export":[
+    {
+      "type":"variable",
+      "as":"c.id",
+      "name":"c.id"
+    }
+  ],
+  "key":"e1bd75d85798552123bfed98d61c3fce",
+  "limit":100,
+  "withTables":[],
+  "cte":[]
+}
