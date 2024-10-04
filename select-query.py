@@ -11,7 +11,7 @@ argv = sys.argv
 
 if len(argv) != 3:
     print('Invalid arguments count!')
-    print('Correct format is: python select-rows.py "connection string" "path to json file with query"')
+    print('Correct format is: python select-query.py "connection string" "path to json file with query"')
     exit(1)
 
 if not os.path.isfile(argv[2]):

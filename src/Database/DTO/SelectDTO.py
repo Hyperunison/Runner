@@ -6,7 +6,6 @@ from src.Database.DTO.JoinDTO import JoinDTO
 from src.Database.DTO.OrderByDTO import OrderByDTO
 from src.Database.DTO.TableAliasDTO import TableAliasDTO
 
-
 class SelectDTO:
     table_name: str
     fields: List[str]

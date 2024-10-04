@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 
-from export import table_name, schema
 from src.Database.DTO.FieldExpressionDTO import FieldExpressionDTO
 from src.Database.DTO.JoinDTO import JoinDTO
 from src.Database.DTO.SelectDTO import SelectDTO
@@ -11,8 +10,6 @@ from src.Database.Transformers.SqlExpressionParser import SqlExpressionParser
 from src.Database.Transformers.SubqueryExpressionParser import SubqueryExpressionParser
 from src.Database.Utils.TableNameParser import TableNameParser
 from src.Message.partial.CohortDefinition import CohortDefinition
-
-
 
 class MessageQueryToDtoTransformer:
     variable_mapping: Dict[str, str] = {}

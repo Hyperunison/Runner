@@ -1,5 +1,4 @@
 from typing import List, Dict, Optional
-import re
 from sqlalchemy import Table, Column, MetaData, select, Select, and_, literal, text
 
 from src.Database.BaseDatabase import BaseDatabase
@@ -10,9 +9,7 @@ from src.Database.DTO.FieldExpressionDTO import FieldExpressionDTO
 from src.Database.DTO.JoinDTO import JoinDTO
 from src.Database.DTO.SelectDTO import SelectDTO
 from src.Database.DTO.SubqueryExpressionDTO import SubqueryExpressionDTO
-from src.Database.DTO.TableFieldDTO import TableFieldDTO
 from src.Database.Utils.TableNameParser import TableNameParser
-
 
 class SelectRows(BaseDatabase):
     table_name_parser: TableNameParser
@@ -31,15 +28,14 @@ class SelectRows(BaseDatabase):
             schema=main_table_schema_name
         )
         columns = self.get_column_objects(dto)
+        columns = self.remove_duplicate_columns(columns)
         query = self.build_query(dto, columns, metadata)
 
         with self.engine.connect() as connection:
             return connection.execute(query)
 
     def build_query(self, dto: SelectDTO, columns: List[Column], metadata: MetaData) -> Select:
-        print(columns)
-        exit(0)
-        query = select(columns)
+        query = select(*columns)
         query = self.add_joins_to_query(dto, query, metadata)
         query = self.add_limit_to_query(dto, query)
 
@@ -145,8 +141,6 @@ class SelectRows(BaseDatabase):
                 real_table_name = alias_dto.table_name
 
             for table in tables:
-                print(table.name, real_table_name)
-                print('========================================')
                 if table.name == real_table_name:
                     if table_field.field_name in table.c:
                         result.append(table.c[table_field.field_name])
@@ -205,3 +199,13 @@ class SelectRows(BaseDatabase):
             return select([literal(field.value)])
 
         return None
+
+    def remove_duplicate_columns(self, origin: List[Column]) -> List[Column]:
+        mapping: Dict[str, Column] = {}
+
+        for column in origin:
+            if column.name in mapping:
+                continue
+            mapping[column.name] = column
+
+        return list(mapping.values())

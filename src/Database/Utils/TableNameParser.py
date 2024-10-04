@@ -2,7 +2,6 @@ import re
 from typing import Optional
 from src.Database.DTO.TableFieldDTO import TableFieldDTO
 
-
 class TableNameParser:
 
     def get_table_field_from_alias(self, alias: str) -> Optional[TableFieldDTO]:
