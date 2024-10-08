@@ -1,5 +1,5 @@
 from typing import List, Dict, Optional
-from sqlalchemy import Table, Column, MetaData, select, Select, and_, literal, text
+from sqlalchemy import Table, Column, MetaData, select, Select, and_, literal, text, alias
 
 from src.Database.BaseDatabase import BaseDatabase
 from src.Database.DTO.BaseExpressionDTO import BaseExpressionDTO
@@ -29,13 +29,13 @@ class SelectRows(BaseDatabase):
         )
         columns = self.get_column_objects(dto)
         columns = self.remove_duplicate_columns(columns)
-        query = self.build_query(dto, columns, metadata)
+        query = self.build_query(dto, table, columns, metadata)
 
         with self.engine.connect() as connection:
             return connection.execute(query)
 
-    def build_query(self, dto: SelectDTO, columns: List[Column], metadata: MetaData) -> Select:
-        query = select(*columns)
+    def build_query(self, dto: SelectDTO, main_table: Table, columns: List[Column], metadata: MetaData) -> Select:
+        query = select(*columns).select_from(main_table)
         query = self.add_joins_to_query(dto, query, metadata)
         query = self.add_limit_to_query(dto, query)
 
@@ -43,6 +43,8 @@ class SelectRows(BaseDatabase):
 
     def add_joins_to_query(self, dto: SelectDTO, query: Select, metadata: MetaData) -> Select:
         for join in dto.joins:
+            # print(join.type, join.table.value, join.alias)
+            # exit(0)
             query = self.add_join_to_query(
                 join,
                 query,
@@ -115,12 +117,18 @@ class SelectRows(BaseDatabase):
                 dto.table.value,
                 main_table_schema_name
             )
-            return Table(
+            table = Table(
                 self.table_name_parser.get_table_name_from_full_table_name(dto.table.value),
                 metadata,
                 autoload_with=self.engine,
                 schema=schema
             )
+            table = alias(
+                table,
+                name='c_66e16359b675c'
+            )
+
+            return table
 
         return None
 
@@ -158,6 +166,8 @@ class SelectRows(BaseDatabase):
 
         if condition.operation == '==':
             return left_field == right_field
+        if condition.operation == '=':
+            return left_field == right_field
         elif condition.operation == '!=':
             return left_field != right_field
         elif condition.operation == '<':
@@ -187,6 +197,12 @@ class SelectRows(BaseDatabase):
             schema_name = self.table_name_parser.get_schema_name_from_full_table_name(
                 main_table_name,
             )
+
+            if table_name == 'c_66e16359b675c':
+                table_name = 'conditions'
+                # print(field.value)
+                # exit(0)
+
             return Table(
                 table_name,
                 metadata,
