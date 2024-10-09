@@ -1,2 +1,2 @@
 ./src/auto
-
+sqlglot===25.24.5
