@@ -1,2 +1,3 @@
 ./src/auto
 sqlglot===25.24.5
+PyMySQL===1.1.1

@@ -15,6 +15,7 @@ from src.Message.partial import CohortDefinition
 from src.UCDM.Schema.Labkey import Labkey
 from src.UCDM.Schema.Postgres import Postgres
 from src.UCDM.Schema.BaseSchema import BaseSchema
+from src.UCDM.Schema.SchemaFactory import SchemaFactory
 
 
 class SQLJoin:
@@ -67,18 +68,19 @@ class DataSchema:
     min_count: int = 0
     dst: str = ""
     schema: BaseSchema
+    schema_factory: SchemaFactory
 
     def __init__(self, dsn: str, schema: str, min_count: int):
         self.min_count = min_count
-        self.schema = self.create_schema(dsn, schema, min_count)
+        self.schema = self.create_schema(dsn, min_count)
+        self.schema_factory = SchemaFactory()
         super().__init__()
 
-    def create_schema(self, dsn: str, schema: str, min_count: int) -> BaseSchema:
-        if schema == 'labkey':
-            return Labkey(dsn, min_count)
-        if schema == 'postgres':
-            return Postgres(dsn, min_count)
-        raise Exception("Unknown schema {}".format(schema))
+    def create_schema(self, dsn: str, min_count: int) -> BaseSchema:
+        return self.schema_factory.create(
+            dsn=dsn,
+            min_count=min_count,
+        )
 
     def build_with_cte_list(self, with_tables: Dict) -> Dict[str, str]:
         if len(with_tables) == 0:
