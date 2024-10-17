@@ -72,8 +72,8 @@ class DataSchema:
 
     def __init__(self, dsn: str, schema: str, min_count: int):
         self.min_count = min_count
-        self.schema = self.create_schema(dsn, min_count)
         self.schema_factory = SchemaFactory()
+        self.schema = self.create_schema(dsn, min_count)
         super().__init__()
 
     def create_schema(self, dsn: str, min_count: int) -> BaseSchema:
