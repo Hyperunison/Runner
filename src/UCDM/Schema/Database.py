@@ -1,3 +1,4 @@
+import decimal
 import logging
 from decimal import Decimal
 from typing import List, Dict, Tuple
@@ -61,3 +62,129 @@ class Database(BaseSchema):
 
     def execute_sql(self, sql: str):
         self.engine.execute(text(sql))
+
+    def get_table_column_stats(self, table_name: str, column_name: str, cte: str) -> TableStat:
+        with_cte_label = 'with CTE' if cte else ''
+        try:
+            unique_count = self.get_unique_values_count(table_name, column_name, cte)
+        except ProgrammingError as e:
+            self.engine.rollback()
+            if isinstance(e.orig, UndefinedTable):
+                return self.build_abandoned_table_column_stat(table_name, column_name)
+            else:
+                raise e
+
+        try:
+            sql = self.get_min_max_avg_value_query(table_name, column_name, cte)
+            row = self.fetch_row(sql)
+
+            min_value = row['min_value']
+            max_value = row['max_value']
+            avg_value = row['avg_value']
+
+            if not self.is_numeric(min_value) or not self.is_numeric(max_value) or not self.is_numeric(avg_value):
+                min_value = None
+                max_value = None
+                avg_value = None
+                median50_value = None
+                median25_value = None
+                median12_value = None
+                median37_value = None
+                median75_value = None
+                median63_value = None
+                median88_value = None
+            else:
+                median50_value = self.get_median(table_name, column_name, min_value, max_value, cte)
+                median25_value = self.get_median(table_name, column_name, min_value, median50_value, cte)
+                median12_value = self.get_median(table_name, column_name, min_value, median25_value, cte)
+                median37_value = self.get_median(table_name, column_name, median25_value, median50_value, cte)
+                median75_value = self.get_median(table_name, column_name, median50_value, max_value, cte)
+                median63_value = self.get_median(table_name, column_name, median50_value, median75_value, cte)
+                median88_value = self.get_median(table_name, column_name, median75_value, max_value, cte)
+                values_counts = []
+        except ProgrammingError as e:
+            logging.debug("Can't get min/max values for {}.{} {}".format(table_name, column_name, with_cte_label))
+            self.engine.rollback()
+            if not isinstance(e.orig, UndefinedFunction):
+                raise e
+            min_value=None
+            max_value=None
+            avg_value=None
+            median50_value=None
+            median25_value=None
+            median12_value=None
+            median37_value=None
+            median75_value=None
+            median63_value=None
+            median88_value=None
+
+        sql = self.get_values_count_query(table_name, column_name, cte)
+        sql = self.wrap_sql_by_cte(sql, table_name, cte)
+        logging.debug(sql)
+        values_counts = self.fetch_all(sql)
+        logging.info("Frequent values counts for {}.{} {}: {}".format(
+            table_name,
+            column_name,
+            with_cte_label,
+            (values_counts)
+        ))
+        nulls_count_sql = self.get_nulls_count_query(table_name, column_name, cte)
+        nulls_count = self.fetch_row(nulls_count_sql)['cnt']
+
+        stat = TableStat()
+        stat.table_name = table_name
+        stat.column_name = column_name
+        stat.abandoned = False
+        stat.unique_count = unique_count
+        stat.nulls_count = nulls_count
+        stat.min_value = min_value
+        stat.max_value = max_value
+        stat.avg_value = avg_value
+        stat.median12_value = median12_value
+        stat.median25_value = median25_value
+        stat.median37_value = median37_value
+        stat.median50_value = median50_value
+        stat.median63_value = median63_value
+        stat.median75_value = median75_value
+        stat.median88_value = median88_value
+        stat.values = values_counts
+        return stat
+
+    def get_median(self, table: str, column: str, min, max, cte: str):
+        if min is None or max is None:
+            return None
+        sql = self.get_median_query(table, column, min, max)
+        sql = self.wrap_sql_by_cte(sql, table, cte)
+
+        return self.fetch_row(sql)['median']
+
+    def get_median_query(self, table: str, column: str, min, max, cte: str) -> str:
+        raise Exception("Not implemented")
+
+    def build_abandoned_table_column_stat(self, table_name: str, column_name: str) -> TableStat:
+        stat = TableStat()
+        stat.table_name = table_name
+        stat.column_name = column_name
+        stat.abandoned = True
+        return stat
+
+    def get_unique_values_count_query(self, table_name: str, column_name: str) -> str:
+        raise Exception("Not implemented")
+
+    def get_unique_values_count(self, table_name: str, column_name: str, cte: str) -> int:
+        sql = self.get_unique_values_count_query(table_name, column_name)
+        sql = self.wrap_sql_by_cte(sql, table_name, cte)
+        row = self.fetch_row(sql)
+        return row['unique_count']
+
+    def get_min_max_avg_value_query(self, table_name: str, column_name: str, cte: str) -> str:
+        raise Exception("Not implemented")
+
+    def get_values_count_query(self, table_name: str, column_name: str, cte: str) -> str:
+        raise Exception("Not implemented")
+
+    def get_nulls_count_query(self, table_name: str, column_name: str, cte: str) -> str:
+        raise Exception("Not implemented")
+
+    def is_numeric(self, value) -> bool:
+        return isinstance(value, (int, float, complex, decimal.Decimal))
