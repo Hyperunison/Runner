@@ -12,12 +12,12 @@ from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.UCDM.DataSchema import VariableMapper
 
 class GwasFederated(WorkflowBase):
-    mapping_file_name: str = "var/gwas-mapping-values.csv"
-
     def execute(self, message: StartWorkflow):
         logging.info("Workflow execution task")
         logging.info(message)
         logging.info("Parameters: {}".format(message.parameters))
+
+        self.download_mapping()
 
         variables: List[str] = message.parameters['variables']
         csv_transformer = CsvToMappingTransformer()
@@ -25,7 +25,8 @@ class GwasFederated(WorkflowBase):
         ucdm_mapping_resolver = UCDMMappingResolver(csv_mapping)
 
         resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
-        sql_final = self.get_sql_final(message.cohort_definition)
+        query = CohortDefinition(message.cohort_definition)
+        sql_final = self.get_sql_final(query)
         ucdm = resolver.get_ucdm_result(
             sql_final,
             StrToIntGenerator()
@@ -57,15 +58,6 @@ class GwasFederated(WorkflowBase):
             }
         )
 
-    def download_mapping(self):
-        response = self.api.export_mapping()
-        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
-            while True:
-                chunk = response.read(8192)
-                if not chunk:
-                    break
-                file.write(chunk)
-
     def build_phenotype(self, ucdm: List[Dict[str, UCDMConvertedField]], variables: List[str]) -> str:
         if len(ucdm) == 0:
             return ''
@@ -79,6 +71,15 @@ class GwasFederated(WorkflowBase):
             i += 1
 
         return content
+
+    def download_mapping(self):
+        response = self.api.export_mapping()
+        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                file.write(chunk)
 
     def convert_value(self, variable) -> str:
         if isinstance(variable, bool):
