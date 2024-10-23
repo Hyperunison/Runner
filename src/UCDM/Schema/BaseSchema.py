@@ -6,13 +6,11 @@ class BaseSchema:
     type = ''
     engine = None
     min_count: int = 0
-    dsn: str
 
     known_functions = []
 
     def __init__(self, dsn: str, min_count: int):
         self.min_count = min_count
-        self.dsn = dsn
         super().__init__()
 
     def fetch_all(self, sql: str):
