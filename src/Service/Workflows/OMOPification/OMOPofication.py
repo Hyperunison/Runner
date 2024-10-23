@@ -22,7 +22,6 @@ from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 class OMOPofication(WorkflowBase):
     resolver: UCDMResolver
     dir: str = "var/"
-    mapping_file_name: str = "var/mapping-values.csv"
     manual_file_name: str = "var/manual.pdf"
     manual_csv_file_name: str = "var/manual.csv"
     api: Api
@@ -126,15 +125,6 @@ class OMOPofication(WorkflowBase):
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
-
-    def download_mapping(self):
-        response = self.api.export_mapping()
-        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
-            while True:
-                chunk = response.read(8192)
-                if not chunk:
-                    break
-                file.write(chunk)
 
     def download_manual_pdf(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         response = self.api.export_mapping_docs()

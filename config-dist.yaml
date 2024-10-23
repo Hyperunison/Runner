@@ -32,8 +32,12 @@ k8s:
 
 # endpoint to SQL database with patients phenoenotypic data
 phenoenotypicDb:
-  dsn: postgresql+psycopg2://***:***@***:***/***    # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
-  schema: postgres                                  # SQL engine used. May be postgres or labkey
+  # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
+  # examples:
+  # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase"
+  # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase?sslmode=require"
+  dsn: postgresql+psycopg2://***:***@***:***/***
+  schema: postgres                                  # SQL engine used. May be "postgres" or "labkey"
   min_count: 3                                      # Minimum number of unique patients with list of properties to allow system to export this properties
 
 # You may describe data forbidden to access by Runner
