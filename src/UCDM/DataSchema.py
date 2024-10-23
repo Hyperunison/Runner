@@ -6,6 +6,8 @@ import time
 import signal
 from typing import List, Dict, Tuple, Optional
 from src.Api import Api
+from src.Database.Converters.ConvertRawSql import ConvertRawSql
+from src.Database.Utils.DsnParser import DsnParser
 from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
@@ -118,6 +120,7 @@ class DataSchema:
 
         cte_part = self.get_cte_sql(parts[1])
         sql = '{} {}'.format(cte_part, parts[0])
+        sql = self.transform_sql_to_specific_database(sql)
 
         logging.info("Generated SQL query: \n{}".format(sql))
 
@@ -142,8 +145,6 @@ class DataSchema:
         else:
             with_cte_list: Dict[str, str] = {}
         cte_list = dict(list(cte_list.items()) + list(with_cte_list.items()))
-
-
 
         for exp in cohort_definition.where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
@@ -217,6 +218,12 @@ class DataSchema:
 
         return sql
 
+    def transform_sql_to_specific_database(self, sql: str) -> str:
+        parser = DsnParser()
+        engine_type = parser.get_engine_type(self.schema.dsn)
+        converter = ConvertRawSql()
+        return converter.convert_raw_sql(sql, engine_type)
+
     def fork(self, api: Api) -> int:
         # return 0
         pid = os.fork()
@@ -242,7 +249,6 @@ class DataSchema:
         return pid
 
     def execute_cohort_definition(self, cohort_api_request: CohortAPIRequest, api: Api):
-        api_logger = ApiLogger(api)
         key = cohort_api_request.cohort_definition.key
         mapper = VariableMapper(cohort_api_request.cohort_definition.fields)
 
