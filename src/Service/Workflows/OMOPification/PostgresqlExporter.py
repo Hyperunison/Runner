@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+from src.Database.Engines.EngineFacade import EngineFacade
 from src.Service.SqlBuilder import SqlBuilder
 from src.Service.UCDMConvertedField import UCDMConvertedField
 from src.Service.Workflows.OMOPification.LinesFilter import LinesFilter
@@ -11,6 +12,7 @@ class PostgresqlExporter:
     connection_string: str
     data_schema: DataSchema
     sql_builder: SqlBuilder
+    engine_facade: EngineFacade
 
     def __init__(self, connection_string: str):
         self.lines_filter = LinesFilter()
@@ -21,6 +23,9 @@ class PostgresqlExporter:
             min_count=0
         )
         self.sql_builder = SqlBuilder()
+        self.engine_facade = EngineFacade(
+            self.connection_string,
+        )
 
     def export(
             self,
@@ -86,7 +91,8 @@ class PostgresqlExporter:
             rows=database_rows,
             columns=columns
         )
-        self.data_schema.execute_sql(sql=sql)
+        self.engine_facade.execute(sql)
+        # self.data_schema.execute_sql(sql=sql)
 
     def get_field_names(
             self,
@@ -115,7 +121,8 @@ class PostgresqlExporter:
             table_name=table['tableName'],
             fields=table['columns']
         )
-        self.data_schema.execute_sql(sql=sql)
+        self.engine_facade.execute(sql)
+        # self.data_schema.execute_sql(sql=sql)
 
     def transform_rows_by_fields_map(
             self,
