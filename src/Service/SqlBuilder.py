@@ -46,6 +46,9 @@ class SqlBuilder:
         if origin_type.lower() == "varchar(max)":
             return "text"
 
+        if origin_type.lower() == "integer":
+            return "bigint"
+
         return origin_type.lower()
 
     def transform_rows_with_types(
