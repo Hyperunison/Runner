@@ -7,10 +7,8 @@ import logging
 
 
 def create_by_config(api_client, config, runner_instance_id) -> BaseAdapter:
-    if config['type'] == 'k8s':
-        return K8s(api_client, config['work_dir'], runner_instance_id, config['k8s'], config)
-    elif config['type'] == 'slurm':
-        return Slurm(api_client, config['slurm'])
+    if config['pipeline']['executor']['type'] == 'k8s':
+        return K8s(api_client, runner_instance_id, config['pipeline'])
     else:
-        logging.critical("Unknown adapter type " + config['type'])
+        logging.critical("Unknown adapter type " + config['pipeline']['executor']['type'])
         sys.exit(1)

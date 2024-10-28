@@ -31,7 +31,7 @@ k8s:
   volume: "ebs-claim-prod-10"           # volume name for shared files between pods. Should be mounter to $work_dir
 
 # endpoint to SQL database with patients phenoenotypic data
-phenoenotypicDb:
+phenotypic_db:
   # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
   # examples:
   # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase"

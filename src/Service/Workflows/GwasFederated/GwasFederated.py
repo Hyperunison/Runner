@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List, Dict
 
+from src import Api
 from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Message.StartWorkflow import StartWorkflow
 from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
@@ -12,10 +13,12 @@ from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.UCDM.DataSchema import VariableMapper
 
 class GwasFederated(WorkflowBase):
-    def execute(self, message: StartWorkflow):
+    def execute(self, message: StartWorkflow, api: Api):
         logging.info("Workflow execution task")
         logging.info(message)
         logging.info("Parameters: {}".format(message.parameters))
+        self.api.set_run_status(message.run_id, 'deploy')
+        self.api.add_log_chunk(message.run_id, "Downloading mappings from Unison platform\n")
 
         self.download_mapping()
 
@@ -27,16 +30,18 @@ class GwasFederated(WorkflowBase):
         resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
         query = CohortDefinition(message.cohort_definition)
         sql_final = self.get_sql_final(query)
+        self.api.add_log_chunk(message.run_id, "Executing SQL query and transforming to CDM format\n{}\n".format(sql_final))
         ucdm = resolver.get_ucdm_result(
             sql_final,
             StrToIntGenerator()
         )
+        self.api.add_log_chunk(message.run_id, "Building phenotype.txt\n")
         csv_content = self.build_phenotype(ucdm, variables)
         nextflow_config = self.get_nextflow_config(variables, bool(message.parameters['isBinary']))
 
         self.adapter.run_nextflow_run_abstract(
             message.run_id,
-            "pwd; sleep 10; nextflow run genepi/nf-gwas -r v1.0.4 -c nextflow.config -name {} -with-report report.html -with-weblog {} -with-trace -resume -ansi-log".format(
+            "sudo chown -R nextflow .; nextflow run genepi/nf-gwas -r v1.0.4 -c nextflow.config -name {} -with-report report.html -with-weblog {} -with-trace -ansi-log; ls -lha".format(
                 message.run_name,
                 message.weblog_url,
             ),
@@ -44,18 +49,16 @@ class GwasFederated(WorkflowBase):
             message.s3_path,
             {
                 "phenotype.txt": csv_content,
-                "nextflow.config": nextflow_config,
-                'aws_config': "[default]\nregion = eu-central-1\n",
-                'aws_credentials': "[default]\n" +
-                                   "aws_access_key_id={}\n".format(message.aws_id) +
-                                   "aws_secret_access_key={}\n".format(message.aws_key),
+                "nextflow.config": nextflow_config
             },
             {
-                ".nextflow.log": "/basic/",
-                "nextflow.config": "/",
+                ".nextflow.log": "/basic/.nextflow.log",
+                "nextflow.config": "/nextflow.config",
                 "trace-*.txt": "/basic/",
                 "output/": "/output/",
-            }
+            },
+            message.aws_id,
+            message.aws_key
         )
 
     def build_phenotype(self, ucdm: List[Dict[str, UCDMConvertedField]], variables: List[str]) -> str:

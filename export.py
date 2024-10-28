@@ -63,9 +63,9 @@ rows = t.transform_with_file_path(
 )
 
 schema = DataSchema(
-    config['phenoenotypicDb']['dsn'],
-    config['phenoenotypicDb']['schema'],
-    config['phenoenotypicDb']['min_count']
+    config['phenotypic_db']['dsn'],
+    config['phenotypic_db']['schema'],
+    config['phenotypic_db']['min_count']
 )
 str_to_int = StrToIntGenerator()
 str_to_int.load_from_file()

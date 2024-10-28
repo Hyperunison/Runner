@@ -38,6 +38,8 @@ RUN pip install "psycopg2"
 RUN pip install "sentry-sdk"
 RUN pip install "labkey==2.6.1"
 RUN pip install "python-json-logger"
+RUN pip install "sqlglot===25.24.5"
+RUN pip install "PyMySQL===1.1.1"
 
 RUN apt-get install psmisc
 

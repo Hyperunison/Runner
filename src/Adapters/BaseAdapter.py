@@ -6,12 +6,12 @@ from src.Message.NextflowRun import NextflowRun
 
 
 class BaseAdapter:
-    def process_nextflow_run(self, message: NextflowRun) -> bool:
+    def process_nextflow_run(self, message: NextflowRun, config: Dict) -> bool:
         pass
 
     def run_nextflow_run_abstract(
             self, run_id: int, nextflow_command: str, dir: Optional[str], aws_s3_path: str, input_files: Dict[str, str],
-            output_files: Dict[str, str]
+            output_files: Dict[str, str], aws_id: str, aws_key: str
     ) -> bool:
         pass
 
