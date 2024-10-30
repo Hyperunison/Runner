@@ -7,13 +7,21 @@ class SqlBuilder:
         columns_part = ", ".join([f"{col}" for col in columns_list])
         transformed_rows = self.transform_rows_with_types(rows, columns)
         values_part = ", ".join([
-            "(" + ", ".join([f"{value}" for value in row.values()]) + ")"
+            "(" + ", ".join(
+                [f"{value}" for value in row.values()]
+            ) + ")"
             for row in transformed_rows
         ])
 
         sql_query = f"INSERT INTO {table_name} ({columns_part}) VALUES {values_part};"
 
         return sql_query
+
+    def add_slashes(self, value):
+        if isinstance(value, str):
+            return value.replace("\\", "\\\\").replace("'", "''")
+
+        return value
 
     def build_create_table(self, table_name: str, field_names: List[str]) -> str:
         columns_definition = ", ".join([f"{field} VARCHAR(512)" for field in field_names])
@@ -78,4 +86,4 @@ class SqlBuilder:
                 if column['type'] == 'integer' and not column['required'] and value == '':
                     return 'null'
 
-        return "'" + value + "'"
+        return "'" + self.add_slashes(value) + "'"
