@@ -23,6 +23,7 @@ Method | HTTP request | Description
 [**set_job_state**](AgentApi.md#set_job_state) | **PUT** /api/agent/v{version}/{token}/job/runner-message/{runId}/set-state | 
 [**set_kill_result**](AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 [**set_process_logs**](AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
+[**set_run_dir**](AgentApi.md#set_run_dir) | **POST** /api/agent/v{version}/{token}/run/{id}/dir | 
 [**set_run_status**](AgentApi.md#set_run_status) | **POST** /api/agent/v{version}/{token}/run/{id}/status | 
 [**set_sql_query_for_cohort_api_request**](AgentApi.md#set_sql_query_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/sql-query | 
 [**set_table_column_freequent_values**](AgentApi.md#set_table_column_freequent_values) | **POST** /api/agent/v{version}/{token}/ucdm/tables/{table}/columns/{column}/values | 
@@ -1422,6 +1423,86 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | List all bricks |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **set_run_dir**
+> str set_run_dir(id, version, token)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from auto_api_client.model.set_run_dir_request import SetRunDirRequest
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
+    version = "1" # str | 
+    token = "z" # str | 
+    set_run_dir_request = SetRunDirRequest(
+        dir="",
+    ) # SetRunDirRequest |  (optional)
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.set_run_dir(id, version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_run_dir: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.set_run_dir(id, version, token, set_run_dir_request=set_run_dir_request)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->set_run_dir: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **set_run_dir_request** | [**SetRunDirRequest**](SetRunDirRequest.md)|  | [optional]
+
+### Return type
+
+**str**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Just OK |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

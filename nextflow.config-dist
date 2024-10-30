@@ -1,0 +1,11 @@
+process {
+    executor = 'k8s'
+}
+
+k8s {
+    storageClaimName = 'xxx'
+    storageMountPath = '/path/to/folder'
+    storageSubPath = ''
+    debug.yaml = true
+    namespace = 'prod'
+}

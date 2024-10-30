@@ -137,6 +137,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_run_dir(self):
+        """Test case for set_run_dir
+
+        """
+        pass
+
     def test_set_run_status(self):
         """Test case for set_run_status
 

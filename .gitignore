@@ -6,3 +6,4 @@ var/tmp
 var/pgsql
 .env
 .run
+nextflow.config

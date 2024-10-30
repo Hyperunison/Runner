@@ -31,6 +31,8 @@ from auto_api_client.model.set_task_error_request import SetTaskErrorRequest
 from auto_api_client.model.set_sql_query_for_cohort_api_request_request import \
     SetSQLQueryForCohortApiRequestRequest
 
+from auto_api_client.model.set_run_dir_request import SetRunDirRequest
+
 
 class Api:
     api_instance: AgentApi = None
@@ -48,6 +50,10 @@ class Api:
     def set_run_status(self, id: int, status: str):
         logging.info("Change status of run={} to {}".format(id, status))
         self.api_instance.set_run_status(id=id, status=status, version=self.version, token=self.token)
+
+    def set_run_dir(self, id: int, dir: str):
+        logging.info("Change dir of run={} to {}".format(id, dir))
+        self.api_instance.set_run_dir(id=id, set_run_dir_request=SetRunDirRequest(dir=dir), version=self.version, token=self.token)
 
     def set_process_logs(self, process_id: str, logs: str, channel: str):
         self.api_instance.set_process_logs(
@@ -129,7 +135,7 @@ class Api:
         )
 
     def export_mapping(self):
-        logging.info("Export mapping in CSV file")
+        logging.info("Export mapping to CSV file")
 
         return self.api_instance.export_mapping_short_for_specific_biobank(
             version=self.version,

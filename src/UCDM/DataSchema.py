@@ -225,7 +225,7 @@ class DataSchema:
         return converter.convert_raw_sql(sql, engine_type)
 
     def fork(self, api: Api) -> int:
-        # return 0
+        return 0
         pid = os.fork()
         logging.info("Forked, pid={}".format(pid))
 
