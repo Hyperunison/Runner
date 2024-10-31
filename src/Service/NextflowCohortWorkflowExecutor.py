@@ -25,4 +25,4 @@ class NextflowCohortWorkflowExecutor:
         else:
             raise ValueError("Unknown workflow {}".format(message.workflow_name))
 
-        workflow.execute(message, self.api)
+        workflow.execute(message)
