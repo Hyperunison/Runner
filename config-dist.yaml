@@ -45,3 +45,35 @@ data_protected:
   schemas: []                                       # List of protected schemes. For example: ["public", "personal"]
   tables: []                                        # List of protected tables. For example: ["public.participant", "personal.addresses"]
   columns: []
+
+pipeline:
+  file_transfer:
+    type: k8s
+    namespace: prod
+    image: ubuntu:22.04
+    command: "sleep 3600"    # timeout
+    pod_prefix: "unison-file-transfer"
+    base_dir: "/data/nextflow/pipelines/dev"
+    volumes:
+      ebs-claim-prod5-encrypted: "/data/nextflow"
+    labels:
+      unison: 'yes'
+      type: '{pod_prefix}'
+      run_id: '{run_id}'
+      last_connect: '{last_connect}'
+      agent_id: '{agent_id}'
+
+  executor:
+    type: k8s
+    namespace: prod
+    work_dir: "/data/nextflow/pipelines/dev"
+    pod_prefix: "unison-dev-worker"
+    image: '058264135461.dkr.ecr.eu-central-1.amazonaws.com/main:nextflow-dev-latest'
+    volumes:
+      ebs-claim-prod5-encrypted: "/data/nextflow"
+    labels:
+      type: '{pod_prefix}'
+      run_id: '{run_id}'
+      instance: '{instance}'
+      last_connect: '{last_connect}'
+      agent_id: '{agent_id}'
