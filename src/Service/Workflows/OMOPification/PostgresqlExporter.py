@@ -92,7 +92,6 @@ class PostgresqlExporter:
             columns=columns
         )
         self.engine_facade.execute(sql)
-        # self.data_schema.execute_sql(sql=sql)
 
     def get_field_names(
             self,
@@ -122,7 +121,6 @@ class PostgresqlExporter:
             fields=table['columns']
         )
         self.engine_facade.execute(sql)
-        # self.data_schema.execute_sql(sql=sql)
 
     def transform_rows_by_fields_map(
             self,
@@ -149,11 +147,6 @@ class PostgresqlExporter:
         result: Dict[str, str] = {}
 
         for field, value in fields_map.items():
-            field_name = self.get_field_name(field)
-            result[value['name']] = field_name
+            result[value['name']] = value['name']
 
         return result
-
-    def get_field_name(self, field) -> str:
-        parts = field.split('.')
-        return parts[-1]
