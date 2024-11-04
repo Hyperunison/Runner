@@ -1,22 +1,22 @@
 import os
 from src.Message.StartWorkflow import StartWorkflow
-from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
+from src.Service import PipelineExecutor
 from src.UCDM.DataSchema import DataSchema
 
 
 class WorkflowBase:
     mapping_file_name: str = "var/mapping-values.csv"
     api: Api
-    adapter: BaseAdapter
+    pipeline_executor: PipelineExecutor
     schema: DataSchema
 
-    def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema):
+    def __init__(self, api: Api, pipeline_executor: PipelineExecutor, schema: DataSchema):
         self.api = api
-        self.adapter = adapter
+        self.pipeline_executor = pipeline_executor
         self.schema = schema
 
-    def execute(self, message: StartWorkflow):
+    def execute(self, message: StartWorkflow, api: Api):
         pass
 
     def download_mapping(self):

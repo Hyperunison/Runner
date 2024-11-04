@@ -12,6 +12,7 @@ from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.UCDM.DataSchema import VariableMapper
 
+
 class GwasFederated(WorkflowBase):
     def execute(self, message: StartWorkflow, api: Api):
         logging.info("Workflow execution task")
@@ -30,7 +31,8 @@ class GwasFederated(WorkflowBase):
         resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
         query = CohortDefinition(message.cohort_definition)
         sql_final = self.get_sql_final(query)
-        self.api.add_log_chunk(message.run_id, "Executing SQL query and transforming to CDM format\n{}\n".format(sql_final))
+        self.api.add_log_chunk(message.run_id,
+                               "Executing SQL query and transforming to CDM format\n{}\n".format(sql_final))
         ucdm = resolver.get_ucdm_result(
             sql_final,
             StrToIntGenerator()
@@ -39,21 +41,24 @@ class GwasFederated(WorkflowBase):
         csv_content = self.build_phenotype(ucdm, variables)
         nextflow_config = self.get_nextflow_config(variables, bool(message.parameters['isBinary']))
 
-        self.adapter.run_nextflow_run_abstract(
+        cmd = "sudo chown -R nextflow .; nextflow run genepi/nf-gwas -r v1.0.4 -c nextflow-gwas.config -c nextflow.config -name {} -with-report report.html -with-weblog {} -with-trace -ansi-log".format(
+            message.run_name,
+            message.weblog_url,
+        )
+
+        self.pipeline_executor.run_nextflow_run_abstract(
             message.run_id,
-            "sudo chown -R nextflow .; nextflow run genepi/nf-gwas -r v1.0.4 -c nextflow.config -name {} -with-report report.html -with-weblog {} -with-trace -ansi-log; ls -lha".format(
-                message.run_name,
-                message.weblog_url,
-            ),
+            cmd,
             message.dir,
             message.s3_path,
             {
                 "phenotype.txt": csv_content,
-                "nextflow.config": nextflow_config
+                "nextflow.config": file_get_contents('nextflow.config'),
+                "nextflow-gwas.config": nextflow_config
             },
             {
                 ".nextflow.log": "/basic/.nextflow.log",
-                "nextflow.config": "/nextflow.config",
+                "nextflow-gwas.config": "/nextflow-gwas.config",
                 "trace-*.txt": "/basic/",
                 "output/": "/output/",
             },
@@ -96,7 +101,7 @@ class GwasFederated(WorkflowBase):
         else:
             is_binary_str = 'false'
 
-        config =  "params {\n"
+        config = "params {\n"
         config += "  project                       = 'Unison_GWAS'\n"
         config += "  genotypes_prediction          = '/data/nextflow/data/example.{bim,bed,fam}'\n"
         config += "  genotypes_association         = '/data/nextflow/data/example.vcf.gz'\n"
@@ -128,3 +133,8 @@ class GwasFederated(WorkflowBase):
             False,
             False,
         )
+
+
+def file_get_contents(file_path: str) -> str:
+    with open(file_path, 'r') as file:
+        return file.read()

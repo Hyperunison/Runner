@@ -1,7 +1,6 @@
 import logging
 import os
 
-from src.FileTransport.FileTransferFactory import create_file_transfer
 from src.Service.ConfigurationLoader import ConfigurationLoader
 import time
 import auto_api_client
@@ -42,17 +41,17 @@ with ApiClient(configuration) as api_client:
     runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
-    adapter = create_by_config(api, config, runner_instance_id)
+    pipeline_executor = create_by_config(api, config, runner_instance_id)
     schema = DataSchema(config['phenotypic_db']['dsn'], config['phenotypic_db']['schema'],
                         config['phenotypic_db']['min_count'])
-    workflow_executor = NextflowCohortWorkflowExecutor(api, adapter, schema)
+    workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema)
     check_interval = config['check_runs_status_interval']
     last_check = None
     while True:
         response = None
         try:
             if not last_check or time.time() - last_check > check_interval:
-                adapter.check_runs_statuses()
+                pipeline_executor.check_runs_statuses()
                 last_check = time.time()
             response = api.next_task()
             message = MessageFactory().create_message_object_from_response(message=response)
@@ -63,11 +62,11 @@ with ApiClient(configuration) as api_client:
                     if result != 'ok':
                         continue
             if type(message) is NextflowRun:
-                adapter.process_nextflow_run(message, config['pipeline'])
+                pipeline_executor.process_nextflow_run(message)
             elif type(message) is GetProcessLogs:
-                adapter.process_get_process_logs(message)
+                pipeline_executor.adapter.process_get_process_logs(message)
             elif type(message) is KillJob:
-                adapter.process_kill_job(message)
+                pipeline_executor.adapter.process_kill_job(message)
             elif type(message) is CohortAPIRequest:
                 schema.execute_cohort_definition(message, api)
             elif type(message) is KillCohortAPIRequest:

@@ -3,3 +3,5 @@
 *.pdf
 *.json
 pipeline_*
+nextflow
+
