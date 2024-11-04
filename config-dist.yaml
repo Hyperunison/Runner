@@ -55,7 +55,7 @@ pipeline:
     pod_prefix: "unison-file-transfer"
     base_dir: "/data/nextflow/pipelines/dev"
     volumes:
-      ebs-claim-prod5-encrypted: "/data/nextflow"
+      volume_name: "/data/nextflow"
     labels:
       unison: 'yes'
       type: '{pod_prefix}'
@@ -70,7 +70,7 @@ pipeline:
     pod_prefix: "unison-dev-worker"
     image: '058264135461.dkr.ecr.eu-central-1.amazonaws.com/main:nextflow-dev-latest'
     volumes:
-      ebs-claim-prod5-encrypted: "/data/nextflow"
+      volume_name: "/data/nextflow"
     labels:
       type: '{pod_prefix}'
       run_id: '{run_id}'
