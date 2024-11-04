@@ -3,7 +3,7 @@ class BaseFileTransport:
     def __init__(self):
         pass
 
-    def init(self):
+    def init(self, run_id: int, agent_id: int):
         pass
 
     def cleanup(self):

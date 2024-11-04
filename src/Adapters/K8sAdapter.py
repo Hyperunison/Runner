@@ -1,15 +1,11 @@
-import json
 import logging
-import random
 import shlex
 import string
 import subprocess
-import tempfile
 import time
 import os
 import sys
-from typing import Dict, Optional
-
+from typing import Dict
 import yaml
 
 from ..FileTransport.FileTransferFactory import create_file_transfer
@@ -18,9 +14,8 @@ from src.Adapters.BaseAdapter import BaseAdapter
 from src.Api import Api
 from src.Message import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
-from src.Message.NextflowRun import NextflowRun
 
-sendLogsPeriod = 3
+
 updateLabelPeriod = 30
 
 
@@ -29,19 +24,17 @@ def file_get_contents(file_path: str) -> str:
         return file.read()
 
 
-def file_put_contents(file_path: str, content: str):
-    with open(file_path, 'w') as file:
-        file.write(content)
+def _check_pid(pid: int):
+    """ Check For the existence of a unix pid. """
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
 
 
-def create_temp_file(content: str) -> str:
-    tmp = tempfile.NamedTemporaryFile(delete=False, prefix="upload_tmp_file", suffix=".bin", mode='w')
-    tmp.write(content)
-    tmp.close()
-    return tmp.name
-
-
-class K8s(BaseAdapter):
+class K8sAdapter(BaseAdapter):
     namespace: str = None
     image: str = None
     pod_prefix: str = None
@@ -54,7 +47,7 @@ class K8s(BaseAdapter):
     observed_runs: {} = {}
     agent_id: int = None
 
-    def __init__(self, api_client: Api, runner_instance_id: str, config):
+    def __init__(self, api_client: Api, runner_instance_id: str, config, agent_id: int):
         self.namespace = config['executor']['namespace']
         self.image = config['executor']['image']
         self.pod_prefix = config['executor']['pod_prefix']
@@ -64,72 +57,16 @@ class K8s(BaseAdapter):
         self.work_dir = config['executor']['work_dir']
         self.config = config
         self.hostname = runner_instance_id
-        self.agent_id = self.api_client.get_agent_id()
+        self.agent_id = agent_id
 
     def type(self):
         return 'k8s'
 
-    def process_nextflow_run(self, message: NextflowRun, config: Dict) -> bool:
-        input_files: Dict[str, str] = {
-            'main.nf': message.nextflow_code,
-            'data.json': json.dumps(message.input_data),
-            'nextflow.config': file_get_contents('nextflow.config'),
-        }
-
-        output_file_masks: Dict[str, str] = {
-            ".nextflow.log": "/basic/",
-            "trace-*.txt": "/basic/",
-        }
-
-        return self.run_nextflow_run_abstract(
-            message.run_id,
-            message.command,
-            message.dir,
-            message.aws_s3_path,
-            input_files,
-            output_file_masks,
-            message.aws_id,
-            message.aws_key
-        )
-
-    def run_nextflow_run_abstract(
-            self, run_id: int, nextflow_command: str, workdir: Optional[str], aws_s3_path: str,
-            input_files: Dict[str, str], output_file_masks: Dict[str, str], aws_id: str, aws_key: str
-    ):
-        self.api_client.set_run_status(run_id, 'process')
+    def run_pipeline(self, nextflow_command: str, folder: str, run_id: int):
         k8s = K8sService(self.namespace)
-        file_transfer = create_file_transfer(self.config['file_transfer'])
-        self.api_client.api_instance.api_client.close()
-        self.api_client.api_instance.api_client.rest_client.pool_manager.clear()
-        folder = self.get_pipeline_remote_dir_name(workdir)
-
-        logging.info("Uploading workflow files")
-
-        self.api_client.set_run_dir(run_id, folder)
-
-        file_transfer.init()
-        k8s.wait_pod_status(file_transfer.pod_name, ['Running'])
-
-        file_transfer.mkdir(file_transfer.base_dir + "/" + folder)
-
-        for file in input_files.keys():
-            file_transfer.upload(create_temp_file(input_files[file]),
-                                 file_transfer.base_dir + "/" + folder + "/" + file)
-
-        file_transfer.cleanup()
+        nextflow_command = 'cd ' + self.work_dir + "/" + folder + ';\n' + nextflow_command
         labels = self.get_labels(run_id)
         labels['folder'] = folder
-
-        pipeline_config: Dict = {
-            'aws_id': aws_id,
-            'aws_key': aws_key,
-            'aws_s3_path': aws_s3_path,
-            'output_file_masks': output_file_masks,
-        }
-        os.mkdir("var/" + folder)
-        file_put_contents('var/{}/pipeline_config.yaml'.format(folder), yaml.dump(pipeline_config))
-
-        nextflow_command = 'cd ' + self.work_dir + "/" + folder + ';\n' + nextflow_command
         pod_name = k8s.create_pod(self.pod_prefix, nextflow_command, labels, self.image, self.volumes)
         k8s.wait_pod_status(pod_name, ['Running', 'Failed', 'Succeeded'], 60)
         self.process_send_pod_logs(k8s, pod_name, int(run_id))
@@ -146,13 +83,12 @@ class K8s(BaseAdapter):
         if pid == 0:
             k8s.wait_pod_status(pod_name, ['Completed', 'Failed', 'Succeeded'], 86400 * 30, 30)
             file_transfer = create_file_transfer(config)
-            file_transfer.init()
+            file_transfer.init(run_id, self.agent_id)
 
             pipeline_config = yaml.safe_load(file_get_contents('var/{}/pipeline_config.yaml'.format(folder)))
             for mask in pipeline_config['output_file_masks'].keys():
                 target = pipeline_config['output_file_masks'][mask]
-                file_transfer.download(file_transfer.base_dir + "/" + folder + '/' + mask,
-                                       "var/" + folder + "/output/" + target)
+                file_transfer.download(folder + '/' + mask, "var/" + folder + "/output/" + target)
             self.upload_local_file_to_s3(
                 "var/" + folder + '/output', pipeline_config['aws_s3_path'], pipeline_config['aws_id'],
                 pipeline_config['aws_key']
@@ -171,12 +107,6 @@ class K8s(BaseAdapter):
             labels[label] = labels[label].replace('{agent_id}', str(self.agent_id))
 
         return labels
-
-    def get_pipeline_remote_dir_name(self, work_dir: str) -> str:
-        if work_dir == "" or work_dir is None:
-            return 'pipeline_' + self._random_word(16)
-        else:
-            return work_dir.replace(self.work_dir, "")
 
     def process_get_process_logs(self, message: GetProcessLogs):
         k8s = K8sService(self.namespace)
@@ -240,8 +170,8 @@ class K8s(BaseAdapter):
                 if instance and instance == self.hostname:
                     if run_id in self.observed_runs:
                         pid = self.observed_runs[run_id]
-                        logging.info("pid {} - state {}".format(pid, self._check_pid(pid)))
-                        if not self._check_pid(pid):
+                        logging.info("pid {} - state {}".format(pid, _check_pid(pid)))
+                        if not _check_pid(pid):
                             del self.observed_runs[run_id]
                         if not last_connect or time.time() - last_connect >= updateLabelPeriod:
                             k8s.add_label_to_pod(pod_name, "last_connect='{}'".format(int(float(time.time()))), True)
@@ -257,33 +187,4 @@ class K8s(BaseAdapter):
                         int(run_id), pod_name, k8s, folder, self.config['file_transfer']
                     )
 
-    def upload_local_file_to_s3(self, filename: str, s3_path: str, aws_id: str, aws_key: str) -> bool:
-        logging.info("Uploading local file {} to {}".format(filename, s3_path))
 
-        cmd = (
-            'bash -c \'export AWS_ACCESS_KEY_ID="{}"; export AWS_SECRET_ACCESS_KEY="{}"; aws s3 cp --recursive {} {}\''.
-            format(aws_id, aws_key, filename, s3_path))
-
-        logging.info("Executing command: {}".format(cmd))
-        p = subprocess.run(shlex.split(cmd), capture_output=True)
-
-        if p.returncode > 0:
-            logging.critical(
-                "Can't upload file to S3, stdout={}, error={}, return_code={}".format(cmd, p.stdout, p.stderr,
-                                                                                      p.returncode))
-            return False
-
-        return True
-
-    def _random_word(self, length: int):
-        letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(length))
-
-    def _check_pid(self, pid: int):
-        """ Check For the existence of a unix pid. """
-        try:
-            os.kill(pid, 0)
-        except OSError:
-            return False
-        else:
-            return True

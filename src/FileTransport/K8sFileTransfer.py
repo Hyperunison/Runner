@@ -1,3 +1,5 @@
+import time
+
 from src.FileTransport.BaseFileTransport import BaseFileTransport
 from src.Service.K8s import K8s
 
@@ -26,8 +28,9 @@ class K8sFileTransfer(BaseFileTransport):
 
         self.k8s = K8s(namespace)
 
-    def init(self):
-        pod_name = self.k8s.create_pod(self.pod_prefix, 'sleep infinity', self.labels, self.image, self.volumes)
+    def init(self, run_id: int, agent_id: int):
+        labels = self.get_labels(run_id, agent_id)
+        pod_name = self.k8s.create_pod(self.pod_prefix, 'sleep infinity', labels, self.image, self.volumes)
         if pod_name is None:
             raise Exception("Can't create pod for uploading files")
         self.pod_name = pod_name
@@ -36,14 +39,26 @@ class K8sFileTransfer(BaseFileTransport):
         if not pod_started:
             raise Exception("Can't start pod for uploading files")
 
+        self.k8s.wait_pod_status(pod_name, ['Running'])
+
+    def get_labels(self, run_id: int, agent_id: int):
+        labels = self.labels
+        for label in labels.keys():
+            labels[label] = labels[label].replace('{pod_prefix}', self.pod_prefix)
+            labels[label] = labels[label].replace('{run_id}', str(run_id))
+            labels[label] = labels[label].replace('{last_connect}', str(int(float(time.time()))))
+            labels[label] = labels[label].replace('{agent_id}', str(agent_id))
+
+        return labels
+
     def upload(self, local_path: str, remote_path: str):
-        self.k8s.upload(self.pod_name, local_path, remote_path)
+        self.k8s.upload(self.pod_name, local_path, self.base_dir + '/' + remote_path)
 
     def mkdir(self, dirname: str):
-        self.k8s.create_folder_remote(self.pod_name, dirname)
+        self.k8s.create_folder_remote(self.pod_name, self.base_dir + '/' + dirname)
 
     def download(self, remote_path: str, local_path: str):
-        self.k8s.download(self.pod_name, remote_path, local_path)
+        self.k8s.download(self.pod_name, self.base_dir + "/" + remote_path, local_path)
 
     def cleanup(self):
         self.k8s.delete_pod(self.pod_name)

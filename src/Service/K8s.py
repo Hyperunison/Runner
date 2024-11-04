@@ -13,8 +13,6 @@ from typing import List, Optional, Dict
 import yaml
 
 sendLogsPeriod = 3
-updateLabelPeriod = 30
-
 
 class K8s:
     namespace: str = None
@@ -153,7 +151,7 @@ class K8s:
 
         return pod_name
 
-    def get_pod_status(self, pod_name: str) -> str:
+    def get_pod_status(self, pod_name: str) -> Optional[str]:
         cmd = "kubectl --namespace={} get pod {} -o json".format(self.namespace, pod_name)
         args = shlex.split(cmd)
         p = subprocess.run(args, capture_output=True)
@@ -164,11 +162,10 @@ class K8s:
         json_string: str = str(p.stdout.decode('utf-8'))
         try:
             data = json.loads(json_string)
+            return data['status']['phase']
         except JSONDecodeError as e:
             logging.error("Can't parse k8s response, as it's not json: {}".format(json_string))
-            pass
-
-        return data['status']['phase']
+            return None
 
     def wait_pod_status(self, pod_name: str, required_statuses: List[str], timeout: int = 30, interval: int = 1) -> bool:
         total_wait = 0

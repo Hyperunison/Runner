@@ -5,6 +5,7 @@ import os
 from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
+from src.Service import PipelineExecutor
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
 from src.Service.Workflows.WorkflowBase import WorkflowBase
@@ -26,11 +27,11 @@ class OMOPofication(WorkflowBase):
     manual_csv_file_name: str = "var/manual.csv"
     api: Api
 
-    def __init__(self, api: Api, adapter: BaseAdapter, schema: DataSchema, may_upload_private_data: bool):
+    def __init__(self, api: Api, pipeline_executor: PipelineExecutor, schema: DataSchema, may_upload_private_data: bool):
         self.may_upload_private_data = may_upload_private_data
-        super().__init__(api, adapter, schema)
+        super().__init__(api, pipeline_executor, schema)
 
-    def execute(self, message: StartOMOPoficationWorkflow):
+    def execute(self, message: StartOMOPoficationWorkflow, api: Api):
         api_logger = ApiLogger(self.api)
         self.download_mapping()
         csv_transformer = CsvToMappingTransformer()
@@ -44,7 +45,7 @@ class OMOPofication(WorkflowBase):
 
         if self.may_upload_private_data:
             s3_path = s3_folder + 'mapping-values.csv'
-            if not self.adapter.upload_local_file_to_s3(os.path.abspath(self.mapping_file_name), s3_path, message.aws_id, message.aws_key):
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(os.path.abspath(self.mapping_file_name), s3_path, message.aws_id, message.aws_key):
                 api_logger.write(message.id, "Can't upload mapping-values.csv file to S3")
 
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
@@ -109,7 +110,7 @@ class OMOPofication(WorkflowBase):
                         skipped_rows = self.build_csv_file(filename, ucdm, fields_map)
                         if self.may_upload_private_data:
                             s3_path = s3_folder + table_name + '.csv'
-                            if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
+                            if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
                                 api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
                                 self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
                                 return
@@ -137,7 +138,7 @@ class OMOPofication(WorkflowBase):
 
         if self.may_upload_private_data:
             s3_path = s3_folder + 'manual.pdf'
-            if not self.adapter.upload_local_file_to_s3(self.manual_file_name, s3_path, message.aws_id, message.aws_key):
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.manual_file_name, s3_path, message.aws_id, message.aws_key):
                 api_logger.write(message.id, "Can't upload manual.pdf file to S3")
                 return
 
@@ -152,7 +153,7 @@ class OMOPofication(WorkflowBase):
 
         if self.may_upload_private_data:
             s3_path = s3_folder + 'manual.csv'
-            if not self.adapter.upload_local_file_to_s3(self.manual_csv_file_name, s3_path, message.aws_id, message.aws_key):
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.manual_csv_file_name, s3_path, message.aws_id, message.aws_key):
                 api_logger.write(message.id, "Can't upload manual.csv file to S3")
                 return
 
@@ -163,7 +164,7 @@ class OMOPofication(WorkflowBase):
 
         if self.may_upload_private_data:
             s3_path = s3_folder + table_name + '.sql'
-            if not self.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key):
                 api_logger.write(message.id, "Can't upload {}.sql file to S3".format(table_name))
                 return
 

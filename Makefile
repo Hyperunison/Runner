@@ -1,8 +1,11 @@
 up:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down --remove-orphans ;\
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d ;\
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build ;\
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T unison-agent sh -c "pip install -r requirements.txt" ;\
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T unison-agent sh -c "pip install pydevd_pycharm==233.13763.5"
+
+down:
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down --remove-orphans
 
 up-console:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down --remove-orphans ;\
