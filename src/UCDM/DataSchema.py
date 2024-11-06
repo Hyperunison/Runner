@@ -72,7 +72,7 @@ class DataSchema:
     schema: BaseSchema
     schema_factory: SchemaFactory
 
-    def __init__(self, dsn: str, schema: str, min_count: int):
+    def __init__(self, dsn: str, min_count: int):
         self.min_count = min_count
         self.schema_factory = SchemaFactory()
         self.schema = self.create_schema(dsn, min_count)

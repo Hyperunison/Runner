@@ -42,8 +42,7 @@ with ApiClient(configuration) as api_client:
     api_instance = agent_api.AgentApi(api_client)
     api = Api(api_instance, config['api_version'], config['agent_token'])
     pipeline_executor = create_by_config(api, config, runner_instance_id)
-    schema = DataSchema(config['phenotypic_db']['dsn'], config['phenotypic_db']['schema'],
-                        config['phenotypic_db']['min_count'])
+    schema = DataSchema(config['phenotypic_db']['dsn'], config['phenotypic_db']['min_count'])
     workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema)
     check_interval = config['check_runs_status_interval']
     last_check = None

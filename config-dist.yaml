@@ -9,7 +9,6 @@
 api_version: 1.0
 api_url: "https://api.hyperunison.com"
 agent_token: "<copy it from your biobank>"
-work_dir: "/data/nextflow/pipelines"    # Used for k8s only
 idle_delay: 5.0                         # delay between requests to Hyperunison backend to get new tasks
 check_runs_status_interval: 30.0
 sentry_dsn: ""                          # Generate sentryDSN in https://sentry.io/ and use in here to monitor errors
@@ -22,14 +21,6 @@ log:
   level: 20 # 10 - debug, 50 - critical. I recommend level=20 for most users
   filename: "" #filename or empty for stdout
 
-type: k8s                               # cluster type. Now only k8s is supported
-# settings for k8s HPC
-k8s:
-  namespace: "dev"                      # namespace to use for pods
-  master_pod: "nextflow-dev"            # the pod for upload pipeline results files to S3
-  pod_prefix: "unison-worker"           # the prefix for Unison pods
-  volume: "ebs-claim-prod-10"           # volume name for shared files between pods. Should be mounter to $work_dir
-
 # endpoint to SQL database with patients phenoenotypic data
 phenotypic_db:
   # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
@@ -37,7 +28,6 @@ phenotypic_db:
   # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase"
   # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase?sslmode=require"
   dsn: postgresql+psycopg2://***:***@***:***/***
-  schema: postgres                                  # SQL engine used. May be "postgres" or "labkey"
   min_count: 3                                      # Minimum number of unique patients with list of properties to allow system to export this properties
 
 # You may describe data forbidden to access by Runner
