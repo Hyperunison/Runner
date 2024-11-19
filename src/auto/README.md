@@ -58,6 +58,7 @@ from auto_api_client.model.mapping_resolve_response import MappingResolveRespons
 from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
+from auto_api_client.model.set_installed_pipelines_request import SetInstalledPipelinesRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.set_run_dir_request import SetRunDirRequest
@@ -114,6 +115,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**set_car_status**](docs/AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 *AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
 *AgentApi* | [**set_error_for_cohort_api_request**](docs/AgentApi.md#set_error_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/error | 
+*AgentApi* | [**set_installed_pipelines**](docs/AgentApi.md#set_installed_pipelines) | **POST** /api/agent/v{version}/{token}/pipelines/installed/ | 
 *AgentApi* | [**set_job_state**](docs/AgentApi.md#set_job_state) | **PUT** /api/agent/v{version}/{token}/job/runner-message/{runId}/set-state | 
 *AgentApi* | [**set_kill_result**](docs/AgentApi.md#set_kill_result) | **POST** /api/agent/v{version}/{token}/run/{id}/kill-result | 
 *AgentApi* | [**set_process_logs**](docs/AgentApi.md#set_process_logs) | **POST** /api/agent/v{version}/{token}/process/{processId}/logs | 
@@ -143,6 +145,7 @@ Class | Method | HTTP request | Description
  - [PostAppAgentAddjoblogsRequest](docs/PostAppAgentAddjoblogsRequest.md)
  - [RunnerMessage](docs/RunnerMessage.md)
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
+ - [SetInstalledPipelinesRequest](docs/SetInstalledPipelinesRequest.md)
  - [SetJobStateRequest](docs/SetJobStateRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)
  - [SetRunDirRequest](docs/SetRunDirRequest.md)

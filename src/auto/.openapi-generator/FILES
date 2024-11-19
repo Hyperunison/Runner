@@ -23,6 +23,7 @@ auto_api_client/model/nextflow_run.py
 auto_api_client/model/post_app_agent_addjoblogs_request.py
 auto_api_client/model/runner_message.py
 auto_api_client/model/set_cohort_definition_aggregation_request.py
+auto_api_client/model/set_installed_pipelines_request.py
 auto_api_client/model/set_job_state_request.py
 auto_api_client/model/set_process_logs_request.py
 auto_api_client/model/set_run_dir_request.py
@@ -50,6 +51,7 @@ docs/NextflowRun.md
 docs/PostAppAgentAddjoblogsRequest.md
 docs/RunnerMessage.md
 docs/SetCohortDefinitionAggregationRequest.md
+docs/SetInstalledPipelinesRequest.md
 docs/SetJobStateRequest.md
 docs/SetProcessLogsRequest.md
 docs/SetRunDirRequest.md
@@ -80,6 +82,7 @@ test/test_nextflow_run.py
 test/test_post_app_agent_addjoblogs_request.py
 test/test_runner_message.py
 test/test_set_cohort_definition_aggregation_request.py
+test/test_set_installed_pipelines_request.py
 test/test_set_job_state_request.py
 test/test_set_process_logs_request.py
 test/test_set_run_dir_request.py

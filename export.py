@@ -4,7 +4,7 @@ import json
 import string
 import random
 
-from src.Service.UCDMResolverTwo import UCDMResolver
+from src.Service.UCDMResolver import UCDMResolver
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 
 from src.UCDM.DataSchema import DataSchema

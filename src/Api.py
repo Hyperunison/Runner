@@ -33,6 +33,8 @@ from auto_api_client.model.set_sql_query_for_cohort_api_request_request import \
 
 from auto_api_client.model.set_run_dir_request import SetRunDirRequest
 
+from auto_api_client.model.set_installed_pipelines_request import SetInstalledPipelinesRequest
+
 
 class Api:
     api_instance: AgentApi = None
@@ -166,6 +168,16 @@ class Api:
             token=self.token
         )
 
+    def send_installed_pipelines(self, pipelines: List[str]):
+        logging.info("Sending list of installed pipelines: {}".format(", ".join(pipelines)))
+        result = self.api_instance.set_installed_pipelines(
+            version=self.version,
+            token=self.token,
+            set_installed_pipelines_request=SetInstalledPipelinesRequest(pipelines=pipelines)
+        )
+        if result != 'OK':
+            logging.error("Error with sending list of pipelines to server")
+
     def add_log_chunk(self, id: int, chunk: str):
         logging.info("Adding logs to run={}, len={}".format(id, len(chunk)))
         try:
@@ -268,4 +280,5 @@ class Api:
         return self.api_instance.get_agent_id(token=self.token, version=self.version)
 
     def set_car_status(self, car_id: int, status: str, pid: int = None):
+        logging.info("Update CAR {} status to {}, pid={}".format(int(car_id), status, pid))
         self.api_instance.set_car_status(int(car_id), status=status, pid=str(pid), token=self.token, version=self.version)

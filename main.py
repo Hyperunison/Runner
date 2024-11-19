@@ -6,7 +6,8 @@ import time
 import auto_api_client
 import socket
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
-from src.Service.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
+from src.Service.Workflows.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
+from src.Service.Workflows.VendorPipelines import VendorPipelines
 from src.UCDM.DataSchema import DataSchema
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
@@ -43,9 +44,12 @@ with ApiClient(configuration) as api_client:
     api = Api(api_instance, config['api_version'], config['agent_token'])
     pipeline_executor = create_by_config(api, config, runner_instance_id)
     schema = DataSchema(config['phenotypic_db']['dsn'], config['phenotypic_db']['min_count'])
-    workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema)
+    vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)
+    workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema, vendor_pipelines)
     check_interval = config['check_runs_status_interval']
     last_check = None
+
+    vendor_pipelines.sync_pipeline_list_with_backend()
     while True:
         response = None
         try:

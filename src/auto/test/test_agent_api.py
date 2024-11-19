@@ -119,6 +119,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_set_installed_pipelines(self):
+        """Test case for set_installed_pipelines
+
+        """
+        pass
+
     def test_set_job_state(self):
         """Test case for set_job_state
 

@@ -1,11 +1,10 @@
-import csv
 import json
 import logging
 import os
 from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
-from src.Service import PipelineExecutor
+from src.Service.Workflows import PipelineExecutor
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
 from src.Service.Workflows.WorkflowBase import WorkflowBase
@@ -13,10 +12,9 @@ from src.Api import Api
 from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
-from src.Service.UCDMResolverTwo import UCDMResolver
+from src.Service.UCDMResolver import UCDMResolver
 from src.Service.UCDMConvertedField import UCDMConvertedField
-from src.Adapters.BaseAdapter import BaseAdapter
-from src.UCDM.DataSchema import DataSchema, VariableMapper
+from src.UCDM.DataSchema import DataSchema
 from src.Service.ApiLogger import ApiLogger
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 
@@ -177,16 +175,6 @@ class OMOPofication(WorkflowBase):
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
         percent = int(round(step / length * 100, 0))
         self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
-
-    def get_sql_final(self, cohort_definition: CohortDefinition) -> str:
-        mapper = VariableMapper(cohort_definition.fields)
-
-        return self.schema.build_cohort_definition_sql_query(
-            mapper,
-            cohort_definition,
-            False,
-            False,
-        )
 
     def build_csv_file(
             self,

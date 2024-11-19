@@ -1,14 +1,10 @@
 import logging
-import os
 from typing import List, Dict
 
 from src import Api
 from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Message.StartWorkflow import StartWorkflow
-from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
-from src.Service.UCDMMappingResolver import UCDMMappingResolver
-from src.Service.UCDMResolverTwo import UCDMResolver, UCDMConvertedField
-from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
+from src.Service.UCDMResolver import UCDMConvertedField
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.UCDM.DataSchema import VariableMapper
 
@@ -19,24 +15,8 @@ class GwasFederated(WorkflowBase):
         logging.info(message)
         logging.info("Parameters: {}".format(message.parameters))
         self.api.set_run_status(message.run_id, 'deploy')
-        self.api.add_log_chunk(message.run_id, "Downloading mappings from Unison platform\n")
-
-        self.download_mapping()
-
         variables: List[str] = message.parameters['variables']
-        csv_transformer = CsvToMappingTransformer()
-        csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
-        ucdm_mapping_resolver = UCDMMappingResolver(csv_mapping)
-
-        resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
-        query = CohortDefinition(message.cohort_definition)
-        sql_final = self.get_sql_final(query)
-        self.api.add_log_chunk(message.run_id,
-                               "Executing SQL query and transforming to CDM format\n{}\n".format(sql_final))
-        ucdm = resolver.get_ucdm_result(
-            sql_final,
-            StrToIntGenerator()
-        )
+        ucdm = self.get_ucdm(message)
         self.api.add_log_chunk(message.run_id, "Building phenotype.txt\n")
         csv_content = self.build_phenotype(ucdm, variables)
         nextflow_config = self.get_nextflow_config(variables, bool(message.parameters['isBinary']))
@@ -50,7 +30,6 @@ class GwasFederated(WorkflowBase):
             message.run_id,
             cmd,
             message.dir,
-            message.s3_path,
             {
                 "phenotype.txt": csv_content,
                 "nextflow.config": file_get_contents('nextflow.config'),
@@ -62,6 +41,7 @@ class GwasFederated(WorkflowBase):
                 "trace-*.txt": "/basic/",
                 "output/": "/output/",
             },
+            message.s3_path,
             message.aws_id,
             message.aws_key
         )
@@ -79,15 +59,6 @@ class GwasFederated(WorkflowBase):
             i += 1
 
         return content
-
-    def download_mapping(self):
-        response = self.api.export_mapping()
-        with open(os.path.abspath(self.mapping_file_name), 'wb') as file:
-            while True:
-                chunk = response.read(8192)
-                if not chunk:
-                    break
-                file.write(chunk)
 
     def convert_value(self, variable) -> str:
         if isinstance(variable, bool):

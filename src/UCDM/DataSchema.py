@@ -225,7 +225,7 @@ class DataSchema:
         return converter.convert_raw_sql(sql, engine_type)
 
     def fork(self, api: Api) -> int:
-        return 0
+        # return 0
         pid = os.fork()
         logging.info("Forked, pid={}".format(pid))
 
@@ -263,13 +263,13 @@ class DataSchema:
             sql
         )
         pid = self.fork(api)
+        child_pid = os.getpid()
+        api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
         if pid != 0:
             # Master process, continue working
             return
-        child_pid = os.getpid()
         logging.info("Processing request in child process: {}".format(child_pid))
         try:
-            api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(

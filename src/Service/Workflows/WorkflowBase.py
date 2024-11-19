@@ -1,9 +1,15 @@
 import os
+from typing import List, Dict
+from src.Service.UCDMMappingResolver import UCDMMappingResolver
+from src.Service.UCDMResolver import UCDMResolver
 from src.Message.StartWorkflow import StartWorkflow
 from src.Api import Api
-from src.Service import PipelineExecutor
-from src.UCDM.DataSchema import DataSchema
-
+from src.Message.partial.CohortDefinition import CohortDefinition
+from src.Service.Workflows import PipelineExecutor
+from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
+from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
+from src.UCDM.DataSchema import DataSchema, VariableMapper
+from src.Service.UCDMConvertedField import UCDMConvertedField
 
 class WorkflowBase:
     mapping_file_name: str = "var/mapping-values.csv"
@@ -27,3 +33,28 @@ class WorkflowBase:
                 if not chunk:
                     break
                 file.write(chunk)
+
+    def get_sql_final(self, cohort_definition: CohortDefinition) -> str:
+        mapper = VariableMapper(cohort_definition.fields)
+
+        return self.schema.build_cohort_definition_sql_query(
+            mapper,
+            cohort_definition,
+            False,
+            False,
+        )
+
+    def get_ucdm(self, message: StartWorkflow) -> List[Dict[str, UCDMConvertedField]]:
+        self.api.add_log_chunk(message.run_id, "Downloading mappings from Unison platform\n")
+        self.download_mapping()
+        query = CohortDefinition(message.cohort_definition)
+        sql_final = self.get_sql_final(query)
+        self.api.add_log_chunk(message.run_id, "Executing SQL query marmonizing the result\n{}\n".format(sql_final))
+        csv_transformer = CsvToMappingTransformer()
+        csv_mapping = csv_transformer.transform_with_file_path(os.path.abspath(self.mapping_file_name))
+        ucdm_mapping_resolver = UCDMMappingResolver(csv_mapping)
+        resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
+        self.api.add_log_chunk(message.run_id, "Executing SQL query and harmonization result\n{}\n".format(sql_final))
+        ucdm = resolver.get_ucdm_result(sql_final, StrToIntGenerator())
+
+        return ucdm

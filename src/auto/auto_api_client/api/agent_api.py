@@ -29,6 +29,7 @@ from auto_api_client.model.mapping_resolve_response import MappingResolveRespons
 from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
+from auto_api_client.model.set_installed_pipelines_request import SetInstalledPipelinesRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
 from auto_api_client.model.set_run_dir_request import SetRunDirRequest
@@ -1250,6 +1251,81 @@ class AgentApi(object):
                     'token': 'path',
                     'id': 'path',
                     'set_task_error_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_installed_pipelines_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/pipelines/installed/',
+                'operation_id': 'set_installed_pipelines',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'set_installed_pipelines_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\w-]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'set_installed_pipelines_request':
+                        (SetInstalledPipelinesRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'set_installed_pipelines_request': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -3789,6 +3865,93 @@ class AgentApi(object):
         kwargs['id'] = \
             id
         return self.set_error_for_cohort_api_request_endpoint.call_with_http_info(**kwargs)
+
+    def set_installed_pipelines(
+        self,
+        version,
+        token,
+        **kwargs
+    ):
+        """set_installed_pipelines  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_installed_pipelines(version, token, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+
+        Keyword Args:
+            set_installed_pipelines_request (SetInstalledPipelinesRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        return self.set_installed_pipelines_endpoint.call_with_http_info(**kwargs)
 
     def set_job_state(
         self,

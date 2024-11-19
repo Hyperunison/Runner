@@ -47,16 +47,16 @@ class PipelineExecutor:
             message.run_id,
             message.command,
             message.dir,
-            message.aws_s3_path,
             input_files,
             output_file_masks,
+            message.aws_s3_path,
             message.aws_id,
             message.aws_key
         )
 
     def run_nextflow_run_abstract(
-            self, run_id: int, nextflow_command: str, workdir: Optional[str], aws_s3_path: str,
-            input_files: Dict[str, str], output_file_masks: Dict[str, str], aws_id: str, aws_key: str
+            self, run_id: int, nextflow_command: str, workdir: Optional[str],
+            input_files: Dict[str, str], output_file_masks: Dict[str, str], aws_s3_path: str, aws_id: str, aws_key: str
     ):
         self.api_client.set_run_status(run_id, 'process')
         file_transfer = create_file_transfer(self.config['file_transfer'])

@@ -30,7 +30,7 @@ class K8sFileTransfer(BaseFileTransport):
 
     def init(self, run_id: int, agent_id: int):
         labels = self.get_labels(run_id, agent_id)
-        pod_name = self.k8s.create_pod(self.pod_prefix, 'sleep infinity', labels, self.image, self.volumes)
+        pod_name = self.k8s.create_pod(self.pod_prefix, self.command, labels, self.image, self.volumes)
         if pod_name is None:
             raise Exception("Can't create pod for uploading files")
         self.pod_name = pod_name

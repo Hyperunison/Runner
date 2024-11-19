@@ -1,6 +1,6 @@
 from src.Adapters.DockerAdapter import DockerAdapter
 from src.Adapters.K8sAdapter import K8sAdapter
-from src.Service.PipelineExecutor import PipelineExecutor
+from src.Service.Workflows.PipelineExecutor import PipelineExecutor
 
 
 def create_by_config(api_client, config, runner_instance_id) -> PipelineExecutor:
