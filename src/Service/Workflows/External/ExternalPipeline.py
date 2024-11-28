@@ -28,9 +28,10 @@ class ExternalPipeline(WorkflowBase):
         self.api.set_run_status(message.run_id, 'deploy')
 
         ucdm = self.get_ucdm(message)
+        ucdm_simplified = [{key: val.export_value for key, val in row.items()} for row in ucdm]
 
         try:
-            input_files = self.module.get_input_files(ucdm, message.parameters)
+            input_files = self.module.get_input_files(ucdm_simplified, message.parameters)
             output_file_masks = self.module.get_output_file_masks(message.parameters)
             cmd = self.module.get_nextflow_cmd(input_files, message.parameters, message.run_name, message.weblog_url)
 

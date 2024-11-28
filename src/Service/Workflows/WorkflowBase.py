@@ -41,7 +41,7 @@ class WorkflowBase:
             mapper,
             cohort_definition,
             False,
-            False,
+            True,
         )
 
     def get_ucdm(self, message: StartWorkflow) -> List[Dict[str, UCDMConvertedField]]:

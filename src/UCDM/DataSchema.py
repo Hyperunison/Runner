@@ -154,6 +154,13 @@ class DataSchema:
             sql_where = "true"
 
         select_array: list[str] = []
+
+        if add_participant_id:
+            select_array.append("{}.{} as participant_id".format(
+                cohort_definition.participant_table,
+                cohort_definition.participant_id_field
+            ))
+
         group_array: list[str] = []
         for exp in cohort_definition.export:
             alias = exp['as'] if 'as' in exp else query.select[exp['name']]
@@ -166,12 +173,6 @@ class DataSchema:
         select_string = ", ".join(select_array)
 
         sql = ''
-
-        if add_participant_id:
-            select_string += " , {}.{} as participant_id".format(
-                cohort_definition.participant_table,
-                cohort_definition.participant_id_field
-            )
 
         if distribution:
             sql += "SELECT\n    {},\n".format(select_string)
