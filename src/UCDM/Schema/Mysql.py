@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from psycopg2.errors import UndefinedFunction, UndefinedTable
 
 from src.Database.Utils.DsnParser import DsnParser
+from src.UCDM.Exception.NonNumericField import NonNumericField
 from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.Schema.Database import Database
 from src.UCDM.TableStat import TableStat
@@ -71,7 +72,7 @@ class Mysql(Database):
 
         if row:
             for col in row:
-                sql_column_info = "WITH {} AS ({}) SELECT '{}' AS type_info, {} FROM {}".format(
+                sql_column_info = "WITH {} AS ({}) SELECT '{}' AS type_info, {} FROM {} LIMIT 1".format(
                     table_name, cte, col, col, table_name
                 )
                 type_row = self.fetch_row(sql_column_info)
@@ -110,8 +111,16 @@ class Mysql(Database):
 
         return self.fetch_row(sql)['median']
 
+    def get_min_max_avg_value(self, table_name: str, column_name: str, cte: str) -> Dict[str, any]:
+        try:
+            return super().get_min_max_avg_value(table_name, column_name, cte)
+        except ProgrammingError as e:
+            if isinstance(e.orig, UndefinedFunction):
+                raise NonNumericField(str(e), params=e.params, orig=e)
+            raise e
+
     def sql_expression_interval(self, count: str, unit: str) -> str:
-        return "'{} {}'::interval".format(count, unit)
+        return "INTERVAL '{} {}'".format(count, unit)
 
     def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
         return "({})::{}".format(expression, data_type)

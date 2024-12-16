@@ -3,6 +3,8 @@ from typing import List, Dict, Tuple
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+
+from src.UCDM.Exception.NonNumericField import NonNumericField
 from src.UCDM.Schema.Database import Database
 from psycopg2.errors import UndefinedFunction, UndefinedTable
 from src.UCDM.TableStat import TableStat
@@ -71,6 +73,23 @@ class Postgres(Database):
                 columns.append(item)
 
         return count, columns
+
+    def get_min_max_avg_value(self, table_name: str, column_name: str, cte: str) -> Dict[str, any]:
+        try:
+            return super().get_min_max_avg_value(table_name, column_name, cte)
+        except ProgrammingError as e:
+            if isinstance(e.orig, UndefinedFunction):
+                raise NonNumericField(str(e), params=e.params, orig=e)
+            raise e
+
+    def get_median(self, table: str, column: str, min, max, cte: str):
+        try:
+            return super().get_median(table, column, min, max, cte)
+        except ProgrammingError as e:
+            if isinstance(e.orig, UndefinedFunction):
+                raise NonNumericField(str(e), params=e.params, orig=e)
+            raise e
+
 
     def sql_expression_interval(self, count: str, unit: str) -> str:
         return "'{} {}'::interval".format(count, unit)

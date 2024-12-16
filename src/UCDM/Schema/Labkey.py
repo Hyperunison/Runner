@@ -8,7 +8,8 @@ from ..TableStat import TableStat
 from sqlalchemy import text
 from urllib.parse import urlparse
 
-class Labkey (BaseSchema):
+
+class Labkey(BaseSchema):
     type = 'labkey'
     schema = 'lists'
     manager_schema = 'ListManager'
@@ -29,7 +30,8 @@ class Labkey (BaseSchema):
         super().__init__(dsn, min_count)
 
     def get_tables_list(self) -> List[str]:
-        rows = self.engine.query.select_rows(self.manager_schema, self.manager_schema, columns=['*'], max_rows=100000, include_total_count=True)
+        rows = self.engine.query.select_rows(self.manager_schema, self.manager_schema, columns=['*'], max_rows=100000,
+                                             include_total_count=True)
         result: List[str] = []
         for i in rows['rows']:
             result.append(i['Name'])
@@ -37,7 +39,8 @@ class Labkey (BaseSchema):
         return result
 
     def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
-        rows = self.engine.query.select_rows(self.schema, table_name, columns=['*'], max_rows=1, include_total_count=True)
+        rows = self.engine.query.select_rows(self.schema, table_name, columns=['*'], max_rows=1,
+                                             include_total_count=True)
         fields = rows['metaData']['fields']
         count = rows['rowCount']
         columns: List[Dict[str, str]] = []
@@ -78,7 +81,8 @@ class Labkey (BaseSchema):
             return stat
 
         try:
-            sql = "SELECT min(\"{v}\") as min_value, max(\"{v}\") as max_value, avg(\"{v}\") as avg_value from {table}".format(v=column_name, table=table_name)
+            sql = "SELECT min(\"{v}\") as min_value, max(\"{v}\") as max_value, avg(\"{v}\") as avg_value from {table}".format(
+                v=column_name, table=table_name)
             sql = self.wrap_sql_by_cte(sql, table_name, cte)
             logging.info(sql)
             result = self.engine.query.execute_sql(self.schema, sql=sql)
@@ -96,16 +100,16 @@ class Labkey (BaseSchema):
             values_counts = []
         except Exception as e:
             logging.debug("Can't get min/max values for {}.{} {}".format(table_name, column_name, with_cte_label))
-            min_value=None
-            max_value=None
-            avg_value=None
-            median50_value=None
-            median25_value=None
-            median12_value=None
-            median37_value=None
-            median75_value=None
-            median63_value=None
-            median88_value=None
+            min_value = None
+            max_value = None
+            avg_value = None
+            median50_value = None
+            median25_value = None
+            median12_value = None
+            median37_value = None
+            median75_value = None
+            median63_value = None
+            median88_value = None
             pass
 
         sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) >= {min} ORDER BY 1 DESC LIMIT 100".format(
@@ -181,7 +185,8 @@ class Labkey (BaseSchema):
         date_functions = ['hours', 'days', 'weeks', 'months', 'years']
         if statement['type'] == 'binary' and statement['operator'] in ["+", "-"]:
             # Catching adding interval to date/datetime
-            if (statement['right']['type'] == 'function' and statement['right']['name'] in date_functions) or (statement['left']['type'] == 'function' and statement['left']['name'] in date_functions):
+            if (statement['right']['type'] == 'function' and statement['right']['name'] in date_functions) or (
+                    statement['left']['type'] == 'function' and statement['left']['name'] in date_functions):
                 interval_map = dict()
                 interval_map['hours'] = 'SQL_TSI_HOUR'
                 interval_map['days'] = 'SQL_TSI_DAY'
@@ -201,7 +206,7 @@ class Labkey (BaseSchema):
 
                 node1 = dict()
                 node1['type'] = 'constant'
-                node1['json'] = '"'+interval_map[interval['name']]+'"'
+                node1['json'] = '"' + interval_map[interval['name']] + '"'
 
                 node2 = dict()
                 node2['type'] = 'constant'

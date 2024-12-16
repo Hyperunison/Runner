@@ -166,9 +166,10 @@ class DataSchema:
             alias = exp['as'] if 'as' in exp else query.select[exp['name']]
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
+            # Labkey does not support GROUP BY <constant>
             if exp['type'] != 'constant':
-                # Labkey does not support GROUP BY <constant>
-                group_array.append(alias)
+                # group_array.append(alias)
+                group_array.append(self.build_sql_expression(exp, query, mapper))
 
         select_string = ", ".join(select_array)
 
@@ -192,7 +193,7 @@ class DataSchema:
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
-            sql += 'GROUP BY "{}" \n'.format('", "'.join(map(str, group_array))) + \
+            sql += 'GROUP BY {} \n'.format(', '.join(map(str, group_array))) + \
                    "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(
                        cohort_definition.participant_table,
                        cohort_definition.participant_id_field,

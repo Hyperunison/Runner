@@ -2,6 +2,7 @@ from src.Database.Utils.DsnParser import DsnParser
 from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.Schema.Labkey import Labkey
 from src.UCDM.Schema.Mysql import Mysql
+from src.UCDM.Schema.Hive import Hive
 from src.UCDM.Schema.Postgres import Postgres
 
 
@@ -18,6 +19,8 @@ class SchemaFactory:
             return Postgres(dsn, min_count)
         if type == "mysql":
             return Mysql(dsn, min_count)
+        if type == "hive":
+            return Hive(dsn, min_count)
         if type == "labkey":
             return Labkey(dsn, min_count)
         if type == "mssql":

@@ -52,6 +52,8 @@ with ApiClient(configuration) as api_client:
     vendor_pipelines.sync_pipeline_list_with_backend()
     while True:
         response = None
+        # Rollback to avoid any issues with connection state
+        schema.schema.engine.rollback()
         try:
             if not last_check or time.time() - last_check > check_interval:
                 pipeline_executor.check_runs_statuses()

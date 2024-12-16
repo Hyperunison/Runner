@@ -9,11 +9,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from psycopg2.errors import UndefinedFunction, UndefinedTable
 
 from src.Database.Engines.EngineFacade import EngineFacade
+from src.UCDM.Exception.NonNumericField import NonNumericField
 from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.TableStat import TableStat
 import datetime
 
 Base = declarative_base()
+
 
 class Database(BaseSchema):
     type = 'postgres'
@@ -22,7 +24,8 @@ class Database(BaseSchema):
 
     def __init__(self, dsn: str, min_count: int):
         self.dsn = dsn
-        self.engine = create_engine(dsn, isolation_level="AUTOCOMMIT").connect()
+        if self.engine is None:
+            self.engine = create_engine(dsn, isolation_level="AUTOCOMMIT").connect()
         super().__init__(dsn, min_count)
 
     def fetch_row(self, sql: str) -> Dict:
@@ -75,9 +78,7 @@ class Database(BaseSchema):
                 raise e
 
         try:
-            sql = self.get_min_max_avg_value_query(table_name, column_name, cte)
-            row = self.fetch_row(sql)
-
+            row = self.get_min_max_avg_value(table_name, column_name, cte)
             min_value = row['min_value']
             max_value = row['max_value']
             avg_value = row['avg_value']
@@ -101,22 +102,18 @@ class Database(BaseSchema):
                 median75_value = self.get_median(table_name, column_name, median50_value, max_value, cte)
                 median63_value = self.get_median(table_name, column_name, median50_value, median75_value, cte)
                 median88_value = self.get_median(table_name, column_name, median75_value, max_value, cte)
-                values_counts = []
-        except ProgrammingError as e:
+        except NonNumericField as e:
             logging.debug("Can't get min/max values for {}.{} {}".format(table_name, column_name, with_cte_label))
-            self.engine.rollback()
-            if not isinstance(e.orig, UndefinedFunction):
-                raise e
-            min_value=None
-            max_value=None
-            avg_value=None
-            median50_value=None
-            median25_value=None
-            median12_value=None
-            median37_value=None
-            median75_value=None
-            median63_value=None
-            median88_value=None
+            min_value = None
+            max_value = None
+            avg_value = None
+            median50_value = None
+            median25_value = None
+            median12_value = None
+            median37_value = None
+            median75_value = None
+            median63_value = None
+            median88_value = None
 
         sql = self.get_values_count_query(table_name, column_name, cte)
         sql = self.wrap_sql_by_cte(sql, table_name, cte)
@@ -150,10 +147,16 @@ class Database(BaseSchema):
         stat.values = values_counts
         return stat
 
+    def get_min_max_avg_value(self, table_name: str, column_name: str, cte: str) -> Dict[str, any]:
+        sql = self.get_min_max_avg_value_query(table_name, column_name, cte)
+        row = self.fetch_row(sql)
+
+        return row
+
     def get_median(self, table: str, column: str, min, max, cte: str):
         if min is None or max is None:
             return None
-        sql = self.get_median_query(table, column, min, max)
+        sql = self.get_median_query(table, column, min, max, cte)
         sql = self.wrap_sql_by_cte(sql, table, cte)
 
         return self.fetch_row(sql)['median']

@@ -9,4 +9,6 @@ class ConvertRawSql:
             return sqlglot.transpile(raw_sql, read="postgres", write="mysql")[0]
         if target_type == "mssql":
             return sqlglot.transpile(raw_sql, read="postgres", write="tsql")[0]
+        if target_type == "hive":
+            return sqlglot.transpile(raw_sql, read="postgres", write="spark", pretty=True)[0]
         raise ValueError(f"Target type {target_type} not supported")
