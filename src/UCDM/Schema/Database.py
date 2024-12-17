@@ -35,8 +35,9 @@ class Database(BaseSchema):
         return result[0]
 
     def fetch_all(self, sql: str):
-        result = self.engine.execute(text(sql)).mappings().all()
-        result = [dict(row) for row in result]
+        result_intermediate = self.engine.execute(text(sql)).fetchall()
+        columns = [col[0] for col in self.engine.execute(text(sql)).cursor.description]
+        result = [dict(zip(columns, row)) for row in result_intermediate]
 
         for item in result:
             for key, value in item.items():

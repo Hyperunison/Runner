@@ -44,7 +44,10 @@ RUN pip install "PyMySQL===1.1.1"
 RUN apt-get install psmisc
 
 RUN apt-get install -y libsasl2-dev  libsasl2-modules
-RUN pip install "pyhive[hive]===1.1.1"
+RUN pip install "pyhive==0.7.0"
+RUN pip install "pure-sasl==0.6.2"
+RUN pip install "thrift==0.21.0"
+RUN pip install "thrift-sasl==0.4.3"
 
 
 RUN wget https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.14/aws-iam-authenticator_0.6.14_linux_amd64 -O /bin/aws-iam-authenticator
