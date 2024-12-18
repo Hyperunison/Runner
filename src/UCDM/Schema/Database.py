@@ -153,7 +153,7 @@ class Database(BaseSchema):
     def get_median(self, table: str, column: str, min, max, cte: str):
         if min is None or max is None:
             return None
-        sql = self.get_median_query(table, column, min, max)
+        sql = self.get_median_query(table, column, min, max, cte)
         sql = self.wrap_sql_by_cte(sql, table, cte)
 
         return self.fetch_row(sql)['median']
