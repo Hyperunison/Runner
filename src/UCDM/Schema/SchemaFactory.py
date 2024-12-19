@@ -26,4 +26,4 @@ class SchemaFactory:
         if type == "mssql":
             pass
 
-        raise Exception("Unknown schema type")
+        raise Exception("Unknown schema type {}".format(type))
