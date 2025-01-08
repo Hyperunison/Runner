@@ -8,7 +8,6 @@ from sqlalchemy import text
 from sqlalchemy.ext.declarative import declarative_base
 from psycopg2.errors import UndefinedFunction, UndefinedTable
 
-from src.Database.Engines.EngineFacade import EngineFacade
 from src.UCDM.Exception.NonNumericField import NonNumericField
 from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.TableStat import TableStat
@@ -20,7 +19,6 @@ Base = declarative_base()
 class Database(BaseSchema):
     type = 'postgres'
     dsn = ''
-    engine_facade: EngineFacade
 
     def __init__(self, dsn: str, min_count: int):
         self.dsn = dsn

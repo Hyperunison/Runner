@@ -2,7 +2,6 @@ from typing import List, Dict, Tuple
 import logging
 from sqlalchemy.exc import ProgrammingError
 
-from src.Database.Engines.EngineFacade import EngineFacade
 from src.UCDM.DataSchema import DataSchema
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
@@ -12,14 +11,10 @@ from src.Service.UCDMConvertedField import UCDMConvertedField
 class UCDMResolver:
     schema: DataSchema
     ucdm_mapping_resolver: UCDMMappingResolver
-    engine_facade: EngineFacade
 
     def __init__(self, schema: DataSchema, ucdm_mapping_resolver: UCDMMappingResolver):
         self.schema = schema
         self.ucdm_mapping_resolver = ucdm_mapping_resolver
-        self.engine_facade = EngineFacade(
-            self.schema.schema.dsn
-        )
 
     def get_ucdm_result(
             self,
@@ -28,8 +23,7 @@ class UCDMResolver:
     ) -> List[Dict[str, UCDMConvertedField]]:
         try:
             mapping_index = self.build_mapping_index()
-            # result = self.schema.fetch_all(sql_final)
-            result = self.engine_facade.fetch(sql_final)
+            result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
             ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int)
 

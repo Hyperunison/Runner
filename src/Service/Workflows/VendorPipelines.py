@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Optional, List
 
@@ -29,7 +30,7 @@ class VendorPipelines:
                 for version in versions:
                     if not os.path.isdir("{}/{}/{}/{}".format(self.pipelines_dir, folder, pipeline, version)):
                         continue
-                    print("{} {} {}".format(folder, pipeline, version))
+                    logging.info("{} {} {}".format(folder, pipeline, version))
                     result.append("{}/{}:{}".format(folder, pipeline, version))
 
         return result

@@ -317,9 +317,9 @@ class DataSchema:
                     done = True
             if done:
                 api.set_car_status(kill_message.cohort_api_request_id, "killed")
-                print(f"Process with PID {kill_message.pid} killed successfully.")
+                logging.info(f"Process with PID {kill_message.pid} killed successfully.")
         except OSError as e:
-            print(f"Error while killing PID {kill_message.pid} : {e}")
+            logging.error(f"Error while killing PID {kill_message.pid} : {e}")
             api.set_car_status(kill_message.cohort_api_request_id, "error")
 
     def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:

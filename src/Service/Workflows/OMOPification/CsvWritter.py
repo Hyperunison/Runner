@@ -24,9 +24,11 @@ class CsvWritter:
             for row in ucdm:
                 output = {}
                 skip_reasons: List[str] = self.lines_filter.get_line_errors(row, fields_map)
-                
+
                 if len(skip_reasons) == 0:
                     for key, val in row.items():
+                        if key == 'participant_id' and key not in fields_map:
+                            continue
                         value = val.export_value
                         field_name = fields_map[key]['name']
                         output[field_name] = value if value is not None else ''
