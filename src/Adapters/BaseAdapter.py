@@ -30,12 +30,14 @@ class BaseAdapter:
     def check_runs_statuses(self):
         pass
 
-    def upload_local_file_to_s3(self, filename: str, s3_path: str, aws_id: str, aws_key: str) -> bool:
+    def upload_local_file_to_s3(self, filename: str, s3_path: str, aws_id: str, aws_key: str, recursive: bool = True) -> bool:
         logging.info("Uploading local file {} to {}".format(filename, s3_path))
 
+        recursive_str = '--recursive' if recursive else ''
+
         cmd = (
-            'bash -c \'export AWS_ACCESS_KEY_ID="{}"; export AWS_SECRET_ACCESS_KEY="{}"; aws s3 cp --recursive {} {}\''.
-            format(aws_id, aws_key, filename, s3_path))
+            'bash -c \'export AWS_ACCESS_KEY_ID="{}"; export AWS_SECRET_ACCESS_KEY="{}"; aws s3 cp {} {} {}\''.
+            format(aws_id, aws_key, recursive_str, filename, s3_path))
 
         logging.info("Executing command: {}".format(cmd))
         p = subprocess.run(shlex.split(cmd), capture_output=True)
