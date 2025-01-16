@@ -168,8 +168,8 @@ class DataSchema:
             select_array.append('{} as "{}"'.format(query.select[alias], alias))
             # Labkey does not support GROUP BY <constant>
             if exp['type'] != 'constant':
-                # group_array.append(alias)
-                group_array.append(self.build_sql_expression(exp, query, mapper))
+                group_array.append(alias)
+                # group_array.append(self.build_sql_expression(exp, query, mapper))
 
         select_string = ", ".join(select_array)
 
