@@ -64,4 +64,4 @@ RUN apt-get install --yes docker-ce docker-ce-cli containerd.io docker-buildx-pl
 
 
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
-ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; done
+ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; sleep 3; done
