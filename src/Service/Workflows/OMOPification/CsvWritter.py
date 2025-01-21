@@ -29,6 +29,8 @@ class CsvWritter:
                     for key, val in row.items():
                         if key == 'participant_id' and key not in fields_map:
                             continue
+                        if key.endswith('.__bridge_id'):
+                            continue
                         value = val.export_value
                         field_name = fields_map[key]['name']
                         output[field_name] = value if value is not None else ''

@@ -72,7 +72,7 @@ class UCDMResolver:
 
     def convert_row(
             self,
-            mapping_index: Dict[str, Dict[str, List[Tuple[str, str, str]]]],
+            mapping_index: Dict[str, Dict[str, Dict[str, List[Tuple[str, str, str]]]]],
             row: Dict[str, str],
             serials: Dict[str, SerialGenerator],
             str_to_int: StrToIntGenerator,
@@ -80,10 +80,11 @@ class UCDMResolver:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             field_alias = self.get_field_alias(field)
-            if not field_alias in mapping_index or not str(value) in mapping_index[field_alias]:
+            bridge_id = row['c.__bridge_id']
+            if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:
                 values = [(value, '')]
             else:
-                values = mapping_index[field_alias][str(value)]
+                values = mapping_index[field_alias][bridge_id][str(value)]
 
                 if values[0][2] == 'Yes':
                     values = [(values[0][0], values[0][1])]

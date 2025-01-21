@@ -9,6 +9,7 @@ class CsvToMappingTransformer:
         'sourceCode': 'biobank_value',
         'conceptId': 'export_value',
         'isConceptId': 'is_concept_id',
+        'unisonBridgeId': 'unison_bridge_id',
     }
 
     def transform_with_file_path(self, csv_file_path, table = None) -> List[Dict[str, str]]:
