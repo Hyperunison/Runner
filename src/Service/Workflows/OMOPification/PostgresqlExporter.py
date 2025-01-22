@@ -17,7 +17,6 @@ class PostgresqlExporter:
         self.connection_string = connection_string
         self.data_schema = DataSchema(
             dsn=connection_string,
-            schema="postgres",
             min_count=0
         )
         self.sql_builder = SqlBuilder()
