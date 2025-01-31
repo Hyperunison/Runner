@@ -16,7 +16,7 @@ class CsvWritter:
             ucdm: List[Dict[str, UCDMConvertedField]],
             fields_map: Dict[str, Dict[str, str]]
     ) -> List[str]:
-        with open(filename, 'w', newline='') as file:
+        with open(filename, 'w', newline='', encoding='utf-8') as file:
             header = [item['name'] for item in fields_map.values()]
             writer = csv.DictWriter(file, fieldnames=header)
             writer.writeheader()
