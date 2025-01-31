@@ -157,8 +157,8 @@ class OMOPofication(WorkflowBase):
 
     def save_sql_query(self, table_name: str, query: str, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         filename = os.path.abspath(self.dir + table_name + ".sql")
-        with open(filename, 'wb') as file:
-            file.write(bytes(query, 'utf-8'))
+        with open(filename, 'w', encoding='utf-8') as file:
+            file.write(query)
 
         if self.may_upload_private_data:
             s3_path = s3_folder + table_name + '.sql'
