@@ -51,7 +51,7 @@ class PostgresqlExporter:
                 correct_row = {}
 
                 for key, val in row.items():
-                    if key == 'participant_id' and not key in fields_map:
+                    if not key in fields_map:
                         continue
                     value = val.export_value
                     field_name = fields_map[key]['name']
