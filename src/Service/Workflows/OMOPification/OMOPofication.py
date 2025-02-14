@@ -82,7 +82,8 @@ class OMOPofication(WorkflowBase):
                 self.resolver = UCDMResolver(self.schema, self.mapping_resolver)
                 ucdm = self.resolver.get_ucdm_result(
                     sql_final,
-                    str_to_int
+                    str_to_int,
+                    fields_map
                 )
                 self.save_sql_query(table_name, sql_final, s3_folder, message, api_logger)
                 if ucdm is None:

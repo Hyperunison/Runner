@@ -8,6 +8,10 @@ from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.UCDMConvertedField import UCDMConvertedField
 
+
+def log_error(name_origin, field, value):
+    logging.warning("Value '{value}' is unmapped in the field '{name_origin}'".format(name_origin=name_origin, field=field, value=value))
+
 class UCDMResolver:
     schema: DataSchema
     ucdm_mapping_resolver: UCDMMappingResolver
@@ -19,13 +23,14 @@ class UCDMResolver:
     def get_ucdm_result(
             self,
             sql_final: str,
-            str_to_int: StrToIntGenerator
+            str_to_int: StrToIntGenerator,
+            fields_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
         try:
             mapping_index = self.build_mapping_index()
             result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
-            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int)
+            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map)
 
             return ucdm_result
         except ProgrammingError as e:
@@ -51,7 +56,8 @@ class UCDMResolver:
             self,
             result: List[Dict[str, str]],
             mapping_index: Dict[str, Dict[str, List[Tuple[str, str, str]]]],
-            str_to_int: StrToIntGenerator
+            str_to_int: StrToIntGenerator,
+            fields_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
             return []
@@ -59,7 +65,7 @@ class UCDMResolver:
         serials: Dict[str, SerialGenerator] = {}
 
         for row in result:
-            converted = self.convert_row(mapping_index, row, serials, str_to_int)
+            converted = self.convert_row(mapping_index, row, serials, str_to_int, fields_map)
             for converted_row in converted:
                 output.append(converted_row)
 
@@ -76,12 +82,18 @@ class UCDMResolver:
             row: Dict[str, str],
             serials: Dict[str, SerialGenerator],
             str_to_int: StrToIntGenerator,
+            fields_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             field_alias = self.get_field_alias(field)
             bridge_id = row['c.__bridge_id']
             if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:
+                if field_alias in fields_map:
+                    name_origin: str = fields_map[field_alias]['name']
+                    if name_origin.endswith('concept_id') or name_origin.endswith('concept_id1') or name_origin.endswith('concept_id2'):
+                        log_error(name_origin, field, value)
+                        return []
                 values = [(value, '')]
             else:
                 values = mapping_index[field_alias][bridge_id][str(value)]
@@ -118,16 +130,16 @@ def decartes_multiply_array(array: Dict[str, List[any]]) -> List[Dict[str, str]]
         return []
 
     result = []
-    for key, values in array.items():
+    for field_name, values in array.items():
         if not result:
-            result = [{key: val} for val in values]
+            result = [{field_name: val} for val in values]
             continue
 
         result2 = []
         for val in values:
             for row in result:
                 new_row = row.copy()
-                new_row[key] = val
+                new_row[field_name] = val
                 result2.append(new_row)
         result = result2
 

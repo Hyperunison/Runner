@@ -71,7 +71,7 @@ str_to_int.load_from_file()
 
 ucdm_mapping_resolver = UCDMMappingResolver(rows)
 ucdm_resolver = UCDMResolver(schema, ucdm_mapping_resolver)
-result = ucdm_resolver.get_ucdm_result(sql_query, str_to_int)
+result = ucdm_resolver.get_ucdm_result(sql_query, str_to_int, fields_map)
 
 if result is None:
     print('Invalid UCDM result!')
