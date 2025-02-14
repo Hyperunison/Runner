@@ -92,10 +92,21 @@ class UCDMResolver:
                 if field_alias in fields_map:
                     name_origin: str = fields_map[field_alias]['name']
                     is_required = fields_map[field_alias]['isRequired']
-                    if is_required and (name_origin.endswith('concept_id') or name_origin.endswith('concept_id1') or name_origin.endswith('concept_id2')):
-                        log_error(name_origin, field, value)
-                        return []
-                values = [(value, '')]
+                    is_concept = name_origin.endswith('concept_id') or name_origin.endswith('concept_id1') or name_origin.endswith('concept_id2')
+                    if is_concept:
+                        if is_required:
+                            logging.warning("Value '{value}' is unmapped in the field '{name_origin}'. Skip row, field is required".format(
+                                name_origin=name_origin, field=field, value=value))
+                            return []
+                        else:
+                            logging.warning(
+                                "Value '{value}' is unmapped in the field '{name_origin}'. Use blank field, field is optional".format(
+                                    name_origin=name_origin, field=field, value=value))
+                            values = [('', '')]
+                    else:
+                        values = [(value, '')]
+                else:
+                    values = [(value, '')]
             else:
                 values = mapping_index[field_alias][bridge_id][str(value)]
 
