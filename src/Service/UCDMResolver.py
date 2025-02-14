@@ -91,7 +91,8 @@ class UCDMResolver:
             if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:
                 if field_alias in fields_map:
                     name_origin: str = fields_map[field_alias]['name']
-                    if name_origin.endswith('concept_id') or name_origin.endswith('concept_id1') or name_origin.endswith('concept_id2'):
+                    is_required = fields_map[field_alias]['isRequired']
+                    if is_required and (name_origin.endswith('concept_id') or name_origin.endswith('concept_id1') or name_origin.endswith('concept_id2')):
                         log_error(name_origin, field, value)
                         return []
                 values = [(value, '')]
