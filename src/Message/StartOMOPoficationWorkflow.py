@@ -14,6 +14,7 @@ class StartOMOPoficationWorkflow(BaseMessage):
     format: str
     connection_string: str
     all_tables: List[Dict[str, any]]
+    automation_strategies_map: Dict[str, Dict[str, str]]
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartOMOPoficationWorkflow'
@@ -28,5 +29,6 @@ class StartOMOPoficationWorkflow(BaseMessage):
         self.format = message.data['format']
         self.connection_string = message.data['connectionString']
         self.all_tables = message.data['allTables']
+        self.automation_strategies_map = message.data['automationStrategiesMap']
 
 

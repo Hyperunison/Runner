@@ -55,6 +55,6 @@ class WorkflowBase:
         ucdm_mapping_resolver = UCDMMappingResolver(csv_mapping)
         resolver = UCDMResolver(self.schema, ucdm_mapping_resolver)
         self.api.add_log_chunk(message.run_id, "Executing SQL query and harmonization result\n{}\n".format(sql_final))
-        ucdm = resolver.get_ucdm_result(sql_final, StrToIntGenerator(), {})
+        ucdm = resolver.get_ucdm_result(sql_final, StrToIntGenerator(), {}, message.automation_strategies_map)
 
         return ucdm

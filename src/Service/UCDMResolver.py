@@ -25,12 +25,13 @@ class UCDMResolver:
             sql_final: str,
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
+            automation_strategies_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
         try:
             mapping_index = self.build_mapping_index()
             result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
-            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map)
+            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map, automation_strategies_map)
 
             return ucdm_result
         except ProgrammingError as e:
@@ -58,6 +59,7 @@ class UCDMResolver:
             mapping_index: Dict[str, Dict[str, List[Tuple[str, str, str]]]],
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
+            automation_strategies_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
         if len(result) == 0:
             return []
@@ -65,7 +67,7 @@ class UCDMResolver:
         serials: Dict[str, SerialGenerator] = {}
 
         for row in result:
-            converted = self.convert_row(mapping_index, row, serials, str_to_int, fields_map)
+            converted = self.convert_row(mapping_index, row, serials, str_to_int, fields_map, automation_strategies_map)
             for converted_row in converted:
                 output.append(converted_row)
 
@@ -83,11 +85,17 @@ class UCDMResolver:
             serials: Dict[str, SerialGenerator],
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
+            automation_strategies_map: Dict[str, Dict[str, str]]
     ) -> List[Dict[str, UCDMConvertedField]]:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             field_alias = self.get_field_alias(field)
             bridge_id = row['c.__bridge_id']
+            if bridge_id in automation_strategies_map and field_alias in automation_strategies_map[bridge_id]:
+                automation_strategy = automation_strategies_map[bridge_id][field_alias]
+            else:
+                automation_strategy = ''
+
             if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:
                 if field_alias in fields_map:
                     name_origin: str = fields_map[field_alias]['name']
@@ -95,25 +103,25 @@ class UCDMResolver:
                     is_concept = name_origin.endswith('concept_id') or name_origin.endswith('concept_id1') or name_origin.endswith('concept_id2')
                     if is_concept:
                         if is_required:
-                            logging.warning("Value '{value}' is unmapped in the field '{name_origin}'. Skip row, field is required".format(
-                                name_origin=name_origin, field=field, value=value))
+                            logging.warning("Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Skip row, field is required".format(
+                                name_origin=name_origin, field=field, value=value, bridge_id=bridge_id))
                             return []
                         else:
                             logging.warning(
-                                "Value '{value}' is unmapped in the field '{name_origin}'. Use blank field, field is optional".format(
-                                    name_origin=name_origin, field=field, value=value))
-                            values = [('', '')]
+                                "Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Use blank field, field is optional".format(
+                                    name_origin=name_origin, field=field, value=value, bridge_id=bridge_id))
+                            values = [('', automation_strategy)]
                     else:
-                        values = [(value, '')]
+                        values = [(value, automation_strategy)]
                 else:
-                    values = [(value, '')]
+                    values = [(value, automation_strategy)]
             else:
                 values = mapping_index[field_alias][bridge_id][str(value)]
 
                 if values[0][2] == 'Yes':
-                    values = [(values[0][0], values[0][1])]
+                    values = [(values[0][0], automation_strategy)]
                 else:
-                    values = [(value, values[0][1])]
+                    values = [(value, automation_strategy)]
             input_matrix[field] = values
 
         multiplied = decartes_multiply_array(input_matrix)

@@ -38,12 +38,32 @@ class OMOPofication(WorkflowBase):
         length = len(message.queries.items())
         step = 0
 
+        automation_strategies_map = message.automation_strategies_map
+
+        filename = os.path.abspath(self.dir + '/automation_strategies_map.json')
+        with open(filename, 'w') as file:
+            json.dump(automation_strategies_map, file, indent=4)
+
         s3_folder = 's3://' + message.s3_bucket + message.s3_path
         result_path = s3_folder if self.may_upload_private_data else (os.path.abspath('.') + '/' + self.dir)
 
         if self.may_upload_private_data:
-            s3_path = s3_folder + 'mapping-values.csv'
-            if not self.pipeline_executor.adapter.upload_local_file_to_s3(os.path.abspath(self.mapping_file_name), s3_path, message.aws_id, message.aws_key, False):
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(
+                os.path.abspath(self.dir+'/automation_strategies_map.json'),
+                s3_folder + 'automation_strategies_map.json',
+                message.aws_id,
+                message.aws_key,
+                False
+            ):
+                api_logger.write(message.id, "Can't upload automation_strategies_map.json file to S3")
+
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(
+                    os.path.abspath(self.mapping_file_name),
+                    s3_folder + 'mapping-values.csv',
+                    message.aws_id,
+                    message.aws_key,
+                    False
+            ):
                 api_logger.write(message.id, "Can't upload mapping-values.csv file to S3")
 
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
@@ -83,7 +103,8 @@ class OMOPofication(WorkflowBase):
                 ucdm = self.resolver.get_ucdm_result(
                     sql_final,
                     str_to_int,
-                    fields_map
+                    fields_map,
+                    automation_strategies_map
                 )
                 self.save_sql_query(table_name, sql_final, s3_folder, message, api_logger)
                 if ucdm is None:
@@ -118,7 +139,16 @@ class OMOPofication(WorkflowBase):
                     if len(skipped_rows) > 0:
                         api_logger.write(message.id, '\n'.join(skipped_rows))
             self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
-            str_to_int.save_to_file()
+            str_filename = str_to_int.save_to_file()
+
+            if not self.pipeline_executor.adapter.upload_local_file_to_s3(
+                    os.path.abspath(str_filename),
+                    s3_folder + 'str-to-int.csv',
+                    message.aws_id,
+                    message.aws_key,
+                    False
+            ):
+                api_logger.write(message.id, "Can't upload str-to-int.csv file to S3")
 
         except Exception as e:
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))

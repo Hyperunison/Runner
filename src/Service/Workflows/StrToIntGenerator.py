@@ -39,10 +39,12 @@ class StrToIntGenerator:
                 self.map[row[0]] = int(row[1])
             self.counter = len(self.map.values())
 
-    def save_to_file(self):
+    def save_to_file(self) -> str:
         with open(self.mapping_file_path, 'w', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=self.mapping_file_header)
             writer.writeheader()
 
             for key, value in self.map.items():
                 writer.writerow({'String': key, 'Integer': value})
+
+        return self.mapping_file_path

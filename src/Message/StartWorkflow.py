@@ -13,6 +13,7 @@ class StartWorkflow(BaseMessage):
     parameters: Dict[str, str]
     run_name: str
     weblog_url: str
+    automation_strategies_map: Dict[str, Dict[str, str]]
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartWorkflow'
@@ -22,6 +23,7 @@ class StartWorkflow(BaseMessage):
         self.workflow_name = message.data['workflowName']
         self.workflow_version = message.data['workflowVersion']
         self.cohort_definition = message.data['cohortDefinition']
+        self.automation_strategies_map = message.data['automationStrategiesMap']
         self.parameters = message.data['parameters']
         self.run_name = message.data['runName']
         self.weblog_url = message.data['weblogUrl']
