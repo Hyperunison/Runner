@@ -136,8 +136,8 @@ class OMOPofication(WorkflowBase):
                                 return
                         api_logger.write(message.id, "{}.csv file was written".format(table_name))
 
-                    if len(skipped_rows) > 0:
-                        api_logger.write(message.id, '\n'.join(skipped_rows))
+                    # if len(skipped_rows) > 0:
+                    #     api_logger.write(message.id, '\n'.join(skipped_rows))
             self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
             str_filename = str_to_int.save_to_file()
 
