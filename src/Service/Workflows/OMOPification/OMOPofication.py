@@ -7,6 +7,7 @@ from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.Workflows import PipelineExecutor
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
+from src.Service.Workflows.OMOPification.SQLiteExporter import SQLiteExporter
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.Api import Api
 from src.Message.partial.CohortDefinition import CohortDefinition
@@ -78,6 +79,11 @@ class OMOPofication(WorkflowBase):
                     connection_string=message.connection_string
                 )
                 exporter.create_all_tables(message.all_tables)
+
+            if message.format == 'sqlite':
+                exporter = SQLiteExporter()
+                exporter.create_all_tables(message.all_tables)
+
             for table_name, val in message.queries.items():
                 api_logger.write(message.id, "Start exporting {}".format(table_name))
                 query = CohortDefinition(val['query'])
@@ -113,7 +119,7 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:
-                    if message.format == 'postgresql':
+                    if message.format in ('postgresql', 'sqlite'):
                         skipped_rows = self.save_rows_to_database(
                             table_name=table_name,
                             ucdm=ucdm,
@@ -122,7 +128,8 @@ class OMOPofication(WorkflowBase):
                             columns=self.get_columns(
                                 table_name=table_name,
                                 tables=message.all_tables
-                            )
+                            ),
+                            format=message.format
                         )
                         api_logger.write(message.id, "Table {} was filled".format(table_name))
                     else:
@@ -149,6 +156,16 @@ class OMOPofication(WorkflowBase):
                     False
             ):
                 api_logger.write(message.id, "Can't upload str-to-int.csv file to S3")
+
+            if self.may_upload_private_data and message.format == 'sqlite':
+                exporter = SQLiteExporter()
+                self.pipeline_executor.adapter.upload_local_file_to_s3(
+                    os.path.abspath(exporter.file_name),
+                    s3_folder + exporter.file_name,
+                    message.aws_id,
+                    message.aws_key,
+                    False
+                )
 
         except Exception as e:
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
@@ -223,13 +240,29 @@ class OMOPofication(WorkflowBase):
             ucdm: List[Dict[str, UCDMConvertedField]],
             fields_map: Dict[str, Dict[str, str]],
             connection_string: str,
-            columns: List[Dict[str, str]]
+            columns: List[Dict[str, str]],
+            format: str
     ) -> List[str]:
-        exporter = PostgresqlExporter(
-            connection_string=connection_string
-        )
+        if format == 'sqlite':
+            exporter = SQLiteExporter()
 
-        return exporter.export(table_name=table_name, ucdm=ucdm, fields_map=fields_map, columns=columns)
+            return exporter.export(
+                table_name=table_name,
+                ucdm=ucdm,
+                fields_map=fields_map,
+                columns=columns
+            )
+        else:
+            exporter = PostgresqlExporter(
+                connection_string=connection_string
+            )
+
+            return exporter.export(
+                table_name=table_name,
+                ucdm=ucdm,
+                fields_map=fields_map,
+                columns=columns
+            )
 
     def get_columns(self, table_name: str, tables: List[Dict[str, any]]) -> List[Dict[str, str]]:
         for table in tables:

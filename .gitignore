@@ -4,6 +4,7 @@ config.yaml
 test.py
 var/tmp
 var/pgsql
+var/database.sqlite
 .env
 .run
 nextflow.config
