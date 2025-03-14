@@ -73,6 +73,11 @@ class OMOPofication(WorkflowBase):
 
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
+
+        if message.format == 'sqlite':
+            exporter = SQLiteExporter()
+            exporter.remove_database_file()
+
         try:
             if message.format == 'postgresql':
                 exporter = PostgresqlExporter(
@@ -157,11 +162,22 @@ class OMOPofication(WorkflowBase):
             ):
                 api_logger.write(message.id, "Can't upload str-to-int.csv file to S3")
 
+            if message.format == 'sqlite':
+                exporter = SQLiteExporter()
+                exporter.save_export_to_binary_file()
+
             if self.may_upload_private_data and message.format == 'sqlite':
                 exporter = SQLiteExporter()
                 self.pipeline_executor.adapter.upload_local_file_to_s3(
                     os.path.abspath(exporter.file_name),
                     s3_folder + exporter.file_name,
+                    message.aws_id,
+                    message.aws_key,
+                    False
+                )
+                self.pipeline_executor.adapter.upload_local_file_to_s3(
+                    os.path.abspath(exporter.bin_file_name),
+                    s3_folder + exporter.bin_file_name,
                     message.aws_id,
                     message.aws_key,
                     False

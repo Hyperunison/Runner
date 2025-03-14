@@ -5,6 +5,7 @@ test.py
 var/tmp
 var/pgsql
 var/database.sqlite
+var/database.bin
 .env
 .run
 nextflow.config
