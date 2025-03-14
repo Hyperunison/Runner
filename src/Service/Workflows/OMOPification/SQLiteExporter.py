@@ -16,6 +16,9 @@ class SQLiteExporter(BaseDatabaseExporter):
         self.file_name = 'var/database.sqlite'
 
     def create_all_tables(self, tables: List[Dict[str, any]]):
+        if os.path.exists(self.file_name):
+            os.remove(self.file_name)
+
         for table in tables:
             self.create_table(table)
 
@@ -25,10 +28,7 @@ class SQLiteExporter(BaseDatabaseExporter):
             fields=table['columns']
         )
 
-        if os.path.exists(self.file_name):
-            os.remove(self.file_name)
-
-        file = open(self.file_name, 'w')
+        file = open(self.file_name, 'a')
         file.write(sql)
         file.close()
 
