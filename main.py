@@ -50,6 +50,7 @@ with ApiClient(configuration) as api_client:
     last_check = None
 
     vendor_pipelines.sync_pipeline_list_with_backend()
+    logging.info("Start listening tasks from the server")
     while True:
         response = None
         # Rollback to avoid any issues with connection state

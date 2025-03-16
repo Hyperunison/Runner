@@ -1,8 +1,5 @@
 version: '3'
 
-networks:
-  default-network:
-    driver: bridge
 
 services:
   unison-agent:
@@ -15,8 +12,6 @@ services:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube
       - ./Resources/.aws:/root/.aws
-    networks:
-      - default-network
 
   pgsql:
     image: postgres:16.4
@@ -28,5 +23,3 @@ services:
       POSTGRES_PASSWORD: ${EXPORT_PGSQL_PASSWORD}
     volumes:
       - ./var/pgsql:/var/lib/postgresql/data
-    networks:
-      - default-network

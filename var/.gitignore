@@ -1,7 +1,14 @@
 *.csv
+dqd/
+errorReportSql.txt
+log_DqDashboard_main.txt
+errors/
+output/
+sqlite.db
 *.sql
 *.pdf
 *.json
+qc-*.log
 pipeline_*
 nextflow
 

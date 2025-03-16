@@ -4,7 +4,9 @@ import os
 from typing import List, Dict
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
+from src.Service.DqdOmop54 import DqdOmop54
 from src.Service.Workflows import PipelineExecutor
+from src.Service.Workflows.OMOPification import BaseDatabaseExporter
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
 from src.Service.Workflows.OMOPification.SQLiteExporter import SQLiteExporter
@@ -83,6 +85,7 @@ class OMOPofication(WorkflowBase):
             if message.format == 'sqlite':
                 exporter = SQLiteExporter()
                 exporter.create_all_tables(message.all_tables)
+                self.run_dqd_if_needed(message, exporter, api_logger, s3_folder)
 
             for table_name, val in message.queries.items():
                 api_logger.write(message.id, "Start exporting {}".format(table_name))
@@ -172,6 +175,33 @@ class OMOPofication(WorkflowBase):
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
+
+    def run_dqd_if_needed(
+        self, message: StartOMOPoficationWorkflow, exporter: BaseDatabaseExporter, api_logger: ApiLogger, s3_folder: str
+    ) -> None:
+        if message.run_dqd != 'OMOP-5.4' or message.format != 'sqlite':
+            return
+        api_logger.write(message.id, "Start running DQD, SQLite filename {}".format(exporter.file_name))
+        dqd = DqdOmop54()
+        api_logger.write(message.id, "Start running DQD")
+        sqlite = exporter.file_name.replace("var/", "")
+        sqlite = "sqlite.db"        # debug hack
+        data = dqd.generate_results_json(sqlite)
+        api_logger.write(message.id, "DQD finished, uploading results: {}".format(json.dumps(data)))
+        self.pipeline_executor.adapter.upload_local_file_to_s3(
+            os.path.abspath(data['result']),
+            s3_folder + 'results.json',
+            message.aws_id,
+            message.aws_key,
+            False
+        )
+        self.pipeline_executor.adapter.upload_local_file_to_s3(
+            os.path.abspath(data['log']),
+            s3_folder + 'qc.log',
+            message.aws_id,
+            message.aws_key,
+            False
+        )
 
     def download_manual_pdf(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         response = self.api.export_mapping_docs()

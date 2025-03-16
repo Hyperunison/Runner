@@ -8,3 +8,4 @@ var/database.sqlite
 .env
 .run
 nextflow.config
+.DS_Store
