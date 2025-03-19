@@ -8,6 +8,7 @@ from src.Service.DqdOmop54 import DqdOmop54
 from src.Service.Workflows import PipelineExecutor
 from src.Service.Workflows.OMOPification import BaseDatabaseExporter
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
+from src.Service.Workflows.OMOPification.ExporterFactory import exporter_factory
 from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
 from src.Service.Workflows.OMOPification.SQLiteExporter import SQLiteExporter
 from src.Service.Workflows.WorkflowBase import WorkflowBase
@@ -81,16 +82,8 @@ class OMOPofication(WorkflowBase):
             exporter.remove_database_file()
 
         try:
-            if message.format == 'postgresql':
-                exporter = PostgresqlExporter(
-                    connection_string=message.connection_string
-                )
-                exporter.create_all_tables(message.all_tables)
-
-            if message.format == 'sqlite':
-                exporter = SQLiteExporter()
-                exporter.create_all_tables(message.all_tables)
-                self.run_dqd_if_needed(message, exporter, api_logger, s3_folder)
+            exporter = exporter_factory(message)
+            exporter.create_all_tables(message.all_tables)
 
             for table_name, val in message.queries.items():
                 api_logger.write(message.id, "Start exporting {}".format(table_name))
@@ -98,6 +91,7 @@ class OMOPofication(WorkflowBase):
                 fields_map = val['fieldsMap']
                 if table_name == "":
                     table_name = "person"
+
                 self.save_fields_map(fields_map, table_name)
                 self.send_notification_to_api(
                     id=message.id,
@@ -127,65 +121,50 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:
-                    if message.format in ('postgresql', 'sqlite'):
-                        skipped_rows = self.save_rows_to_database(
+                    exporter.export(
+                        table_name=table_name,
+                        ucdm=ucdm,
+                        fields_map=fields_map,
+                        columns=self.get_columns(
                             table_name=table_name,
-                            ucdm=ucdm,
-                            fields_map=fields_map,
-                            connection_string=message.connection_string,
-                            columns=self.get_columns(
-                                table_name=table_name,
-                                tables=message.all_tables
-                            ),
-                            format=message.format
+                            tables=message.all_tables
                         )
-                        api_logger.write(message.id, "Table {} was filled".format(table_name))
-                    else:
-                        filename = self.dir + "{}.csv".format(table_name)
-                        skipped_rows = self.build_csv_file(filename, ucdm, fields_map)
-                        if self.may_upload_private_data:
+                    )
+                    api_logger.write(message.id, "{} data was written".format(table_name))
+                    filename = exporter.write_single_table_dump(table_name)
+                    if self.may_upload_private_data and filename is not None:
+                        if filename is not None:
                             s3_path = s3_folder + table_name + '.csv'
-                            if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key, False):
+                            if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id,
+                                                                                          message.aws_key, False):
                                 api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
                                 self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
-                                return
-                        api_logger.write(message.id, "{}.csv file was written".format(table_name))
+                                continue
 
-                    # if len(skipped_rows) > 0:
-                    #     api_logger.write(message.id, '\n'.join(skipped_rows))
-            self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
             str_filename = str_to_int.save_to_file()
 
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(
-                    os.path.abspath(str_filename),
-                    s3_folder + 'str-to-int.csv',
-                    message.aws_id,
-                    message.aws_key,
-                    False
+                os.path.abspath(str_filename),
+                s3_folder + 'str-to-int.csv',
+                message.aws_id,
+                message.aws_key,
+                False
             ):
                 api_logger.write(message.id, "Can't upload str-to-int.csv file to S3")
 
-            if message.format == 'sqlite':
-                exporter = SQLiteExporter()
-                exporter.save_export_to_binary_file()
-
-            if self.may_upload_private_data and message.format == 'sqlite':
-                exporter = SQLiteExporter()
+            full_dump = exporter.write_full_dump()
+            if full_dump is not None and self.may_upload_private_data:
                 self.pipeline_executor.adapter.upload_local_file_to_s3(
-                    os.path.abspath(exporter.file_name),
-                    s3_folder + exporter.file_name,
+                    os.path.abspath(full_dump),
+                    s3_folder + full_dump.replace('var/', ''),
                     message.aws_id,
                     message.aws_key,
                     False
                 )
-                self.pipeline_executor.adapter.upload_local_file_to_s3(
-                    os.path.abspath(exporter.bin_file_name),
-                    s3_folder + exporter.bin_file_name,
-                    message.aws_id,
-                    message.aws_key,
-                    False
-                )
+                api_logger.write(message.id, "Full dump file uploaded to S3")
+            self.run_dqd_if_needed(message, exporter, api_logger, s3_folder)
 
+            self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
         except Exception as e:
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
@@ -201,7 +180,6 @@ class OMOPofication(WorkflowBase):
         dqd = DqdOmop54()
         api_logger.write(message.id, "Start running DQD")
         sqlite = exporter.file_name.replace("var/", "")
-        sqlite = "sqlite.db"        # debug hack
         data = dqd.generate_results_json(sqlite)
         api_logger.write(message.id, "DQD finished, uploading results: {}".format(json.dumps(data)))
         self.pipeline_executor.adapter.upload_local_file_to_s3(
@@ -270,45 +248,6 @@ class OMOPofication(WorkflowBase):
         percent = int(round(step / length * 100, 0))
         self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
 
-    def build_csv_file(
-            self,
-            filename: str,
-            ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]]
-    ) -> List[str]:
-        csv_writter = CsvWritter()
-
-        return csv_writter.build(filename, ucdm, fields_map)
-
-    def save_rows_to_database(
-            self,
-            table_name: str,
-            ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]],
-            connection_string: str,
-            columns: List[Dict[str, str]],
-            format: str
-    ) -> List[str]:
-        if format == 'sqlite':
-            exporter = SQLiteExporter()
-
-            return exporter.export(
-                table_name=table_name,
-                ucdm=ucdm,
-                fields_map=fields_map,
-                columns=columns
-            )
-        else:
-            exporter = PostgresqlExporter(
-                connection_string=connection_string
-            )
-
-            return exporter.export(
-                table_name=table_name,
-                ucdm=ucdm,
-                fields_map=fields_map,
-                columns=columns
-            )
 
     def get_columns(self, table_name: str, tables: List[Dict[str, any]]) -> List[Dict[str, str]]:
         for table in tables:

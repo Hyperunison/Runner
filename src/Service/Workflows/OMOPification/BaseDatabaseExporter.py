@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from src.Service.SqlBuilder import SqlBuilder
 from src.Service.UCDMConvertedField import UCDMConvertedField
@@ -13,6 +13,9 @@ class BaseDatabaseExporter:
         self.lines_filter = LinesFilter()
         self.sql_builder = SqlBuilder()
 
+    def create_all_tables(self, tables: List[Dict[str, any]]):
+        pass
+
     def export(
             self,
             table_name: str,
@@ -26,6 +29,14 @@ class BaseDatabaseExporter:
             fields_map=fields_map,
             columns=columns
         )
+
+    # In case if exporter writes each table to separate file. Returns filename of dump to upload to S3
+    def write_single_table_dump(self, table_name: str) -> Optional[str]:
+        return None
+
+    # In case if exporter writes full dump into a single file. Returns filename of dump to upload to S3
+    def write_full_dump(self) -> Optional[str]:
+        return None
 
     def save_rows(
             self,
@@ -103,3 +114,4 @@ class BaseDatabaseExporter:
             result[value['name']] = value['name']
 
         return result
+

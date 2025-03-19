@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 import os
 import sqlite3
 
@@ -58,7 +58,7 @@ class SQLiteExporter(BaseDatabaseExporter):
 
         self.cursor.executescript(sql)
 
-    def save_export_to_binary_file(self):
+    def write_full_dump(self):
         if os.path.exists(self.bin_file_name):
             os.remove(self.bin_file_name)
 
@@ -70,3 +70,5 @@ class SQLiteExporter(BaseDatabaseExporter):
 
         source_conn.close()
         binary_conn.close()
+
+        return self.bin_file_name
