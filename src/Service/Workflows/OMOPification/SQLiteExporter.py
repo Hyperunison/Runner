@@ -16,8 +16,8 @@ class SQLiteExporter(BaseDatabaseExporter):
 
     def __init__(self):
         super().__init__()
-        self.file_name = 'var/database.sqlite'
-        self.bin_file_name = 'var/database.bin'
+        self.file_name = 'var/database.sqlite.sql'
+        self.bin_file_name = 'var/database.sqlite'
         self.cursor = self.get_connection_cursor()
 
     def get_connection_cursor(self) -> sqlite3.Cursor:
