@@ -31,9 +31,10 @@ services:
 
   dqd-omop-5.4:
     container_name: ${CONTAINER_NAME:-unison-agent}-dqd-omop-5.4
-    build:
-      context: Resources/dqd-omop-5.4/
-      dockerfile: Dockerfile
+    image: entsupml/unison-runner-dqd-omop-5.4
+#    build:
+#      context: Resources/dqd-omop-5.4/
+#      dockerfile: Dockerfile
     ports:
       - 8080:8080
     volumes:

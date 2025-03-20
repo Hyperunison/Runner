@@ -3,7 +3,6 @@ import json
 import os
 import shlex
 import socketserver
-import random
 import subprocess
 import logging
 from typing import Dict
@@ -34,9 +33,9 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         filename = '/data/' + str(query_params['file'][0])
         if not os.path.isfile(filename):
             return self.reply(404, "File {} not found".format(filename))
-        rnd = str(random.randint(100000, 1000000-1))
-        result_filename = "results-" + rnd + ".json"
-        log_filename = "qc-" + rnd + ".log"
+        id = str(query_params['id'][0])
+        result_filename = "results-" + id + ".json"
+        log_filename = "qc-" + id + ".log"
 
         cmd = "bash -c 'export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/; cd /data/; Rscript /app/qc.r "+filename+" /data/ " + result_filename + " > " + log_filename + " 2>&1'"
         logging.info(cmd)

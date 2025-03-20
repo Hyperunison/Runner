@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from src.auto.auto_api_client.api.agent_api import AgentApi
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
@@ -102,7 +102,7 @@ class Api:
             raw_only="1" if raw_only else "0"
         )
 
-    def set_job_state(self, run_id: str, state: str, percent: int, path: str):
+    def set_job_state(self, run_id: str, state: str, percent: int, path: str, dqd_path: Optional[str] = None):
         self.api_instance.set_job_state(
             run_id=run_id,
             version=self.version,
@@ -111,7 +111,8 @@ class Api:
                 state=state,
                 result=json.dumps({
                     "percent": percent,
-                    "path": path
+                    "path": path,
+                    "dqdPath": dqd_path,
                 })
             )
         )

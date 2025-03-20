@@ -10,8 +10,8 @@ class DqdOmop54:
     def __init__(self):
         pass
 
-    def generate_results_json(self, sqlite_filename: str) -> Dict[str, str]:
-        url = "http://dqd-omop-5.4:8080/dqd-omop-5.4?file=" + sqlite_filename
+    def generate_results_json(self, sqlite_filename: str, run_id: int) -> Dict[str, str]:
+        url = "http://dqd-omop-5.4:8080/dqd-omop-5.4?file=" + sqlite_filename + "&id=" + str(run_id)
         request = urllib.request.Request(url, data=b'', method='POST')
 
         # Send the request and get the response

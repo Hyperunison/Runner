@@ -1,7 +1,8 @@
 import json
 import logging
 import os
-from typing import List, Dict
+import re
+from typing import List, Dict, Optional
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.DqdOmop54 import DqdOmop54
@@ -162,9 +163,16 @@ class OMOPofication(WorkflowBase):
                     False
                 )
                 api_logger.write(message.id, "Full dump file uploaded to S3")
-            self.run_dqd_if_needed(message, exporter, api_logger, s3_folder)
+            s3_dqd_report_path = self.run_dqd_if_needed(message, exporter, api_logger, s3_folder)
 
-            self.send_notification_to_api(id=message.id, length=length, step=step, state='success', path=result_path)
+            self.send_notification_to_api(
+                id=message.id,
+                length=length,
+                step=step,
+                state='success',
+                path=result_path,
+                dqd_path=s3_dqd_report_path,
+            )
         except Exception as e:
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
@@ -173,29 +181,33 @@ class OMOPofication(WorkflowBase):
 
     def run_dqd_if_needed(
         self, message: StartOMOPoficationWorkflow, exporter: BaseDatabaseExporter, api_logger: ApiLogger, s3_folder: str
-    ) -> None:
+    ) -> Optional[str]:
         if message.run_dqd != 'OMOP-5.4' or message.format != 'sqlite':
             return
         api_logger.write(message.id, "Start running DQD, SQLite filename {}".format(exporter.file_name))
         dqd = DqdOmop54()
-        api_logger.write(message.id, "Start running DQD")
         sqlite = exporter.file_name.replace("var/", "")
-        data = dqd.generate_results_json(sqlite)
+        data = dqd.generate_results_json(sqlite, message.id)
         api_logger.write(message.id, "DQD finished, uploading results: {}".format(json.dumps(data)))
+
+        s3_file = s3_folder + re.sub(r"^/.*/", "", data['result'])
+
         self.pipeline_executor.adapter.upload_local_file_to_s3(
             os.path.abspath(data['result']),
-            s3_folder + 'results.json',
+            s3_file,
             message.aws_id,
             message.aws_key,
             False
         )
         self.pipeline_executor.adapter.upload_local_file_to_s3(
             os.path.abspath(data['log']),
-            s3_folder + 'qc.log',
+            s3_folder + re.sub(r"^/.*/", "", data['log']),
             message.aws_id,
             message.aws_key,
             False
         )
+
+        return s3_file
 
     def download_manual_pdf(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         response = self.api.export_mapping_docs()
@@ -244,9 +256,9 @@ class OMOPofication(WorkflowBase):
             json.dump(fields_map, file, indent=4)
 
 
-    def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str):
+    def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str, dqd_path: Optional[str] = None):
         percent = int(round(step / length * 100, 0))
-        self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path)
+        self.api.set_job_state(run_id=str(id), state=state, percent=percent, path=path, dqd_path=dqd_path)
 
 
     def get_columns(self, table_name: str, tables: List[Dict[str, any]]) -> List[Dict[str, str]]:
