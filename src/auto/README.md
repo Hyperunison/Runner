@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**block_task**](docs/AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
 *AgentApi* | [**export_cdm_values_csv**](docs/AgentApi.md#export_cdm_values_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-values/export | 
+*AgentApi* | [**export_cdm_vocabulary_csv**](docs/AgentApi.md#export_cdm_vocabulary_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-vocabulary/export | 
 *AgentApi* | [**export_docs_for_specific_biobank**](docs/AgentApi.md#export_docs_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/docs | 
 *AgentApi* | [**export_docs_for_specific_biobank_in_csv_format**](docs/AgentApi.md#export_docs_for_specific_biobank_in_csv_format) | **GET** /api/agent/v{version}/{token}/export-mapping/docs/csv | 
 *AgentApi* | [**export_mapping_short_for_specific_biobank**](docs/AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 

@@ -74,6 +74,7 @@ class OMOPofication(WorkflowBase):
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
         self.download_manual_pdf(s3_folder, message, api_logger)
         self.download_manual_csv(s3_folder, message, api_logger)
+        self.download_server_data(message)
 
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
@@ -265,3 +266,10 @@ class OMOPofication(WorkflowBase):
         for table in tables:
             if table['tableName'] == table_name:
                 return table['columns']
+
+    def download_server_data(self, message: StartOMOPoficationWorkflow):
+        if message.does_server_data_omop_concept_exist():
+            self.download_cdm_concept(message.cdm_id)
+
+        if message.does_server_data_omop_vocabularies_exist():
+            self.download_cdm_vocabulary(message.cdm_id)

@@ -145,6 +145,24 @@ class Api:
             token=self.token
         )
 
+    def export_cdm_concept(self, cdm_id: int):
+        logging.info("Export CDM concepts to response body file")
+
+        return self.api_instance.export_cdm_values_csv(
+            version=self.version,
+            token=self.token,
+            cdm_id=cdm_id
+        )
+
+    def export_cdm_vocabulary(self, cdm_id: int):
+        logging.info("Export CDM vocabulary to response body file")
+
+        return self.api_instance.export_cdm_vocabulary_csv(
+            version=self.version,
+            token=self.token,
+            cdm_id=cdm_id
+        )
+
     def export_mapping_docs(self):
         logging.info("Export mapping docs")
 
