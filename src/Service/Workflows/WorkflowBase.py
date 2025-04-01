@@ -13,8 +13,8 @@ from src.Service.UCDMConvertedField import UCDMConvertedField
 
 class WorkflowBase:
     mapping_file_name: str = "var/mapping-values.csv"
-    cdm_concept_file_name: str = "var/cdm-concept.csv"
-    cdm_vocabulary_file_name: str = "var/cdm-vocabulary.csv"
+    cdm_concept_file_name: str = "var/concept.csv"
+    cdm_vocabulary_file_name: str = "var/vocabulary.csv"
     api: Api
     pipeline_executor: PipelineExecutor
     schema: DataSchema
@@ -37,7 +37,7 @@ class WorkflowBase:
                     break
                 file.write(chunk)
 
-    def download_cdm_concept(self, cdm_id: int):
+    def download_cdm_concept(self, cdm_id: str):
         response = self.api.export_cdm_concept(cdm_id)
 
         with open(os.path.abspath(self.cdm_concept_file_name), 'wb') as file:
@@ -47,7 +47,7 @@ class WorkflowBase:
                     break
                 file.write(chunk)
 
-    def download_cdm_vocabulary(self, cdm_id: int):
+    def download_cdm_vocabulary(self, cdm_id: str):
         response = self.api.export_cdm_vocabulary(cdm_id)
 
         with open(os.path.abspath(self.cdm_vocabulary_file_name), 'wb') as file:

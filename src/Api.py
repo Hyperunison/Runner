@@ -145,7 +145,7 @@ class Api:
             token=self.token
         )
 
-    def export_cdm_concept(self, cdm_id: int):
+    def export_cdm_concept(self, cdm_id: str):
         logging.info("Export CDM concepts to response body file")
 
         return self.api_instance.export_cdm_values_csv(
@@ -154,7 +154,7 @@ class Api:
             cdm_id=cdm_id
         )
 
-    def export_cdm_vocabulary(self, cdm_id: int):
+    def export_cdm_vocabulary(self, cdm_id: str):
         logging.info("Export CDM vocabulary to response body file")
 
         return self.api_instance.export_cdm_vocabulary_csv(

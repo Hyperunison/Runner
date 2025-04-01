@@ -74,7 +74,7 @@ class OMOPofication(WorkflowBase):
         self.send_notification_to_api(id=message.id, length=length, step=step, state='process', path=result_path)
         self.download_manual_pdf(s3_folder, message, api_logger)
         self.download_manual_csv(s3_folder, message, api_logger)
-        self.download_server_data(message)
+        self.download_server_data(s3_folder, message, api_logger)
 
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
@@ -267,9 +267,25 @@ class OMOPofication(WorkflowBase):
             if table['tableName'] == table_name:
                 return table['columns']
 
-    def download_server_data(self, message: StartOMOPoficationWorkflow):
+    def download_server_data(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         if message.does_server_data_omop_concept_exist():
-            self.download_cdm_concept(message.cdm_id)
+            self.download_cdm_concept(str(int(message.cdm_id)))
+
+            if self.may_upload_private_data:
+                s3_path = s3_folder + 'concept.csv'
+
+                if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.cdm_concept_file_name, s3_path,
+                                                                              message.aws_id, message.aws_key, False):
+                    api_logger.write(message.id, "Can't upload concept.csv file to S3")
+                    return
 
         if message.does_server_data_omop_vocabularies_exist():
-            self.download_cdm_vocabulary(message.cdm_id)
+            self.download_cdm_vocabulary(str(int(message.cdm_id)))
+
+            if self.may_upload_private_data:
+                s3_path = s3_folder + 'vocabulary.csv'
+
+                if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.cdm_vocabulary_file_name, s3_path,
+                                                                              message.aws_id, message.aws_key, False):
+                    api_logger.write(message.id, "Can't upload vocabulary.csv file to S3")
+                    return

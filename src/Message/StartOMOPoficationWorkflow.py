@@ -35,8 +35,8 @@ class StartOMOPoficationWorkflow(BaseMessage):
         self.automation_strategies_map = message.data['automationStrategiesMap']
         self.automation_strategies_map = message.data['automationStrategiesMap']
         self.run_dqd = message.data['runDQD']
-        self.server_data_links = message.data['serverDataLinks']
-        self.cdm_id = message.data['cdmId']
+        self.server_data_links = message.data['serverDataLinks'] if 'serverDataLinks' in message.data else []
+        self.cdm_id = message.data['cdmId'] if 'cdmId' in message.data else None
 
     def does_server_data_omop_concept_exist(self) -> bool:
         if self.server_data_links is None:
