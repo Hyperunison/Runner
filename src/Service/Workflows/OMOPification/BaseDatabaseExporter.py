@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional
+import csv
+from typing import List, Dict, Optional, Any
 
 from src.Service.SqlBuilder import SqlBuilder
 from src.Service.UCDMConvertedField import UCDMConvertedField
@@ -117,3 +118,30 @@ class BaseDatabaseExporter:
 
         return result
 
+    def fill_server_data_tables(self, tables: List[Dict[str, any]]):
+        pass
+
+    def read_csv_file(self, file_name: str) -> List[Dict[str, any]]:
+        with open(file_name, 'r', newline='') as file:
+            result: List[Dict[str, any]] = []
+            reader = csv.reader(file, delimiter=',', quotechar='"')
+            try:
+                header = next(reader)
+            except StopIteration:
+                return result
+
+            for row in reader:
+                result_row: Dict[str, any] = {}
+                for index, value in enumerate(row):
+                    result_row[header[index]] = value
+
+                result.append(result_row)
+
+            return result
+
+    def get_columns(self, table_name: str, tables: List[Dict[str, any]]) -> List[Dict[str, any]]:
+        for table in tables:
+            if table['tableName'] == table_name:
+                return table['columns']
+
+        return None

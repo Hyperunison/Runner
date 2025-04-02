@@ -90,6 +90,7 @@ class OMOPofication(WorkflowBase):
                 self.cdm_vocabulary_file_name
             )
             exporter.create_all_tables(message.all_tables)
+            exporter.fill_server_data_tables(message.all_tables)
 
             for table_name, val in message.queries.items():
                 api_logger.write(message.id, "Start exporting {}".format(table_name))

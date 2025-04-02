@@ -62,3 +62,10 @@ class PostgresqlExporter(BaseDatabaseExporter):
             fields=table['columns']
         )
         self.data_schema.execute_sql(sql)
+
+    def fill_server_data_tables(self, tables: List[Dict[str, any]]):
+        if self.concept_csv_path:
+            pass
+
+        if self.vocabulary_csv_path:
+            pass
