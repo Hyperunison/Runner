@@ -1,4 +1,5 @@
 import csv
+import os
 from typing import List, Dict, Optional, Any
 
 from src.Service.SqlBuilder import SqlBuilder
@@ -121,6 +122,9 @@ class BaseDatabaseExporter:
     def fill_server_data_tables(self, tables: List[Dict[str, any]]):
         pass
 
+    def execute_sql(self, sql: str):
+        pass
+
     def read_csv_file(self, file_name: str) -> List[Dict[str, any]]:
         with open(file_name, 'r', newline='') as file:
             result: List[Dict[str, any]] = []
@@ -145,3 +149,35 @@ class BaseDatabaseExporter:
                 return table['columns']
 
         return None
+
+    def fill_concept_table(self, tables: List[Dict[str, any]]):
+        table_name = 'concept'
+        rows = self.read_csv_file(os.path.abspath(self.concept_csv_path))
+        self.fill_table(
+            rows=rows,
+            table_name=table_name,
+            tables=tables
+        )
+
+    def fill_vocabulary_table(self, tables: List[Dict[str, any]]):
+        table_name = 'vocabulary'
+        rows = self.read_csv_file(os.path.abspath(self.vocabulary_csv_path))
+        self.fill_table(
+            rows=rows,
+            table_name=table_name,
+            tables=tables
+        )
+
+    def fill_table(self, rows: List[Dict[str, any]], table_name: str, tables: List[Dict[str, any]]):
+        columns = self.get_columns(table_name=table_name, tables=tables)
+
+        if columns is None:
+            return
+
+        sql = self.sql_builder.build_insert(
+            table_name=table_name,
+            rows=rows,
+            columns=columns
+        )
+
+        self.execute_sql(sql)

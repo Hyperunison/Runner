@@ -74,42 +74,12 @@ class SQLiteExporter(BaseDatabaseExporter):
 
         return self.bin_file_name
 
-    def fill_server_data_tables(self, tables: List[Dict[str, any]]):
+    def execute_sql(self, sql: str):
+        self.cursor.executescript(sql)
 
+    def fill_server_data_tables(self, tables: List[Dict[str, any]]):
         if self.concept_csv_path:
             self.fill_concept_table(tables)
 
         if self.vocabulary_csv_path:
             self.fill_vocabulary_table(tables)
-
-    def fill_concept_table(self, tables: List[Dict[str, any]]):
-        table_name = 'concept'
-        rows = self.read_csv_file(os.path.abspath(self.concept_csv_path))
-        columns = self.get_columns(table_name=table_name, tables=tables)
-
-        if columns is None:
-            return
-
-        sql = self.sql_builder.build_insert(
-            table_name=table_name,
-            rows=rows,
-            columns=columns
-        )
-
-        self.cursor.executescript(sql)
-
-    def fill_vocabulary_table(self, tables: List[Dict[str, any]]):
-        table_name = 'vocabulary'
-        rows = self.read_csv_file(os.path.abspath(self.vocabulary_csv_path))
-        columns = self.get_columns(table_name=table_name, tables=tables)
-
-        if columns is None:
-            return
-
-        sql = self.sql_builder.build_insert(
-            table_name=table_name,
-            rows=rows,
-            columns=columns
-        )
-
-        self.cursor.executescript(sql)
