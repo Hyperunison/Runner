@@ -8,6 +8,8 @@ from src.Service.Workflows.OMOPification.LinesFilter import LinesFilter
 class BaseDatabaseExporter:
     lines_filter: LinesFilter
     sql_builder: SqlBuilder
+    concept_csv_path: Optional[str] = None
+    vocabulary_csv_path: Optional[str] = None
 
     def __init__(self):
         self.lines_filter = LinesFilter()

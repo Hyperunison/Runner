@@ -84,7 +84,11 @@ class OMOPofication(WorkflowBase):
             exporter.remove_database_file()
 
         try:
-            exporter = exporter_factory(message)
+            exporter = exporter_factory(
+                message,
+                self.cdm_concept_file_name,
+                self.cdm_vocabulary_file_name
+            )
             exporter.create_all_tables(message.all_tables)
 
             for table_name, val in message.queries.items():
