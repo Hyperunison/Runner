@@ -1,4 +1,6 @@
-from typing import List, Dict, Optional
+import csv
+import os
+from typing import List, Dict, Optional, Any
 
 from src.Service.SqlBuilder import SqlBuilder
 from src.Service.UCDMConvertedField import UCDMConvertedField
@@ -8,6 +10,8 @@ from src.Service.Workflows.OMOPification.LinesFilter import LinesFilter
 class BaseDatabaseExporter:
     lines_filter: LinesFilter
     sql_builder: SqlBuilder
+    concept_csv_path: Optional[str] = None
+    vocabulary_csv_path: Optional[str] = None
 
     def __init__(self):
         self.lines_filter = LinesFilter()
@@ -115,3 +119,65 @@ class BaseDatabaseExporter:
 
         return result
 
+    def fill_server_data_tables(self, tables: List[Dict[str, any]]):
+        pass
+
+    def execute_sql(self, sql: str):
+        pass
+
+    def read_csv_file(self, file_name: str) -> List[Dict[str, any]]:
+        with open(file_name, 'r', newline='') as file:
+            result: List[Dict[str, any]] = []
+            reader = csv.reader(file, delimiter=',', quotechar='"')
+            try:
+                header = next(reader)
+            except StopIteration:
+                return result
+
+            for row in reader:
+                result_row: Dict[str, any] = {}
+                for index, value in enumerate(row):
+                    result_row[header[index]] = value
+
+                result.append(result_row)
+
+            return result
+
+    def get_columns(self, table_name: str, tables: List[Dict[str, any]]) -> List[Dict[str, any]]:
+        for table in tables:
+            if table['tableName'] == table_name:
+                return table['columns']
+
+        return None
+
+    def fill_concept_table(self, tables: List[Dict[str, any]]):
+        table_name = 'concept'
+        rows = self.read_csv_file(os.path.abspath(self.concept_csv_path))
+        self.fill_table(
+            rows=rows,
+            table_name=table_name,
+            tables=tables
+        )
+
+    def fill_vocabulary_table(self, tables: List[Dict[str, any]]):
+        table_name = 'vocabulary'
+        rows = self.read_csv_file(os.path.abspath(self.vocabulary_csv_path))
+        self.fill_table(
+            rows=rows,
+            table_name=table_name,
+            tables=tables
+        )
+
+    def fill_table(self, rows: List[Dict[str, any]], table_name: str, tables: List[Dict[str, any]]):
+        columns = self.get_columns(table_name=table_name, tables=tables)
+
+        if columns is None:
+            return
+
+        sql = self.sql_builder.build_insert(
+            table_name=table_name,
+            rows=rows,
+            columns=columns
+        )
+
+        self.execute_sql(sql)

@@ -15,6 +15,9 @@ class StartOMOPoficationWorkflow(BaseMessage):
     connection_string: str
     all_tables: List[Dict[str, any]]
     automation_strategies_map: Dict[str, Dict[str, str]]
+    run_dqd: str
+    server_data_links: List[str]
+    cdm_id: int
 
     def __init__(self, message: RunnerMessage):
         self.type = 'StartOMOPoficationWorkflow'
@@ -32,5 +35,19 @@ class StartOMOPoficationWorkflow(BaseMessage):
         self.automation_strategies_map = message.data['automationStrategiesMap']
         self.automation_strategies_map = message.data['automationStrategiesMap']
         self.run_dqd = message.data['runDQD']
+        self.server_data_links = message.data['serverDataLinks'] if 'serverDataLinks' in message.data else []
+        self.cdm_id = message.data['cdmId'] if 'cdmId' in message.data else None
+
+    def does_server_data_omop_concept_exist(self) -> bool:
+        if self.server_data_links is None:
+            return False
+
+        return 'omop-concept' in self.server_data_links
+
+    def does_server_data_omop_vocabularies_exist(self) -> bool:
+        if self.server_data_links is None:
+            return False
+
+        return 'omop-vocabularies' in self.server_data_links
 
 

@@ -1871,6 +1871,104 @@
                     }
                 }
             }
+        },
+        "/api/agent/v{version}/{token}/{cdmId}/cdm-values/export": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportCdmValuesCSV",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    },
+                    {
+                        "name": "cdmId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Export CDM values to CSV file",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/agent/v{version}/{token}/{cdmId}/cdm-vocabulary/export": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportCdmVocabularyCSV",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    },
+                    {
+                        "name": "cdmId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Export CDM vocabulary to CSV file",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {

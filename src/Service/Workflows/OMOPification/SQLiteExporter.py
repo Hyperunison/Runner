@@ -1,6 +1,7 @@
 from typing import List, Dict, Optional
 import os
 import sqlite3
+import csv
 
 from src.Service.SqlBuilder import SqlBuilder
 from src.Service.Workflows.OMOPification.BaseDatabaseExporter import BaseDatabaseExporter
@@ -72,3 +73,13 @@ class SQLiteExporter(BaseDatabaseExporter):
         binary_conn.close()
 
         return self.bin_file_name
+
+    def execute_sql(self, sql: str):
+        self.cursor.executescript(sql)
+
+    def fill_server_data_tables(self, tables: List[Dict[str, any]]):
+        if self.concept_csv_path:
+            self.fill_concept_table(tables)
+
+        if self.vocabulary_csv_path:
+            self.fill_vocabulary_table(tables)
