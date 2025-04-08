@@ -57,14 +57,18 @@ class WorkflowBase:
                     break
                 file.write(chunk)
 
-    def get_sql_final(self, cohort_definition: CohortDefinition) -> str:
+    def get_sql_final(
+            self,
+            cohort_definition: CohortDefinition,
+            add_participant_id: bool = True
+    ) -> str:
         mapper = VariableMapper(cohort_definition.fields)
 
         return self.schema.build_cohort_definition_sql_query(
             mapper,
             cohort_definition,
             False,
-            True,
+            add_participant_id
         )
 
     def get_ucdm(self, message: StartWorkflow) -> List[Dict[str, UCDMConvertedField]]:

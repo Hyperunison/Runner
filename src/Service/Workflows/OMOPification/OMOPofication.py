@@ -108,7 +108,7 @@ class OMOPofication(WorkflowBase):
                     path=result_path
                 )
                 step += 1
-                sql_final = self.get_sql_final(query)
+                sql_final = self.get_sql_final(query, False)
                 csv_mapping = csv_transformer.transform_with_file_path(
                     os.path.abspath(self.mapping_file_name),
                     table_name,
