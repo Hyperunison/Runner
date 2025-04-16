@@ -78,6 +78,23 @@ class UCDMResolver:
             return "c." + origin
         return origin
 
+    def get_is_concept(
+            self,
+            automation_strategies_map: Dict[str, Dict[str, str]],
+            bridge_id: str,
+            field_alias: str
+    ) -> bool:
+        if not str(bridge_id) in automation_strategies_map:
+            return False
+
+        if not field_alias in automation_strategies_map[bridge_id]:
+            return False
+
+        if not "valueMappingType" in automation_strategies_map[bridge_id][field_alias]:
+            return automation_strategies_map[bridge_id][field_alias]["valueMappingType"] == "conceptId"
+
+        return False
+
     def convert_row(
             self,
             mapping_index: Dict[str, Dict[str, Dict[str, List[Tuple[str, str, str]]]]],
@@ -100,7 +117,11 @@ class UCDMResolver:
                 if field_alias in fields_map:
                     name_origin: str = fields_map[field_alias]['name']
                     is_required = fields_map[field_alias]['isRequired']
-                    is_concept = fields_map[field_alias]['isConcept']
+                    is_concept = self.get_is_concept(
+                        automation_strategies_map,
+                        bridge_id,
+                        field_alias
+                    )
                     if is_concept:
                         if is_required:
                             logging.warning("Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Skip row, field is required".format(

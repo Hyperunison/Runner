@@ -33,7 +33,6 @@ class StartOMOPoficationWorkflow(BaseMessage):
         self.connection_string = message.data['connectionString']
         self.all_tables = message.data['allTables']
         self.automation_strategies_map = message.data['automationStrategiesMap']
-        self.automation_strategies_map = message.data['automationStrategiesMap']
         self.run_dqd = message.data['runDQD']
         self.server_data_links = message.data['serverDataLinks'] if 'serverDataLinks' in message.data else []
         self.cdm_id = message.data['cdmId'] if 'cdmId' in message.data else None
