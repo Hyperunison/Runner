@@ -90,7 +90,7 @@ class UCDMResolver:
         if not field_alias in automation_strategies_map[bridge_id]:
             return False
 
-        if not "valueMappingType" in automation_strategies_map[bridge_id][field_alias]:
+        if "valueMappingType" in automation_strategies_map[bridge_id][field_alias]:
             return automation_strategies_map[bridge_id][field_alias]["valueMappingType"] == "conceptId"
 
         return False
