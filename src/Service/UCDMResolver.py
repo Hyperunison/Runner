@@ -95,6 +95,23 @@ class UCDMResolver:
 
         return False
 
+    def get_automation_strategy(
+            self,
+            automation_strategies_map: Dict[str, Dict[str, str]],
+            bridge_id: str,
+            field_alias: str
+    ) -> str:
+        if not bridge_id in automation_strategies_map:
+            return ''
+
+        if not field_alias in automation_strategies_map[bridge_id]:
+            return ''
+
+        if not "automationStrategy" in automation_strategies_map[bridge_id][field_alias]:
+            return ''
+
+        return automation_strategies_map[bridge_id][field_alias]["automationStrategy"]
+
     def convert_row(
             self,
             mapping_index: Dict[str, Dict[str, Dict[str, List[Tuple[str, str, str]]]]],
@@ -108,10 +125,7 @@ class UCDMResolver:
         for field, value in row.items():
             field_alias = self.get_field_alias(field)
             bridge_id = row['c.__bridge_id']
-            if bridge_id in automation_strategies_map and field_alias in automation_strategies_map[bridge_id]:
-                automation_strategy = automation_strategies_map[bridge_id][field_alias]
-            else:
-                automation_strategy = ''
+            automation_strategy = self.get_automation_strategy(automation_strategies_map, bridge_id, field_alias)
 
             if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:
                 if field_alias in fields_map:
