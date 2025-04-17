@@ -189,31 +189,39 @@ class OMOPofication(WorkflowBase):
         self, message: StartOMOPoficationWorkflow, exporter: BaseDatabaseExporter, api_logger: ApiLogger, s3_folder: str
     ) -> Optional[str]:
         if message.run_dqd != 'OMOP-5.4' or message.format != 'sqlite':
-            return
+            return None
         api_logger.write(message.id, "Start running DQD, SQLite filename {}".format(exporter.file_name))
         dqd = DqdOmop54()
         sqlite = exporter.file_name.replace("var/", "")
-        data = dqd.generate_results_json(sqlite, message.id)
-        api_logger.write(message.id, "DQD finished, uploading results: {}".format(json.dumps(data)))
+        try:
+            data = dqd.generate_results_json(sqlite, message.id)
 
-        s3_file = s3_folder + re.sub(r"^/.*/", "", data['result'])
+            if 'log' in data:
+                self.pipeline_executor.adapter.upload_local_file_to_s3(
+                    os.path.abspath(data['log']),
+                    s3_folder + re.sub(r"^/.*/", "", data['log']),
+                    message.aws_id,
+                    message.aws_key,
+                    False
+                )
 
-        self.pipeline_executor.adapter.upload_local_file_to_s3(
-            os.path.abspath(data['result']),
-            s3_file,
-            message.aws_id,
-            message.aws_key,
-            False
-        )
-        self.pipeline_executor.adapter.upload_local_file_to_s3(
-            os.path.abspath(data['log']),
-            s3_folder + re.sub(r"^/.*/", "", data['log']),
-            message.aws_id,
-            message.aws_key,
-            False
-        )
+            if not data['success']:
+                api_logger.write(message.id, "Error during generation DQD: {}".format(json.dumps(data)))
+                raise Exception('Error during generation DQD: {}'.format(data))
 
-        return s3_file
+            api_logger.write(message.id, "DQD finished, uploading results: {}".format(json.dumps(data)))
+            s3_file = s3_folder + re.sub(r"^/.*/", "", data['result'])
+            self.pipeline_executor.adapter.upload_local_file_to_s3(
+                os.path.abspath(data['result']),
+                s3_file,
+                message.aws_id,
+                message.aws_key,
+                False
+            )
+
+            return s3_file
+        except Exception as e:
+            raise Exception('Error during generation DQD')
 
     def download_manual_pdf(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
         response = self.api.export_mapping_docs()
