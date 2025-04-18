@@ -954,6 +954,7 @@ class AgentApi(object):
                 'all': [
                     'version',
                     'token',
+                    'queue',
                 ],
                 'required': [
                     'version',
@@ -990,14 +991,18 @@ class AgentApi(object):
                         (str,),
                     'token':
                         (str,),
+                    'queue':
+                        (str,),
                 },
                 'attribute_map': {
                     'version': 'version',
                     'token': 'token',
+                    'queue': 'queue',
                 },
                 'location_map': {
                     'version': 'path',
                     'token': 'path',
+                    'queue': 'query',
                 },
                 'collection_format_map': {
                 }
@@ -3676,6 +3681,7 @@ class AgentApi(object):
             token (str):
 
         Keyword Args:
+            queue (str): Filter message by queue. [optional] if omitted the server will use the default value of ""
             _return_http_data_only (bool): response data without head status
                 code and headers. Default is True.
             _preload_content (bool): if False, the urllib3.HTTPResponse object

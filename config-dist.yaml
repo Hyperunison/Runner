@@ -67,3 +67,12 @@ pipeline:
       instance: '{instance}'
       last_connect: '{last_connect}'
       agent_id: '{agent_id}'
+
+threads:
+  queues:
+    cohort:
+      threads_max_count: 10
+      timeout: 1800
+    general:
+      threads_max_count: 10
+      timeout: 1800

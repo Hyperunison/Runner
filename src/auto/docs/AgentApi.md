@@ -897,10 +897,19 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
     token = "z" # str | 
+    queue = "" # str | Filter message by queue (optional) if omitted the server will use the default value of ""
 
     # example passing only required values which don't have defaults set
     try:
         api_response = api_instance.get_next_task(version, token)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->get_next_task: %s\n" % e)
+
+    # example passing only required values which don't have defaults set
+    # and optional values
+    try:
+        api_response = api_instance.get_next_task(version, token, queue=queue)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->get_next_task: %s\n" % e)
@@ -913,6 +922,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **version** | **str**|  |
  **token** | **str**|  |
+ **queue** | **str**| Filter message by queue | [optional] if omitted the server will use the default value of ""
 
 ### Return type
 
