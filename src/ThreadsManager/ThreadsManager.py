@@ -43,24 +43,17 @@ class ThreadsManager:
             logging.info(f"The queue {queue} has {count} threads.")
             return
 
-        worker = Worker(queue, self.config, self.configuration)
-
-        def task_wrapper():
-            try:
-                result = worker.run()
-                return {"worker": worker, "error": None, "result": result}
-            except Exception as e:
-                return {"worker": worker, "error": e, "result": None}
-
-        future = self.executor.submit(task_wrapper)
-        # self.threads[queue][str(worker.native_id)] = ThreadInfo(worker.native_id)
+        worker = Worker(queue, self.config, self.configuration, self._on_start)
+        future = self.executor.submit(worker.run)
         future.add_done_callback(self._on_done)
 
     def _on_done(self, future):
-        logging.info(f"The future is done.")
-        pass
-        # worker = future.result()
-        # self.remove_thread(worker.queue, worker.native_id)
+        logging.info(f"The worker is done.")
+        worker = future.result()
+        self.remove_thread(worker.queue, worker.native_id)
+
+    def _on_start(self, worker: Worker):
+        self.threads[worker.queue][str(worker.native_id)] = ThreadInfo(worker.native_id)
 
     def remove_old_threads(self, queue: str):
         timeout = self.threads_config["queues"][queue]["timeout"]

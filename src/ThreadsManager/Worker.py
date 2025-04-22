@@ -32,11 +32,13 @@ class Worker:
     config: Dict
     native_id: int = None
     configuration: Configuration = None
+    on_start = None
 
-    def __init__(self, queue: str, config: Dict, configuration: Configuration):
+    def __init__(self, queue: str, config: Dict, configuration: Configuration, on_start = None):
         self.queue = queue
         self.config = config
         self.configuration = configuration
+        self.on_start = on_start
 
     def init_logging(self):
         filename = os.path.abspath('var/output/thread-' + str(self.native_id) + '.log')
@@ -59,6 +61,9 @@ class Worker:
             self.native_id = threading.get_native_id()
             self.init_logging()
             allow_private_upload_data_to_unison = self.config['allow_private_upload_data_to_unison'] == 1
+
+            if self.on_start is not None:
+                self.on_start(self)
 
             with ApiClient(self.configuration) as api_client:
                 runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
