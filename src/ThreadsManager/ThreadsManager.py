@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.ThreadsManager.ThreadInfo import ThreadInfo
 from src.ThreadsManager.Worker import Worker
-
+from src.auto.auto_api_client.configuration import Configuration
 
 class ThreadsManager:
     threads: Dict[str, Dict[str, ThreadInfo]] = None
@@ -13,6 +13,7 @@ class ThreadsManager:
     config: Dict[str, Dict] = None
     executor: ThreadPoolExecutor = None
     manager: ConsoleApplicationManager = None
+    configuration: Configuration = None
 
     def __init__(self, config: Dict[str, Dict], manager: ConsoleApplicationManager):
         self.threads = {}
@@ -24,6 +25,7 @@ class ThreadsManager:
             self.threads[key] = {}
 
         self.executor = ThreadPoolExecutor(max_workers=self.get_full_max_threads_count())
+        self.configuration = self.manager.initialize(self.config)
 
     def run_next_threads(self):
         logging.info("Starting the next chunk of threads")
@@ -36,18 +38,29 @@ class ThreadsManager:
     def run_next_thread(self, queue: str):
         max_count = self.get_max_threads_count(queue)
         count = len(self.threads[queue].keys())
+        logging.info("The number of threads in queue {} is {}".format(queue, count))
         if count >= max_count:
             logging.info(f"The queue {queue} has {count} threads.")
             return
 
-        worker = Worker(queue, self.config, self.manager)
-        future = self.executor.submit(worker.run)
-        self.threads[queue][str(worker.native_id)] = ThreadInfo(worker.native_id)
+        worker = Worker(queue, self.config, self.configuration)
+
+        def task_wrapper():
+            try:
+                result = worker.run()
+                return {"worker": worker, "error": None, "result": result}
+            except Exception as e:
+                return {"worker": worker, "error": e, "result": None}
+
+        future = self.executor.submit(task_wrapper)
+        # self.threads[queue][str(worker.native_id)] = ThreadInfo(worker.native_id)
         future.add_done_callback(self._on_done)
 
     def _on_done(self, future):
-        worker = future.result()
-        self.remove_thread(worker.queue, worker.native_id)
+        logging.info(f"The future is done.")
+        pass
+        # worker = future.result()
+        # self.remove_thread(worker.queue, worker.native_id)
 
     def remove_old_threads(self, queue: str):
         timeout = self.threads_config["queues"][queue]["timeout"]

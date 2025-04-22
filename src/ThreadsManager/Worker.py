@@ -3,10 +3,10 @@ import logging
 import os
 import socket
 import threading
+import traceback
 
 import auto_api_client
 
-from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Workflows.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.Service.Workflows.VendorPipelines import VendorPipelines
 from src.UCDM.DataSchema import DataSchema
@@ -25,17 +25,28 @@ from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.MessageFactory import MessageFactory
 from src.auto.auto_api_client.api_client import ApiClient
+from src.auto.auto_api_client.configuration import Configuration
 
 class Worker:
 
     config: Dict
     native_id: int = None
-    manager: ConsoleApplicationManager = None
+    configuration: Configuration = None
 
-    def __init__(self, queue: str, config: Dict, manager: ConsoleApplicationManager):
+    def __init__(self, queue: str, config: Dict, configuration: Configuration):
         self.queue = queue
         self.config = config
-        self.manager = manager
+        self.configuration = configuration
+
+    def init_logging(self):
+        filename = os.path.abspath('var/output/thread-' + str(self.native_id) + '.log')
+        logging.basicConfig(
+            filename=filename,
+            filemode='a',
+            format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            level=logging.DEBUG
+        )
 
     def write_log_info(self, message: str):
         logging.info("Process {}: ".format(self.native_id) + message)
@@ -44,12 +55,12 @@ class Worker:
         logging.critical("Process {}: ".format(self.native_id) + message)
 
     def run(self):
-        self.native_id = threading.get_native_id()
-        allow_private_upload_data_to_unison = self.config['allow_private_upload_data_to_unison'] == 1
-        configuration = self.manager.initialize(self.config)
+        try:
+            self.native_id = threading.get_native_id()
+            self.init_logging()
+            allow_private_upload_data_to_unison = self.config['allow_private_upload_data_to_unison'] == 1
 
-        with ApiClient(configuration) as api_client:
-            try:
+            with ApiClient(self.configuration) as api_client:
                 runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
                 api_instance = agent_api.AgentApi(api_client)
                 api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
@@ -60,7 +71,7 @@ class Worker:
 
                 vendor_pipelines.sync_pipeline_list_with_backend()
 
-                response = api.next_task()
+                response = api.next_task(self.queue)
                 message = MessageFactory().create_message_object_from_response(message=response)
                 if not message is None:
                     self.write_log_info("Received message {}".format(response.type))
@@ -100,19 +111,23 @@ class Worker:
                 elif type(message) is StartOMOPoficationWorkflow:
                     workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
                 elif message is None:
-                    pass
+                    self.write_log_info("Message is empty")
                 else:
                     error = "Unknown message type {}".format(type(message))
                     if not response is None and not response.id is None:
                         api.set_task_error(response.id, error)
-            except auto_api_client.ApiException as e:
-                error = "Exception when calling AgentApi: %s\n" % e
-                self.write_log_critical(error)
-                if not response is None and not response.id is None:
-                    api.set_task_error(response.id, error)
 
-            except Exception as e:
-                error = "Unknown exception: %s\n" % e
-                self.write_log_critical(error)
-                if not response is None and not response.id is None:
-                    api.set_task_error(response.id, error)
+        except auto_api_client.ApiException as e:
+            error = "Exception when calling AgentApi: %s\n" % e
+            self.write_log_critical(error)
+            if not response is None and not response.id is None:
+                api.set_task_error(response.id, error)
+
+        except Exception as e:
+            error = "Unknown exception: %s\n" % e
+            self.write_log_critical("\n".join(traceback.format_exception(e)))
+            if not response is None and not response.id is None:
+                api.set_task_error(response.id, error)
+            raise e
+
+        return self
