@@ -62,6 +62,8 @@ class Worker(multiprocessing.Process):
 
             if self.on_start is not None:
                 self.on_start(self)
+            else:
+                self.write_log_info("On start function is not defined")
 
             with ApiClient(self.configuration) as api_client:
                 runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
@@ -135,5 +137,7 @@ class Worker(multiprocessing.Process):
 
         if self.on_finish is not None:
             self.on_finish(self)
+        else:
+            self.write_log_info("On finish function is not defined")
 
         return self
