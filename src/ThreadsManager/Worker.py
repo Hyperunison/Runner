@@ -4,6 +4,7 @@ import os
 import socket
 import threading
 import traceback
+import multiprocessing
 
 import auto_api_client
 
@@ -27,39 +28,36 @@ from src.Service.MessageFactory import MessageFactory
 from src.auto.auto_api_client.api_client import ApiClient
 from src.auto.auto_api_client.configuration import Configuration
 
-class Worker:
+class Worker(multiprocessing.Process):
 
     config: Dict
-    native_id: int = None
     configuration: Configuration = None
     on_start = None
+    on_finish = None
 
-    def __init__(self, queue: str, config: Dict, configuration: Configuration, on_start = None):
+    def __init__(
+        self,
+        queue: str,
+        config: Dict,
+        configuration: Configuration,
+        on_start = None,
+        on_finish = None,
+    ):
+        super().__init__()
         self.queue = queue
         self.config = config
         self.configuration = configuration
         self.on_start = on_start
-
-    def init_logging(self):
-        filename = os.path.abspath('var/output/thread-' + str(self.native_id) + '.log')
-        logging.basicConfig(
-            filename=filename,
-            filemode='a',
-            format='%(asctime)s,%(msecs)03d %(name)s %(levelname)s %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S',
-            level=logging.DEBUG
-        )
+        self.on_finish = on_finish
 
     def write_log_info(self, message: str):
-        logging.info("Process {}: ".format(self.native_id) + message)
+        logging.info("Process {}: ".format(self.pid) + message)
 
     def write_log_critical(self, message: str):
-        logging.critical("Process {}: ".format(self.native_id) + message)
+        logging.critical("Process {}: ".format(self.pid) + message)
 
     def run(self):
         try:
-            self.native_id = threading.get_native_id()
-            self.init_logging()
             allow_private_upload_data_to_unison = self.config['allow_private_upload_data_to_unison'] == 1
 
             if self.on_start is not None:
@@ -130,9 +128,12 @@ class Worker:
 
         except Exception as e:
             error = "Unknown exception: %s\n" % e
-            self.write_log_critical("\n".join(traceback.format_exception(e)))
+            self.write_log_critical(error)
             if not response is None and not response.id is None:
                 api.set_task_error(response.id, error)
             raise e
+
+        if self.on_finish is not None:
+            self.on_finish(self)
 
         return self

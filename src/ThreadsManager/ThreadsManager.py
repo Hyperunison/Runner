@@ -43,26 +43,39 @@ class ThreadsManager:
             logging.info(f"The queue {queue} has {count} threads.")
             return
 
-        worker = Worker(queue, self.config, self.configuration, self._on_start)
-        future = self.executor.submit(worker.run)
-        future.add_done_callback(self._on_done)
+        worker = Worker(
+            queue,
+            self.config,
+            self.configuration,
+            self._on_start,
+            self._on_finish
+        )
+        worker.start()
 
-    def _on_done(self, future):
-        logging.info(f"The worker is done.")
-        worker = future.result()
-        self.remove_thread(worker.queue, worker.native_id)
+    def _on_finish(self, worker: Worker):
+        self.remove_thread(worker.queue, str(worker.pid))
 
     def _on_start(self, worker: Worker):
-        self.threads[worker.queue][str(worker.native_id)] = ThreadInfo(worker.native_id)
+        logging.info("The worker has started, queue: {}, pid: {}".format(worker.queue, worker.pid))
+        self.threads[worker.queue][str(worker.pid)] = ThreadInfo(
+            worker.pid,
+            worker
+        )
 
     def remove_old_threads(self, queue: str):
         timeout = self.threads_config["queues"][queue]["timeout"]
         for pid in list(self.threads[queue].keys()):
             if self.threads[queue][pid].get_created_at_diff() >= timeout:
-                pass
+                self.threads[queue][pid].worker.terminate()
 
     def remove_thread(self, queue: str, pid: str):
-        pass
+        if queue not in self.threads:
+            return
+
+        if pid not in self.threads[queue]:
+            return
+
+        del self.threads[queue][pid]
 
     def get_available_threads(self) -> List[str]:
         return list(self.threads.keys())
