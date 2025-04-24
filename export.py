@@ -3,6 +3,7 @@ import os
 import json
 import string
 import random
+import csv
 
 from src.Service.UCDMResolver import UCDMResolver
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
@@ -22,6 +23,13 @@ def get_table_name(file_path: str) -> str:
 
 def get_random_string(length: int = 10) -> str:
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
+def print_csv(csv_path: str) -> None:
+    with open(csv_path, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if any(cell.strip() for cell in row):
+                print(','.join(row))
 
 argv = sys.argv
 
@@ -92,8 +100,7 @@ csv_writter.build(
     fields_map
 )
 
-with open(temp_csv_path) as file:
-    print(file.read())
+print_csv(temp_csv_path)
 
 str_to_int.save_to_file()
 os.remove(temp_csv_path)
