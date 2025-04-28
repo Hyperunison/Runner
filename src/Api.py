@@ -46,8 +46,8 @@ class Api:
         self.version = str(version)
         self.token = str(token)
 
-    def next_task(self) -> RunnerMessage:
-        return self.api_instance.get_next_task(self.version, self.token)
+    def next_task(self, queue: str = None) -> RunnerMessage:
+        return self.api_instance.get_next_task(self.version, self.token, queue=queue)
 
     def set_run_status(self, id: int, status: str):
         logging.info("Change status of run={} to {}".format(id, status))

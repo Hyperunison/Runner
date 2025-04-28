@@ -89,6 +89,7 @@ class RunnerMessage(ModelNormal):
             'status': (str,),  # noqa: E501
             'runner_instance': (str,),  # noqa: E501
             'error': (str,),  # noqa: E501
+            'queue': (str,),  # noqa: E501
         }
 
     @cached_property
@@ -105,6 +106,7 @@ class RunnerMessage(ModelNormal):
         'status': 'status',  # noqa: E501
         'runner_instance': 'runnerInstance',  # noqa: E501
         'error': 'error',  # noqa: E501
+        'queue': 'queue',  # noqa: E501
     }
 
     read_only_vars = {
@@ -156,6 +158,7 @@ class RunnerMessage(ModelNormal):
             status (str): [optional]  # noqa: E501
             runner_instance (str): [optional]  # noqa: E501
             error (str): [optional]  # noqa: E501
+            queue (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -249,6 +252,7 @@ class RunnerMessage(ModelNormal):
             status (str): [optional]  # noqa: E501
             runner_instance (str): [optional]  # noqa: E501
             error (str): [optional]  # noqa: E501
+            queue (str): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
