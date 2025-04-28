@@ -27,9 +27,10 @@ def get_random_string(length: int = 10) -> str:
 def print_csv(csv_path: str) -> None:
     with open(csv_path, newline='') as csvfile:
         reader = csv.reader(csvfile)
+        writer = csv.writer(sys.stdout)
         for row in reader:
             if any(cell.strip() for cell in row):
-                print(','.join(row))
+                writer.writerow(row)
 
 argv = sys.argv
 
