@@ -116,7 +116,7 @@ class Worker(multiprocessing.Process):
                 elif type(message) is StartOMOPoficationWorkflow:
                     workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
                 elif message is None:
-                    self.write_log_info("Message is empty")
+                    logging.debug("Message is empty")
                 else:
                     error = "Unknown message type {}".format(type(message))
                     if not response is None and not response.id is None:

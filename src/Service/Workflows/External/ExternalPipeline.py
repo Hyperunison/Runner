@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+import traceback
 
 from src import Api
 from src.Message.StartWorkflow import StartWorkflow
@@ -45,9 +46,9 @@ class ExternalPipeline(WorkflowBase):
                 message.aws_id,
                 message.aws_key
             )
-        except Exception as e:
-            error = "Pipeline unknown exception: %s\n" % e
-            logging.critical(error)
+        except Exception:
+            error = traceback.format_exc()
+            logging.critical("Pipeline unknown exception occurred", exc_info=True)
             self.api.set_run_status(message.run_id, 'error')
             self.api.add_log_chunk(message.run_id, error)
 

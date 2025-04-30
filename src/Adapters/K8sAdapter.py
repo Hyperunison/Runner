@@ -93,7 +93,9 @@ class K8sAdapter(BaseAdapter):
                 "var/" + folder + '/output', pipeline_config['aws_s3_path'], pipeline_config['aws_id'],
                 pipeline_config['aws_key']
             )
-            self.api_client.set_run_status(run_id, 'success')
+            status = k8s.get_pod_status(pod_name)
+            state = 'success' if (status == 'Succeeded' or status == 'Completed') else 'error'
+            self.api_client.set_run_status(run_id, state)
             file_transfer.cleanup()
             sys.exit(0)
 

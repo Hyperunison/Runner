@@ -124,7 +124,10 @@ class UCDMResolver:
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             field_alias = self.get_field_alias(field)
-            bridge_id = row['c.__bridge_id']
+            if 'c.__bridge_id' in row:
+                bridge_id = row['c.__bridge_id']
+            else:
+                bridge_id = row['.__bridge_id']
             automation_strategy = self.get_automation_strategy(automation_strategies_map, bridge_id, field_alias)
 
             if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:

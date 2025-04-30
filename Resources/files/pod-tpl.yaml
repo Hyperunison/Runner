@@ -18,6 +18,9 @@ spec:
     image: {image}
     imagePullPolicy: Always
     name: {pod_prefix}-{container_hash}
+    resources:
+      requests:
+        cpu: "2"
     volumeMounts:
     - mountPath: /data/nextflow/
       name: data

@@ -119,6 +119,11 @@ class K8s:
                     "image": image,
                     "imagePullPolicy": "Always",
                     "name": pod_name,
+                    "resources": {
+                        "requests": {
+                            "cpu": "2"
+                        }
+                    },
                     "volumeMounts": []
                 }],
                 "volumes": []

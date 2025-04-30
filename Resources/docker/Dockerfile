@@ -62,6 +62,21 @@ RUN echo  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/do
 RUN apt-get update
 RUN apt-get install --yes docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+# Install gcloud to support Google Cloud
+
+# Install dependencies
+RUN apt-get update && apt-get install -y curl gnupg apt-transport-https ca-certificates lsb-release sudo
+
+# Add Google Cloud SDK repo and install gcloud + kubectl
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+    > /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+    apt-get update && apt-get install -y google-cloud-sdk kubectl
+
+WORKDIR /app
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/Resources/gcloud/key.json
+
 
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
 ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; sleep 3; done

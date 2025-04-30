@@ -188,7 +188,7 @@ class Api:
         )
 
     def send_installed_pipelines(self, pipelines: List[str]):
-        logging.info("Sending list of installed pipelines: {}".format(", ".join(pipelines)))
+        logging.debug("Sending list of installed pipelines: {}".format(", ".join(pipelines)))
         result = self.api_instance.set_installed_pipelines(
             version=self.version,
             token=self.token,

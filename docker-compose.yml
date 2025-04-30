@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Resources/docker/Dockerfile
-    container_name: ${CONTAINER_NAME:-unison-agent}
+    container_name: ${CONTAINER_NAME:-unison-runner}
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:

@@ -28,7 +28,7 @@ class ThreadsManager:
         self.configuration = self.manager.initialize(self.config)
 
     def run_next_threads(self):
-        logging.info("Starting the next chunk of threads")
+        logging.debug("Starting the next chunk of threads")
         queues = self.get_available_threads()
 
         for queue in queues:
@@ -38,9 +38,9 @@ class ThreadsManager:
     def run_next_thread(self, queue: str):
         max_count = self.get_max_threads_count(queue)
         count = len(self.threads[queue].keys())
-        logging.info("The number of threads in queue {} is {}".format(queue, count))
+        logging.debug("The number of threads in queue {} is {}".format(queue, count))
         if count >= max_count:
-            logging.info(f"The queue {queue} has {count} threads.")
+            logging.debug(f"The queue {queue} has {count} threads.")
             return
 
         worker = Worker(
@@ -56,7 +56,7 @@ class ThreadsManager:
         self.remove_thread(worker.queue, str(worker.pid))
 
     def _on_start(self, worker: Worker):
-        logging.info("The worker has started, queue: {}, pid: {}".format(worker.queue, worker.pid))
+        logging.debug("The worker has started, queue: {}, pid: {}".format(worker.queue, worker.pid))
         self.threads[worker.queue][str(worker.pid)] = ThreadInfo(
             worker.pid,
             worker
