@@ -3,6 +3,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
+from src.ThreadsManager.PipelineWorker import PipelineWorker
 from src.ThreadsManager.ThreadInfo import ThreadInfo
 from src.ThreadsManager.Worker import Worker
 from src.auto.auto_api_client.configuration import Configuration
@@ -26,6 +27,13 @@ class ThreadsManager:
 
         self.executor = ThreadPoolExecutor(max_workers=self.get_full_max_threads_count())
         self.configuration = self.manager.initialize(self.config)
+
+    def send_pipelines(self):
+        worker = PipelineWorker(
+            self.config,
+            self.configuration,
+        )
+        worker.run()
 
     def run_next_threads(self):
         logging.info("Starting the next chunk of threads")
