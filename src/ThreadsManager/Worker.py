@@ -2,8 +2,6 @@ from typing import Dict
 import logging
 import os
 import socket
-import threading
-import traceback
 import multiprocessing
 
 import auto_api_client
@@ -73,8 +71,6 @@ class Worker(multiprocessing.Process):
                 schema = DataSchema(self.config['phenotypic_db']['dsn'], self.config['phenotypic_db']['min_count'])
                 vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)
                 workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema, vendor_pipelines)
-
-                vendor_pipelines.sync_pipeline_list_with_backend()
 
                 response = api.next_task(self.queue)
                 message = MessageFactory().create_message_object_from_response(message=response)
