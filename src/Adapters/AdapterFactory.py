@@ -4,9 +4,10 @@ from src.Adapters.NoneAdapter import NoneAdapter
 from src.Service.Workflows.PipelineExecutor import PipelineExecutor
 
 
-def create_by_config(api_client, config, runner_instance_id) -> PipelineExecutor:
+def create_by_config(api_client, config, runner_instance_id, agent_id = None) -> PipelineExecutor:
     adapter = None
-    agent_id = api_client.get_agent_id()
+    if agent_id is None:
+        agent_id = api_client.get_agent_id()
     if config['pipeline']['executor']['type'] == 'k8s':
         adapter = K8sAdapter(api_client, runner_instance_id, config['pipeline'], agent_id)
     if config['pipeline']['executor']['type'] == 'docker':

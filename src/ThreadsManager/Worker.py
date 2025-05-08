@@ -32,19 +32,22 @@ class Worker(multiprocessing.Process):
     configuration: Configuration = None
     on_start = None
     on_finish = None
+    agent_id = None
 
     def __init__(
         self,
         queue: str,
         config: Dict,
         configuration: Configuration,
+        agent_id: int,
         on_start = None,
-        on_finish = None,
+        on_finish = None
     ):
         super().__init__()
         self.queue = queue
         self.config = config
         self.configuration = configuration
+        self.agent_id = agent_id
         self.on_start = on_start
         self.on_finish = on_finish
 
@@ -67,7 +70,12 @@ class Worker(multiprocessing.Process):
                 runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
                 api_instance = agent_api.AgentApi(api_client)
                 api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
-                pipeline_executor = create_by_config(api, self.config, runner_instance_id)
+                pipeline_executor = create_by_config(
+                    api,
+                    self.config,
+                    runner_instance_id,
+                    self.agent_id
+                )
                 schema = DataSchema(self.config['phenotypic_db']['dsn'], self.config['phenotypic_db']['min_count'])
                 vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)
                 workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema, vendor_pipelines)

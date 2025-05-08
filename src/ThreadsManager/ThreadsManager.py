@@ -2,11 +2,14 @@ from typing import Dict, List
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
+from src.Api import Api
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.ThreadsManager.PipelineWorker import PipelineWorker
 from src.ThreadsManager.ThreadInfo import ThreadInfo
 from src.ThreadsManager.Worker import Worker
+from src.auto.auto_api_client.api_client import ApiClient
 from src.auto.auto_api_client.configuration import Configuration
+from src.auto.auto_api_client.api import agent_api
 
 class ThreadsManager:
     threads: Dict[str, Dict[str, ThreadInfo]] = None
@@ -15,6 +18,7 @@ class ThreadsManager:
     executor: ThreadPoolExecutor = None
     manager: ConsoleApplicationManager = None
     configuration: Configuration = None
+    agent_id: int = None
 
     def __init__(self, config: Dict[str, Dict], manager: ConsoleApplicationManager):
         self.threads = {}
@@ -27,6 +31,14 @@ class ThreadsManager:
 
         self.executor = ThreadPoolExecutor(max_workers=self.get_full_max_threads_count())
         self.configuration = self.manager.initialize(self.config)
+        self.agent_id = self.get_agent_id()
+
+    def get_agent_id(self):
+        with ApiClient(self.configuration) as api_client:
+            api_instance = agent_api.AgentApi(api_client)
+            api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
+
+            return api.get_agent_id()
 
     def send_pipelines(self):
         worker = PipelineWorker(
@@ -55,6 +67,7 @@ class ThreadsManager:
             queue,
             self.config,
             self.configuration,
+            self.agent_id,
             self._on_start,
             self._on_finish
         )
