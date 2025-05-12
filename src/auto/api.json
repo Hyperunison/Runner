@@ -14,14 +14,16 @@
                 "operationId": "getNextTask",
                 "parameters": [
                     {
-                        "name": "queue",
+                        "name": "queues[]",
                         "in": "query",
                         "description": "Filter message by queue",
                         "required": false,
                         "allowEmptyValue": true,
+                        "explode": true,
                         "schema": {
-                            "type": "string",
-                            "default": ""
+                            "type": "array",
+                            "items": {},
+                            "default": []
                         }
                     },
                     {
@@ -2281,6 +2283,10 @@
                         "type": "integer"
                     },
                     "domainSuggestions": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "vocabularySuggestions": {
                         "type": "object",
                         "additionalProperties": true
                     }

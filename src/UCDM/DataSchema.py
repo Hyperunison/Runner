@@ -226,30 +226,6 @@ class DataSchema:
         converter = ConvertRawSql()
         return converter.convert_raw_sql(sql, engine_type)
 
-    def fork(self, api: Api) -> int:
-        # return 0
-        pid = os.fork()
-        logging.info("Forked, pid={}".format(pid))
-
-        # if pid == 0:
-        #     # child process
-        #     try:
-        #         logging.info("Tty start debugging")
-        #         import pydevd_pycharm
-        #         pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
-        #         logging.info("Debug server connection established for pid {}".format(pid))
-        #     except Exception as e:
-        #         logging.info("Debug server connection was not established for pid {}, error {}".format(pid, e))
-        #         pass
-
-        api.api_instance.api_client.close()
-        api.api_instance.api_client.rest_client.pool_manager.clear()
-        self.schema.reconnect()
-
-        logging.info("Returning pid {}".format(pid))
-
-        return pid
-
     def execute_cohort_definition(self, cohort_api_request: CohortAPIRequest, api: Api):
         key = cohort_api_request.cohort_definition.key
         mapper = VariableMapper(cohort_api_request.cohort_definition.fields)
@@ -264,12 +240,9 @@ class DataSchema:
             cohort_api_request.cohort_api_request_id,
             sql
         )
-        pid = self.fork(api)
+        # pid = self.fork(api)
         child_pid = os.getpid()
         api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
-        if pid != 0:
-            # Master process, continue working
-            return
         logging.info("Processing request in child process: {}".format(child_pid))
         try:
             result = self.schema.fetch_all(sql)
@@ -298,9 +271,6 @@ class DataSchema:
                 cohort_api_request.cohort_api_request_id,
                 "SQL query error: {}".format(e)
             )
-        finally:
-            logging.info("Exiting child process {}".format(child_pid))
-            sys.exit(0)
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
         try:

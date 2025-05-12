@@ -1,3 +1,4 @@
+import json
 from typing import Dict
 import logging
 import os
@@ -6,6 +7,8 @@ import multiprocessing
 
 import auto_api_client
 
+from src.Message import BaseMessage
+from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Workflows.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.Service.Workflows.VendorPipelines import VendorPipelines
 from src.UCDM.DataSchema import DataSchema
@@ -25,11 +28,16 @@ from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.MessageFactory import MessageFactory
 from src.auto.auto_api_client.api_client import ApiClient
 from src.auto.auto_api_client.configuration import Configuration
+from src.auto.auto_api_client.model.runner_message import RunnerMessage
+
 
 class Worker(multiprocessing.Process):
-
+    queue: str
+    response: RunnerMessage
+    message: BaseMessage
     config: Dict
     configuration: Configuration = None
+    manager: ConsoleApplicationManager = None
     on_start = None
     on_finish = None
     agent_id = None
@@ -37,16 +45,22 @@ class Worker(multiprocessing.Process):
     def __init__(
         self,
         queue: str,
+        response: RunnerMessage,
+        message: BaseMessage,
         config: Dict,
         configuration: Configuration,
+        manager: ConsoleApplicationManager,
         agent_id: int,
         on_start = None,
         on_finish = None
     ):
         super().__init__()
         self.queue = queue
+        self.response = response
+        self.message = message
         self.config = config
         self.configuration = configuration
+        self.manager = manager
         self.agent_id = agent_id
         self.on_start = on_start
         self.on_finish = on_finish
@@ -80,10 +94,9 @@ class Worker(multiprocessing.Process):
                 vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)
                 workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema, vendor_pipelines)
 
-                response = api.next_task(self.queue)
-                message = MessageFactory().create_message_object_from_response(message=response)
+                message = self.message
                 if not message is None:
-                    self.write_log_info("Received message {}".format(response.type))
+                    self.write_log_info("Received message {}".format(self.response.type))
 
                 if type(message) is NextflowRun:
                     pipeline_executor.process_nextflow_run(message)
@@ -123,25 +136,27 @@ class Worker(multiprocessing.Process):
                     logging.debug("Message is empty")
                 else:
                     error = "Unknown message type {}".format(type(message))
-                    if not response is None and not response.id is None:
-                        api.set_task_error(response.id, error)
+                    if not self.response is None and not self.response.id is None:
+                        api.set_task_error(self.response.id, error)
+
+                if message is not None:
+                    if not self.manager.args.skip_accept:
+                        api.accept_task(self.response.id)
 
         except auto_api_client.ApiException as e:
             error = "Exception when calling AgentApi: %s\n" % e
             self.write_log_critical(error)
-            if not response is None and not response.id is None:
-                api.set_task_error(response.id, error)
+            if not self.response is None and not self.response.id is None:
+                api.set_task_error(self.response.id, error)
 
         except Exception as e:
             error = "Unknown exception: %s\n" % e
             self.write_log_critical(error)
-            if not response is None and not response.id is None:
-                api.set_task_error(response.id, error)
+            if not self.response is None and not self.response.id is None:
+                api.set_task_error(self.response.id, error)
             raise e
 
         if self.on_finish is not None:
             self.on_finish(self)
         else:
             self.write_log_info("On finish function is not defined")
-
-        return self
