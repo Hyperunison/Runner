@@ -1,17 +1,19 @@
 import decimal
 import logging
 from decimal import Decimal
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from sqlalchemy.ext.declarative import declarative_base
 from psycopg2.errors import UndefinedFunction, UndefinedTable
 
+from src.Helpers.SQLWithParameters import SQLWithParameters
 from src.UCDM.Exception.NonNumericField import NonNumericField
 from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.TableStat import TableStat
 import datetime
+from psycopg2 import sql
 
 Base = declarative_base()
 
@@ -26,13 +28,14 @@ class Database(BaseSchema):
             self.engine = create_engine(dsn, isolation_level="AUTOCOMMIT").connect()
         super().__init__(dsn, min_count)
 
-    def fetch_row(self, sql: str) -> Dict:
+
+    def fetch_row_deprecated(self, sql: str) -> Dict:
         result = self.engine.execute(text(sql)).mappings().all()
         result = [dict(row) for row in result]
 
         return result[0]
 
-    def fetch_all(self, sql: str):
+    def fetch_all_deprecated(self, sql: str):
         result_intermediate = self.engine.execute(text(sql)).fetchall()
         columns = [col[0] for col in self.engine.execute(text(sql)).cursor.description]
         result = [dict(zip(columns, row)) for row in result_intermediate]
@@ -49,6 +52,32 @@ class Database(BaseSchema):
 
         return result
 
+    def fetch_all(self, query: SQLWithParameters):
+        result_intermediate = self.engine.execute(text(query.sql), query.parameters).fetchall()
+        columns = [col[0] for col in self.engine.execute(text(query.sql), query.parameters).cursor.description]
+        result = [dict(zip(columns, row)) for row in result_intermediate]
+
+        for item in result:
+            for key, value in item.items():
+                if isinstance(value, datetime.date):
+                    item[key] = value.strftime('%Y-%m-%d')
+                if isinstance(value, Decimal):
+                    if int(value) == float(value):
+                        item[key] = int(value)
+                    else:
+                        item[key] = float(value)
+
+        return result
+
+    def fetch_row(self, query: SQLWithParameters) -> Dict:
+        result = self.engine.execute(text(query.sql), query.parameters).mappings().all()
+        result = [dict(row) for row in result]
+
+        return result[0]
+
+    def execute_sql(self, query: SQLWithParameters) -> str:
+        self.engine.execute(text(query.sql), query.parameters)
+
     def rollback(self):
         self.engine.rollback()
 
@@ -62,7 +91,7 @@ class Database(BaseSchema):
     def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
         return "({})::{}".format(expression, data_type)
 
-    def execute_sql(self, sql: str):
+    def execute_sql_deprecated(self, sql: str):
         self.engine.execute(text(sql))
 
     def get_table_column_stats(self, table_name: str, column_name: str, cte: str) -> TableStat:
@@ -117,7 +146,7 @@ class Database(BaseSchema):
         sql = self.get_values_count_query(table_name, column_name, cte)
         sql = self.wrap_sql_by_cte(sql, table_name, cte)
         logging.debug(sql)
-        values_counts = self.fetch_all(sql)
+        values_counts = self.fetch_all_deprecated(sql)
         logging.info("Frequent values counts for {}.{} {}: {}".format(
             table_name,
             column_name,
@@ -125,7 +154,7 @@ class Database(BaseSchema):
             (values_counts)
         ))
         nulls_count_sql = self.get_nulls_count_query(table_name, column_name, cte)
-        nulls_count = self.fetch_row(nulls_count_sql)['cnt']
+        nulls_count = self.fetch_row_deprecated(nulls_count_sql)['cnt']
 
         stat = TableStat()
         stat.table_name = table_name
@@ -148,7 +177,7 @@ class Database(BaseSchema):
 
     def get_min_max_avg_value(self, table_name: str, column_name: str, cte: str) -> Dict[str, any]:
         sql = self.get_min_max_avg_value_query(table_name, column_name, cte)
-        row = self.fetch_row(sql)
+        row = self.fetch_row_deprecated(sql)
 
         return row
 
@@ -158,7 +187,7 @@ class Database(BaseSchema):
         sql = self.get_median_query(table, column, min, max, cte)
         sql = self.wrap_sql_by_cte(sql, table, cte)
 
-        return self.fetch_row(sql)['median']
+        return self.fetch_row_deprecated(sql)['median']
 
     def get_median_query(self, table: str, column: str, min, max, cte: str) -> str:
         raise Exception("Not implemented")
@@ -176,7 +205,7 @@ class Database(BaseSchema):
     def get_unique_values_count(self, table_name: str, column_name: str, cte: str) -> int:
         sql = self.get_unique_values_count_query(table_name, column_name)
         sql = self.wrap_sql_by_cte(sql, table_name, cte)
-        row = self.fetch_row(sql)
+        row = self.fetch_row_deprecated(sql)
         return row['unique_count']
 
     def get_min_max_avg_value_query(self, table_name: str, column_name: str, cte: str) -> str:
@@ -190,3 +219,15 @@ class Database(BaseSchema):
 
     def is_numeric(self, value) -> bool:
         return isinstance(value, (int, float, complex, decimal.Decimal))
+
+    def escape_table_name(self, table_name: str) -> str:
+        result: List[str] = []
+        chunks = table_name.split('.')
+        for chunk in chunks:
+            result.append(sql.Identifier(chunk).as_string(self.engine.connection.connection))
+
+        return '.'.join(result)
+
+    def escape_column_name(self, table_name: str) -> str:
+        return sql.Identifier(table_name).as_string(self.engine.connection.connection)
+

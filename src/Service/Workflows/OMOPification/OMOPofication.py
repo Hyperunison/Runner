@@ -4,6 +4,9 @@ import os
 import re
 from typing import List, Dict, Optional
 
+import yaml
+
+from src.Helpers.SQLWithParameters import SQLWithParameters
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.DqdOmop54 import DqdOmop54
 from src.Service.Workflows import PipelineExecutor
@@ -253,21 +256,28 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Can't upload manual.csv file to S3")
                 return
 
-    def save_sql_query(self, table_name: str, query: str, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
-        filename = os.path.abspath(self.dir + table_name + ".sql")
+    def save_sql_query(
+            self,
+            table_name: str,
+            query: SQLWithParameters,
+            s3_folder: str,
+            message: StartOMOPoficationWorkflow,
+            api_logger: ApiLogger
+    ):
+        filename = os.path.abspath(self.dir + table_name + ".sql.yaml")
         with open(filename, 'w', encoding='utf-8') as file:
-            file.write(query)
+            file.write(yaml.dump({"sql": query.sql, "parameters": query.parameters}))
 
         if self.may_upload_private_data:
-            s3_path = s3_folder + table_name + '.sql'
+            s3_path = s3_folder + table_name + '.sql.yaml'
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id, message.aws_key, False):
                 api_logger.write(message.id, "Can't upload {}.sql file to S3".format(table_name))
                 return
 
     def save_fields_map(self, fields_map, table_name: str):
-        filename = os.path.abspath(self.dir + table_name + "-fields-map.json")
+        filename = os.path.abspath(self.dir + table_name + "-fields-map.yaml")
         with open(filename, 'w') as file:
-            json.dump(fields_map, file, indent=4)
+            yaml.dump(fields_map, file, indent=4)
 
 
     def send_notification_to_api(self, id: int, length: int, step: int, state: str, path: str, dqd_path: Optional[str] = None):

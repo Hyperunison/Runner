@@ -54,7 +54,7 @@ class Labkey(BaseSchema):
 
     def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
         sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
-        rows = self.engine.query.execute_sql(self.schema, sql=sql_columns)
+        rows = self.engine.query.execute_sql_deprecated(self.schema, sql=sql_columns)
         fields = rows['metaData']['fields']
         count = rows['rowCount']
         columns: List[Dict[str, str]] = []
@@ -71,7 +71,7 @@ class Labkey(BaseSchema):
         try:
             sql = "SELECT count(distinct \"{v}\") as unique_count from {table}".format(v=column_name, table=table_name)
             sql = self.wrap_sql_by_cte(sql, table_name, cte)
-            result = self.engine.query.execute_sql(self.schema, sql=sql)
+            result = self.engine.query.execute_sql_deprecated(self.schema, sql=sql)
             unique_count = result['rows'][0]['unique_count']
         except ProgrammingError as e:
             stat = TableStat()
@@ -85,7 +85,7 @@ class Labkey(BaseSchema):
                 v=column_name, table=table_name)
             sql = self.wrap_sql_by_cte(sql, table_name, cte)
             logging.info(sql)
-            result = self.engine.query.execute_sql(self.schema, sql=sql)
+            result = self.engine.query.execute_sql_deprecated(self.schema, sql=sql)
 
             min_value = result['rows'][0]['min_value']
             max_value = result['rows'][0]['max_value']
@@ -116,7 +116,7 @@ class Labkey(BaseSchema):
             column=column_name, table=table_name, min=self.min_count)
         sql = self.wrap_sql_by_cte(sql, table_name, cte)
         logging.debug(sql)
-        values_counts = self.fetch_all(sql)
+        values_counts = self.fetch_all_deprecated(sql)
         logging.info("Frequent values counts for {}.{} {}: {}".format(
             table_name,
             column_name,
@@ -126,7 +126,7 @@ class Labkey(BaseSchema):
 
         nulls_count_sql = "SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name)
         nulls_count_sql = self.wrap_sql_by_cte(nulls_count_sql, table_name, cte)
-        nulls_count = self.fetch_row(nulls_count_sql)['cnt']
+        nulls_count = self.fetch_row_deprecated(nulls_count_sql)['cnt']
 
         stat = TableStat()
         stat.table_name = table_name
@@ -157,15 +157,15 @@ class Labkey(BaseSchema):
             max=max
         )
         sql = self.wrap_sql_by_cte(sql, table, cte)
-        return self.fetch_row(sql)['med']
+        return self.fetch_row_deprecated(sql)['med']
 
-    def fetch_row(self, sql: str) -> Dict:
-        result = self.engine.query.execute_sql(self.schema, text(sql))
+    def fetch_row_deprecated(self, sql: str) -> Dict:
+        result = self.engine.query.execute_sql_deprecated(self.schema, text(sql))
         result = [dict(row) for row in result['rows']]
         return result[0]
 
-    def fetch_all(self, sql: str):
-        result = self.engine.query.execute_sql(self.schema, text(sql))
+    def fetch_all_deprecated(self, sql: str):
+        result = self.engine.query.execute_sql_deprecated(self.schema, text(sql))
         result = [dict(row) for row in result['rows']]
         return result
 

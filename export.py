@@ -5,6 +5,8 @@ import string
 import random
 import csv
 
+import yaml
+
 from src.Service.UCDMResolver import UCDMResolver
 from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 
@@ -48,14 +50,14 @@ if not os.path.isfile(argv[2]):
     exit(1)
 
 table_name = get_table_name(argv[1])
-field_map_path = "var/" + table_name + "-fields-map.json"
+field_map_path = "var/" + table_name + "-fields-map.yaml"
 
 if not os.path.isfile(field_map_path):
     print('Field map file does not exist!')
     exit(1)
 
-with open(field_map_path) as json_data:
-    fields_map = json.load(json_data)
+with open(field_map_path) as yaml_data:
+    fields_map = yaml.load(yaml_data)
 
 config = ConfigurationLoader("config.yaml").get_config()
 allow_private_upload_data_to_unison = config['allow_private_upload_data_to_unison'] == 1

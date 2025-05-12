@@ -6,13 +6,6 @@ from src.Service.ConfigurationLoader import ConfigurationLoader
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.ThreadsManager.ThreadsManager import ThreadsManager
 
-try:
-    import pydevd_pycharm
-
-    pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
-except:
-    pass
-
 config = ConfigurationLoader("config.yaml").get_config()
 manager = ConsoleApplicationManager()
 configuration = manager.initialize(config)

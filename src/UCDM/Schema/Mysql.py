@@ -33,7 +33,7 @@ class Mysql(Database):
         sql = """SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = '{}';""".format(database_name)
-        lst = self.fetch_all(sql)
+        lst = self.fetch_all_deprecated(sql)
         result: List[str] = []
         for i in lst:
             result.append(i['TABLE_NAME'])
@@ -42,7 +42,7 @@ class Mysql(Database):
 
     def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
         sql = "select count(*) as cnt from {}".format(table_name)
-        count = self.fetch_row(sql)['cnt']
+        count = self.fetch_row_deprecated(sql)['cnt']
 
         database_name = self.dsn_parser.get_database_name(self.dsn)
         sql = """
@@ -51,7 +51,7 @@ class Mysql(Database):
             WHERE table_schema = '{}'
             AND table_name = '{}';
         """.format(database_name, table_name)
-        lst = self.fetch_all(sql)
+        lst = self.fetch_all_deprecated(sql)
         columns: List[Dict[str, str]] = []
         for i in lst:
             item: Dict[str, str] = {}
@@ -66,16 +66,16 @@ class Mysql(Database):
         sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
         sql_count = "WITH {} AS ({}) SELECT COUNT(*) AS cnt from {}".format(table_name, cte, table_name)
 
-        count = self.fetch_row(sql_count)['cnt']
+        count = self.fetch_row_deprecated(sql_count)['cnt']
         columns: List[Dict[str, str]] = []
-        row = self.fetch_row(sql_columns)
+        row = self.fetch_row_deprecated(sql_columns)
 
         if row:
             for col in row:
                 sql_column_info = "WITH {} AS ({}) SELECT '{}' AS type_info, {} FROM {} LIMIT 1".format(
                     table_name, cte, col, col, table_name
                 )
-                type_row = self.fetch_row(sql_column_info)
+                type_row = self.fetch_row_deprecated(sql_column_info)
 
                 item: Dict[str, str] = {}
                 item['column'] = col
@@ -109,7 +109,7 @@ class Mysql(Database):
 
         sql = self.wrap_sql_by_cte(sql, table, cte)
 
-        return self.fetch_row(sql)['median']
+        return self.fetch_row_deprecated(sql)['median']
 
     def get_min_max_avg_value(self, table_name: str, column_name: str, cte: str) -> Dict[str, any]:
         try:

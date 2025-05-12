@@ -23,7 +23,7 @@ class Postgres(Database):
     def get_tables_list(self) -> List[str]:
         sql = "SELECT table_schema || '.' || table_name as tbl FROM information_schema.tables WHERE table_type = 'BASE TABLE'" + \
               "AND table_schema NOT IN ('pg_catalog', 'information_schema');"
-        lst = self.fetch_all(sql)
+        lst = self.fetch_all_deprecated(sql)
         result: List[str] = []
         for i in lst:
             result.append(i['tbl'])
@@ -32,7 +32,7 @@ class Postgres(Database):
 
     def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
         sql = "select count(*) as cnt from {}".format(table_name)
-        count = self.fetch_row(sql)['cnt']
+        count = self.fetch_row_deprecated(sql)['cnt']
 
         if '.' in table_name:
             schema, table = table_name.split('.')
@@ -40,7 +40,7 @@ class Postgres(Database):
         else:
             sql = "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '{}'".format(table_name)
 
-        lst = self.fetch_all(sql)
+        lst = self.fetch_all_deprecated(sql)
         columns: List[Dict[str, str]] = []
         for i in lst:
             item: Dict[str, str] = {}
@@ -55,16 +55,16 @@ class Postgres(Database):
         sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
         sql_count = "WITH {} AS ({}) SELECT COUNT(*) AS cnt from {}".format(table_name, cte, table_name)
 
-        count = self.fetch_row(sql_count)['cnt']
+        count = self.fetch_row_deprecated(sql_count)['cnt']
         columns: List[Dict[str, str]] = []
-        row = self.fetch_row(sql_columns)
+        row = self.fetch_row_deprecated(sql_columns)
 
         if row:
             for col in row:
                 sql_column_info = "WITH {} AS ({}) SELECT pg_typeof({}) AS pg_typeof, {} FROM {}".format(
                     table_name, cte, col, col, table_name
                 )
-                type_row = self.fetch_row(sql_column_info)
+                type_row = self.fetch_row_deprecated(sql_column_info)
 
                 item: Dict[str, str] = {}
                 item['column'] = col

@@ -8,6 +8,7 @@ from typing import List, Dict, Tuple, Optional
 from src.Api import Api
 from src.Database.Converters.ConvertRawSql import ConvertRawSql
 from src.Database.Utils.DsnParser import DsnParser
+from src.Helpers.SQLWithParameters import SQLWithParameters
 from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
@@ -41,6 +42,14 @@ class SQLQuery:
         self.joins = []
         self.select = {}
 
+class SQLQueryWithCTEList:
+    sql: SQLWithParameters
+    cte: Dict[str, str]
+
+    def __init__(self, sql: SQLWithParameters, cte: Dict[str, str]):
+        self.sql = sql
+        self.cte = cte
+
 
 def escape_string(s: str) -> str:
     return s.replace('\\', '\\\\').replace("'", "\\'")
@@ -62,7 +71,7 @@ class VariableMapper:
         return self.map[var]
 
     def declare_var(self, ucdm: str, local: str):
-        logging.info("Dealaring var {}: {}".format(ucdm, local))
+        logging.debug("Declaring var {}: {}".format(ucdm, local))
         self.map[ucdm] = local
 
 
@@ -84,28 +93,28 @@ class DataSchema:
             min_count=min_count,
         )
 
-    def build_with_cte_list(self, with_tables: Dict) -> Dict[str, str]:
+    def build_with_cte_list(self, with_tables: Dict) -> Dict[str, SQLWithParameters]:
         if len(with_tables) == 0:
             return {}
         result: Dict[str, str] = {}
         for table_name in with_tables:
-            sql = ''
+            sql = SQLWithParameters('', {})
             first: bool = True
             for cohort_definition in with_tables[table_name]:
                 mapper = VariableMapper(cohort_definition.fields)
                 cohort_definition.limit = None
-                parts = self.build_cohort_definition_sql_query_internal(
+                query = self.build_cohort_definition_sql_query_internal(
                     mapper,
                     cohort_definition,
                     False,
                     True,
                 )
-                sql_part = parts[0]
-                result = dict(list(result.items()) + list(parts[1].items()))
+                result = dict(list(result.items()) + list(query.cte.items()))
                 if not first:
-                    sql += "\nUNION ALL\n"
+                    sql.sql += "\nUNION ALL\n"
                 first = False
-                sql += sql_part
+                sql.sql += query.sql.sql
+                sql.parameters |= query.sql.parameters
             result[table_name] = sql
         return result
 
@@ -115,16 +124,16 @@ class DataSchema:
             cohort_definition: CohortDefinition,
             distribution: bool,
             add_participant_id: bool = False,
-    ) -> str:
-        parts = self.build_cohort_definition_sql_query_internal(mapper, cohort_definition, distribution, add_participant_id)
+    ) -> SQLWithParameters:
+        query = self.build_cohort_definition_sql_query_internal(mapper, cohort_definition, distribution, add_participant_id)
 
-        cte_part = self.get_cte_sql(parts[1])
-        sql = '{} {}'.format(cte_part, parts[0])
+        cte_part = self.get_cte_sql(query.cte)
+        sql = '{} {}'.format(cte_part.sql, query.sql.sql)
         sql = self.transform_sql_to_specific_database(sql)
 
-        logging.info("Generated SQL query: \n{}".format(sql))
+        logging.info("Generated SQL query: \n{}, params: {}".format(sql, query.sql.parameters))
 
-        return sql
+        return SQLWithParameters(sql, query.sql.parameters | cte_part.parameters)
 
     def build_cohort_definition_sql_query_internal(
             self,
@@ -132,7 +141,7 @@ class DataSchema:
             cohort_definition: CohortDefinition,
             distribution: bool,
             add_participant_id: bool = False,
-    ) -> Tuple[str, Dict[str, str]]:
+    ) -> SQLQueryWithCTEList:
         logging.info("Cohort request got: {}".format(json.dumps(cohort_definition.where)))
         query = SQLQuery()
 
@@ -143,7 +152,7 @@ class DataSchema:
         if len(cohort_definition.with_tables) > 0:
             with_cte_list = self.build_with_cte_list(cohort_definition.with_tables)
         else:
-            with_cte_list: Dict[str, str] = {}
+            with_cte_list: Dict[str, SQLWithParameters] = {}
         cte_list = dict(list(cte_list.items()) + list(with_cte_list.items()))
 
         for exp in cohort_definition.where:
@@ -157,73 +166,83 @@ class DataSchema:
 
         if add_participant_id:
             select_array.append("{}.{} as participant_id".format(
-                cohort_definition.participant_table,
-                cohort_definition.participant_id_field
+                self.schema.escape_table_name(cohort_definition.participant_table),
+                self.schema.escape_column_name(cohort_definition.participant_id_field)
             ))
 
         group_array: list[str] = []
         for exp in cohort_definition.export:
             alias = exp['as'] if 'as' in exp else query.select[exp['name']]
             query.select[alias] = self.build_sql_expression(exp, query, mapper)
-            select_array.append('{} as "{}"'.format(query.select[alias], alias))
+            select_array.append('{} as {}'.format(
+                query.select[alias],
+                self.schema.escape_column_name(alias))
+            )
             # Labkey does not support GROUP BY <constant>
             if exp['type'] != 'constant':
-                group_array.append('"{}"'.format(alias))
+                group_array.append(self.schema.escape_column_name(alias))
                 # group_array.append(self.build_sql_expression(exp, query, mapper))
 
         select_string = ", ".join(select_array)
 
-        sql = ''
+        sql = SQLWithParameters('', {})
 
         if distribution:
-            sql += "SELECT\n    {},\n".format(select_string)
-            sql += "    count(distinct {}.\"{}\") as count_uniq_participants\n".format(
-                cohort_definition.participant_table,
-                cohort_definition.participant_id_field
+            sql.sql += "SELECT\n    {},\n".format(select_string)
+            sql.sql += "    count(distinct {}.{}) as count_uniq_participants\n".format(
+                self.schema.escape_table_name(cohort_definition.participant_table),
+                self.schema.escape_column_name(cohort_definition.participant_id_field)
             )
         else:
             # distinct is useful, as without participant_id may be a lot of duplicates
-            sql += "SELECT\n    DISTINCT {}\n".format(select_string)
+            sql.sql += "SELECT\n    DISTINCT {}\n".format(select_string)
             # sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
 
-        sql += "FROM {}\n".format(cohort_definition.participant_table)
+        sql.sql += "FROM {}\n".format(self.schema.escape_table_name(cohort_definition.participant_table))
 
         for j in cohort_definition.joins:
-            sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
+            sql.sql += "JOIN {} as {} ON {} \n".format(
+                self.schema.escape_table_name(j['table']),
+                self.schema.escape_table_name(j['alias']),
+                j['on']
+            )
 
-        sql += "WHERE\n{}\n".format(sql_where)
+        sql.sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
-            sql += 'GROUP BY {} \n'.format(', '.join(map(str, group_array))) + \
-                   "HAVING COUNT(distinct {}.\"{}\") >= {}\n".format(
-                       cohort_definition.participant_table,
-                       cohort_definition.participant_id_field,
-                       self.min_count
-                   )
+            sql.sql += 'GROUP BY {} \n'.format(', '.join(map(str, group_array))) + \
+               "HAVING COUNT(distinct {}.{}) >= {}\n".format(
+                   self.schema.escape_table_name(cohort_definition.participant_table),
+                   self.schema.escape_column_name(cohort_definition.participant_id_field),
+                   self.min_count
+               )
 
         if not cohort_definition.limit is None:
-            sql += "\nLIMIT {}".format(cohort_definition.limit)
+            sql.sql += "\nLIMIT {}".format(cohort_definition.limit)
 
-        return (sql, cte_list)
+        return SQLQueryWithCTEList(sql, cte_list)
 
-    def get_cte_sql(self, cte_list: Dict[str, str]) -> str:
+    def get_cte_sql(self, cte_list: Dict[str, SQLWithParameters]) -> SQLWithParameters:
         if len(cte_list) == 0:
-            return ''
+            return SQLWithParameters('', {})
 
         sql = 'WITH '
+        parameters: Dict[str, str] = {}
 
         first: bool = True
         for table_name, cte in cte_list.items():
             if not first:
                 sql += ',\n'
-            sql += '{} AS ({})'.format(table_name, cte)
+            sql += '{} AS ({})'.format(self.schema.escape_table_name(table_name), cte.sql)
             first = False
+            parameters |= cte.parameters
 
-        return sql
+        return SQLWithParameters(sql, parameters)
 
     def transform_sql_to_specific_database(self, sql: str) -> str:
         parser = DsnParser()
         engine_type = parser.get_engine_type(self.schema.dsn)
         converter = ConvertRawSql()
+
         return converter.convert_raw_sql(sql, engine_type)
 
     def fork(self, api: Api) -> int:
@@ -262,21 +281,22 @@ class DataSchema:
         )
         api.set_cohort_sql_query(
             cohort_api_request.cohort_api_request_id,
-            sql
+            self.schema.build_parameters_inside_sql(sql.sql, sql.parameters)
         )
-        pid = self.fork(api)
-        child_pid = os.getpid()
-        api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
-        if pid != 0:
-            # Master process, continue working
-            return
-        logging.info("Processing request in child process: {}".format(child_pid))
+        # pid = self.fork(api)
+        # child_pid = os.getpid()
+        # api.set_car_status(cohort_api_request.cohort_api_request_id, "process", child_pid)
+        # if pid != 0:
+        #     # Master process, continue working
+        #     return
+        # logging.info("Processing request in child process: {}".format(child_pid))
+        child_pid = 0
         try:
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
             api.set_cohort_definition_aggregation(
                 result,
-                sql,
+                self.schema.build_parameters_inside_sql(sql.sql, sql.parameters),
                 cohort_api_request.reply_channel,
                 key,
                 cohort_api_request.raw_only
@@ -288,7 +308,7 @@ class DataSchema:
             self.schema.rollback()
             api.set_cohort_definition_aggregation(
                 {},
-                "/*\n{}*/\n\n{}\n".format(e, sql),
+                "/*\n{}*/\n\n{}\n".format(e, self.schema.build_parameters_inside_sql(sql.sql, sql.parameters)),
                 cohort_api_request.reply_channel,
                 key,
                 cohort_api_request.raw_only
@@ -298,9 +318,9 @@ class DataSchema:
                 cohort_api_request.cohort_api_request_id,
                 "SQL query error: {}".format(e)
             )
-        finally:
-            logging.info("Exiting child process {}".format(child_pid))
-            sys.exit(0)
+        # finally:
+        #     logging.info("Exiting child process {}".format(child_pid))
+        #     sys.exit(0)
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
         try:
@@ -415,7 +435,7 @@ class DataSchema:
 
         return "({})".format(s)
 
-    def fetch_all(self, sql: str):
+    def fetch_all(self, sql: SQLWithParameters):
         return self.schema.fetch_all(sql)
 
     def update_tables_list(self, api: Api, protected_schemas: List[str], protected_tables: List[str]):
@@ -507,4 +527,6 @@ class DataSchema:
         self.schema.reconnect()
 
     def execute_sql(self, sql: str):
-        self.schema.execute_sql(sql)
+        self.schema.execute_sql_deprecated(sql)
+
+

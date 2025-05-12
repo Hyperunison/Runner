@@ -1,5 +1,7 @@
 import os
 from typing import List, Dict
+
+from src.Helpers.SQLWithParameters import SQLWithParameters
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.UCDMResolver import UCDMResolver
 from src.Message.StartWorkflow import StartWorkflow
@@ -61,7 +63,7 @@ class WorkflowBase:
             self,
             cohort_definition: CohortDefinition,
             add_participant_id: bool = True
-    ) -> str:
+    ) -> SQLWithParameters:
         mapper = VariableMapper(cohort_definition.fields)
 
         return self.schema.build_cohort_definition_sql_query(

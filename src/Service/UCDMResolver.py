@@ -2,6 +2,7 @@ from typing import List, Dict, Tuple
 import logging
 from sqlalchemy.exc import ProgrammingError
 
+from src.Helpers.SQLWithParameters import SQLWithParameters
 from src.UCDM.DataSchema import DataSchema
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
@@ -22,7 +23,7 @@ class UCDMResolver:
 
     def get_ucdm_result(
             self,
-            sql_final: str,
+            sql_final: SQLWithParameters,
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]],

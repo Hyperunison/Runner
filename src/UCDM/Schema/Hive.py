@@ -23,7 +23,7 @@ class Hive(Database):
 
     def get_tables_list(self) -> List[str]:
         sql = "show tables"
-        lst = self.fetch_all(sql)
+        lst = self.fetch_all_deprecated(sql)
         result: List[str] = []
         for i in lst:
             result.append(i['tableName'])
@@ -34,14 +34,14 @@ class Hive(Database):
         sql_columns = "DESCRIBE {}".format(table_name)
         sql_count = "SELECT COUNT(*) AS cnt from {}".format(table_name)
 
-        count = self.fetch_row(sql_count)['cnt']
+        count = self.fetch_row_deprecated(sql_count)['cnt']
         columns: List[Dict[str, str]] = []
-        list = self.fetch_all(sql_columns)
+        list = self.fetch_all_deprecated(sql_columns)
 
         for column in list:
             col: str = column['col_name']
             sql_isnull = "SELECT count(*) as cnt FROM {} WHERE {} IS NULL LIMIT 1".format(table_name, col)
-            isnull_row = self.fetch_row(sql_isnull)
+            isnull_row = self.fetch_row_deprecated(sql_isnull)
 
             item: Dict[str, str] = {}
             item['column'] = col
@@ -55,19 +55,19 @@ class Hive(Database):
         sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
         sql_count = "WITH {} AS ({}) SELECT COUNT(*) AS cnt from {}".format(table_name, cte, table_name)
 
-        count = self.fetch_row(sql_count)['cnt']
+        count = self.fetch_row_deprecated(sql_count)['cnt']
         columns: List[Dict[str, str]] = []
-        row = self.fetch_row(sql_columns)
+        row = self.fetch_row_deprecated(sql_columns)
 
         if row:
             for col in row:
                 sql_column_info = "WITH {} AS ({}) SELECT '{}' AS type_info, {} FROM {}".format(
                     table_name, cte, col, col, table_name
                 )
-                type_row = self.fetch_row(sql_column_info)
+                type_row = self.fetch_row_deprecated(sql_column_info)
 
                 sql_isnull = "SELECT count(*) as cnt FROM {} WHERE {} IS NULL LIMIT 1".format(table_name, col)
-                isnull_row = self.fetch_row(sql_isnull)
+                isnull_row = self.fetch_row_deprecated(sql_isnull)
 
                 item: Dict[str, str] = {}
                 item['column'] = col
