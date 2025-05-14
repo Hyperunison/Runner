@@ -75,6 +75,8 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
     | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     apt-get update && apt-get install -y google-cloud-sdk kubectl
 
+RUN apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+
 WORKDIR /app
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/Resources/gcloud/key.json
 
