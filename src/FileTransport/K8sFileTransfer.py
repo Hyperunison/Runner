@@ -14,9 +14,10 @@ class K8sFileTransfer(BaseFileTransport):
     volumes: dict[str, str]
     labels: dict[str, str]
     k8s: K8s
+    pod_creation_timeout: int
 
     def __init__(self, namespace: str, image: str, command: str, pod_prefix: str, base_dir: str,
-                 volumes: dict[str, str], labels: dict[str, str]):
+                 volumes: dict[str, str], labels: dict[str, str], pod_creation_timeout: int):
         super().__init__()
         self.namespace = namespace
         self.image = image
@@ -25,6 +26,8 @@ class K8sFileTransfer(BaseFileTransport):
         self.base_dir = base_dir
         self.volumes = volumes
         self.labels = labels
+        self.pod_creation_timeout = pod_creation_timeout
+
 
         self.k8s = K8s(namespace)
 
@@ -35,7 +38,7 @@ class K8sFileTransfer(BaseFileTransport):
             raise Exception("Can't create pod for uploading files")
         self.pod_name = pod_name
 
-        pod_started = self.k8s.wait_pod_status(self.pod_name, ['Running'], 60)
+        pod_started = self.k8s.wait_pod_status(self.pod_name, ['Running'], self.pod_creation_timeout)
         if not pod_started:
             raise Exception("Can't start pod for uploading files")
 

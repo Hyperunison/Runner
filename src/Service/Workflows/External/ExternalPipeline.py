@@ -30,25 +30,33 @@ class ExternalPipeline(WorkflowBase):
 
         ucdm = self.get_ucdm(message)
         ucdm_simplified = [{key: val.export_value for key, val in row.items()} for row in ucdm]
+        self.execute_with_ucdm(
+            ucdm_simplified, message.parameters, message.run_id, message.run_name, message.weblog_url,
+            message.dir, message.s3_path, message.aws_id, message.aws_key
+        )
 
+
+    def execute_with_ucdm(
+        self, ucdm, parameters, run_id: int, run_name: str, weblog_url: str,
+            dir: str, s3_path: str, aws_id: str, aws_key: str
+    ):
         try:
-            input_files = self.module.get_input_files(ucdm_simplified, message.parameters)
-            output_file_masks = self.module.get_output_file_masks(message.parameters)
-            cmd = self.module.get_nextflow_cmd(input_files, message.parameters, message.run_name, message.weblog_url)
+            input_files = self.module.get_input_files(ucdm, parameters)
+            output_file_masks = self.module.get_output_file_masks(parameters)
+            cmd = self.module.get_nextflow_cmd(input_files, parameters, run_name, weblog_url)
 
             self.pipeline_executor.run_nextflow_run_abstract(
-                message.run_id,
+                run_id,
                 cmd,
-                message.dir,
+                dir,
                 input_files,
                 output_file_masks,
-                message.s3_path,
-                message.aws_id,
-                message.aws_key
+                s3_path,
+                aws_id,
+                aws_key
             )
         except Exception:
             error = traceback.format_exc()
             logging.critical("Pipeline unknown exception occurred", exc_info=True)
-            self.api.set_run_status(message.run_id, 'error')
-            self.api.add_log_chunk(message.run_id, error)
-
+            self.api.set_run_status(run_id, 'error')
+            self.api.add_log_chunk(run_id, error)

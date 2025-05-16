@@ -55,6 +55,10 @@ class K8sAdapter(BaseAdapter):
         self.labels = config['executor']['labels']
         self.api_client = api_client
         self.work_dir = config['executor']['work_dir']
+        if 'pod_creation_timeout' in config:
+            self.pod_creation_timeout = config['pod_creation_timeout']
+        else:
+            self.pod_creation_timeout = 300
         self.config = config
         self.hostname = runner_instance_id
         self.agent_id = agent_id
@@ -68,7 +72,7 @@ class K8sAdapter(BaseAdapter):
         labels = self.get_labels(run_id)
         labels['folder'] = folder
         pod_name = k8s.create_pod(self.pod_prefix, nextflow_command, labels, self.image, self.volumes)
-        k8s.wait_pod_status(pod_name, ['Running', 'Failed', 'Succeeded'], 60)
+        k8s.wait_pod_status(pod_name, ['Running', 'Failed', 'Succeeded'], self.pod_creation_timeout)
         self.process_send_pod_logs(k8s, pod_name, int(run_id))
         self.subscribe_pod_finished_and_upload_result_files(
             int(run_id), pod_name, k8s, folder, self.config['file_transfer']
