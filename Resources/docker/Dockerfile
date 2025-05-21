@@ -80,6 +80,7 @@ RUN apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 WORKDIR /app
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/Resources/gcloud/key.json
 
+RUN apt-get clean
 
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
-ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; sleep 3; done
+ENTRYPOINT pip ;install -r requirements.txt; while true; do python main.py; sleep 3; done

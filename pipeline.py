@@ -48,6 +48,7 @@ def parse_cli_args():
         epilog='')
     parser.add_argument('--pipeline', required=True, help='Path to the pipeline file (main.py)')
     parser.add_argument('--params', required=True, help='Path to the params file')
+    parser.add_argument('--ucdm', required=True, help='Input UCDM file')
     args = parser.parse_known_args()
 
     return args[0]
@@ -60,6 +61,7 @@ def get_random_string(length: int = 10) -> str:
 args = parse_cli_args()
 pipeline = args.pipeline
 params_yaml_filename = args.params
+params_ucdm_filename = args.ucdm
 
 with open("config.yaml", 'r') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -70,9 +72,12 @@ pipeline_executor = create_by_config(MockApiClient(), config, runner_instance_id
 
 pipeline = ExternalPipeline(MockApiClient(), pipeline_executor, None, pipeline)
 
-ucdm = []
 with open(params_yaml_filename, 'r') as file:
     parameters = yaml.load(file, Loader=yaml.FullLoader)
+
+with open(params_ucdm_filename, 'r') as file:
+    ucdm = yaml.load(file, Loader=yaml.FullLoader)
+
 run_id = 1
 run_name = 'test_run'
 dirname = 'test_pipeline_'+get_random_string(12)

@@ -1,11 +1,15 @@
 import importlib
 import logging
 import os
+import sys
 import traceback
+
+import yaml
 
 from src import Api
 from src.Message.StartWorkflow import StartWorkflow
 from src.Service.Workflows import PipelineExecutor
+from src.Service.Workflows.PipelineExecutor import file_put_contents
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.UCDM import DataSchema
 import importlib.util
@@ -30,6 +34,7 @@ class ExternalPipeline(WorkflowBase):
 
         ucdm = self.get_ucdm(message)
         ucdm_simplified = [{key: val.export_value for key, val in row.items()} for row in ucdm]
+        file_put_contents('var/last_ucdm.yaml', yaml.dump(ucdm_simplified))
         self.execute_with_ucdm(
             ucdm_simplified, message.parameters, message.run_id, message.run_name, message.weblog_url,
             message.dir, message.s3_path, message.aws_id, message.aws_key

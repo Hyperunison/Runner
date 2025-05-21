@@ -4,6 +4,8 @@ import os
 import re
 from typing import List, Dict, Optional
 
+import yaml
+
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.DqdOmop54 import DqdOmop54
 from src.Service.Workflows import PipelineExecutor
@@ -128,7 +130,7 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:
-                    exporter.export(
+                    skip_rows = exporter.export(
                         table_name=table_name,
                         ucdm=ucdm,
                         fields_map=fields_map,
@@ -137,6 +139,7 @@ class OMOPofication(WorkflowBase):
                             tables=message.all_tables
                         )
                     )
+                    api_logger.write(message.id, "Rows skipped: {}".format(yaml.dump(skip_rows)))
                     api_logger.write(message.id, "{} data was written".format(table_name))
                     filename = exporter.write_single_table_dump(table_name)
                     if self.may_upload_private_data and filename is not None:
