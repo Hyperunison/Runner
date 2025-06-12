@@ -139,7 +139,9 @@ class OMOPofication(WorkflowBase):
                             tables=message.all_tables
                         )
                     )
-                    api_logger.write(message.id, "Rows skipped: {}".format(yaml.dump(skip_rows)))
+                    if len(skip_rows) > 0:
+                        for reason, count in skip_rows.items():
+                            api_logger.write(message.id, "Rows skipped in {}: {}, reason: {}".format(table_name, count, reason))
                     api_logger.write(message.id, "{} data was written".format(table_name))
                     filename = exporter.write_single_table_dump(table_name)
                     if self.may_upload_private_data and filename is not None:

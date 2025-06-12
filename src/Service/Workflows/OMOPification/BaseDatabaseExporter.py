@@ -26,7 +26,7 @@ class BaseDatabaseExporter:
             ucdm: List[Dict[str, UCDMConvertedField]],
             fields_map: Dict[str, Dict[str, str]],
             columns: List[Dict[str, str]]
-    ) -> List[str]:
+    ) -> Dict[str, int]:
         return self.save_rows(
             table_name=table_name,
             ucdm=ucdm,
@@ -48,8 +48,8 @@ class BaseDatabaseExporter:
             ucdm: List[Dict[str, UCDMConvertedField]],
             fields_map: Dict[str, Dict[str, str]],
             columns: List[Dict[str, str]]
-    ) -> List[str]:
-        skip_rows: List[str] = []
+    ) -> Dict[str, int]:
+        skip_rows: Dict[str, int] = {}
         correct_rows: List[Dict[str, any]] = []
 
         for row in ucdm:
@@ -69,7 +69,10 @@ class BaseDatabaseExporter:
                 row_str: Dict[str, str] = {}
                 for k, v in row.items():
                     row_str[k] = v.export_value
-                skip_rows.append("Skip row as [{}]. Row={}".format(", ".join(skip_reasons), str(row_str)))
+                for reason, count in skip_reasons.items():
+                    if not reason in skip_rows:
+                        skip_rows[reason] = 0
+                    skip_rows[reason] += skip_reasons[reason]
 
         if len(correct_rows) > 0:
             self.insert_rows(

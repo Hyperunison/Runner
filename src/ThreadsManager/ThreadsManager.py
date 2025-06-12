@@ -102,7 +102,7 @@ class ThreadsManager:
             if pid_exists(worker.pid):
                 logging.info("Worker {} is alive {}".format(worker.pid, worker.exitcode))
                 continue
-            logging.info("The worker has finished1, queue: {}, pid: {}".format(worker.queue, worker.pid))
+            logging.info("The worker has finished, queue: {}, pid: {}".format(worker.queue, worker.pid))
             self.workers.remove(worker)
 
 
