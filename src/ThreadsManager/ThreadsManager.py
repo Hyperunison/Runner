@@ -45,7 +45,12 @@ class ThreadsManager:
             api_instance = agent_api.AgentApi(api_client)
             api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
 
-            return api.get_agent_id()
+            try:
+                return api.get_agent_id()
+            except Exception as e:
+                if e.__class__.__name__ == "NotFoundException":
+                    return None
+                raise e
 
     def send_pipelines(self):
         worker = PipelineWorker(

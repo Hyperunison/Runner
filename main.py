@@ -1,6 +1,7 @@
 import logging
 import os
 import socket
+import sys
 import time
 
 from src.Api import Api
@@ -26,6 +27,9 @@ if __name__ == '__main__':
 
     logging.info("Start listening tasks from the server, the main thread ID is {}".format(os.getpid()))
     threads_manager = ThreadsManager(config, manager)
+    if threads_manager.agent_id is None:
+        logging.error("Runner token is invalid")
+        sys.exit(1)
     threads_manager.send_pipelines()
 
     with ApiClient(configuration) as api_client:

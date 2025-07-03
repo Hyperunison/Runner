@@ -1,0 +1,8 @@
+FROM unison-runner_intermediate
+
+COPY ./ /app
+RUN pip install -r requirements.txt
+RUN mv /app/config-dist.env.yaml /app/config.yaml
+
+ENTRYPOINT while true; do python main.py; sleep 3; done
+
