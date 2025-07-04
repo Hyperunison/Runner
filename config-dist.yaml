@@ -25,7 +25,7 @@ log:
 
 # endpoint to SQL database with patients phenoenotypic data
 phenotypic_db:
-  # SQLAlchemy format DSN. More details here: https://workshop-python.readthedocs.io/database/sqlalchemy/connection-dsn.html
+  # SQLAlchemy format DSN. More details here: https://python3.info/database/sqlalchemy/connection-dsn.html
   # examples:
   # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase"
   # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase?sslmode=require"
