@@ -897,7 +897,7 @@ with auto_api_client.ApiClient() as api_client:
     api_instance = agent_api.AgentApi(api_client)
     version = "1" # str | 
     token = "z" # str | 
-    queue = "" # str | Filter message by queue (optional) if omitted the server will use the default value of ""
+    queues = [] # [bool, date, datetime, dict, float, int, list, str, none_type] | Filter message by queue (optional) if omitted the server will use the default value of []
 
     # example passing only required values which don't have defaults set
     try:
@@ -909,7 +909,7 @@ with auto_api_client.ApiClient() as api_client:
     # example passing only required values which don't have defaults set
     # and optional values
     try:
-        api_response = api_instance.get_next_task(version, token, queue=queue)
+        api_response = api_instance.get_next_task(version, token, queues=queues)
         pprint(api_response)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->get_next_task: %s\n" % e)
@@ -922,7 +922,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **version** | **str**|  |
  **token** | **str**|  |
- **queue** | **str**| Filter message by queue | [optional] if omitted the server will use the default value of ""
+ **queues** | [**[bool, date, datetime, dict, float, int, list, str, none_type]**](bool, date, datetime, dict, float, int, list, str, none_type.md)| Filter message by queue | [optional] if omitted the server will use the default value of []
 
 ### Return type
 

@@ -48,6 +48,7 @@ RUN pip install "pyhive==0.7.0"
 RUN pip install "pure-sasl==0.6.2"
 RUN pip install "thrift==0.21.0"
 RUN pip install "thrift-sasl==0.4.3"
+RUN pip install "psutil==7.0.0"
 
 
 RUN wget https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.14/aws-iam-authenticator_0.6.14_linux_amd64 -O /bin/aws-iam-authenticator
@@ -74,9 +75,12 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
     | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     apt-get update && apt-get install -y google-cloud-sdk kubectl
 
+RUN apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+
 WORKDIR /app
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/Resources/gcloud/key.json
 
+RUN apt-get clean
 
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
 ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; sleep 3; done

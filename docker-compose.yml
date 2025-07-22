@@ -12,6 +12,7 @@ services:
       - ./:/app:delegated
       - ./Resources/.kube/:/root/.kube
       - ./Resources/.aws:/root/.aws
+      - ./Resources/gcloud/:/root/.config/gcloud
       #- /var/run/docker.sock:/var/run/docker.sock
 
   filebeat:

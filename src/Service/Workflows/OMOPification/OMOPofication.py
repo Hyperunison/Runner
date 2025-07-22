@@ -131,7 +131,7 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:
-                    exporter.export(
+                    skip_rows = exporter.export(
                         table_name=table_name,
                         ucdm=ucdm,
                         fields_map=fields_map,
@@ -140,6 +140,9 @@ class OMOPofication(WorkflowBase):
                             tables=message.all_tables
                         )
                     )
+                    if len(skip_rows) > 0:
+                        for reason, count in skip_rows.items():
+                            api_logger.write(message.id, "Rows skipped in {}: {}, reason: {}".format(table_name, count, reason))
                     api_logger.write(message.id, "{} data was written".format(table_name))
                     filename = exporter.write_single_table_dump(table_name)
                     if self.may_upload_private_data and filename is not None:

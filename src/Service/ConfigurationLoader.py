@@ -3,8 +3,8 @@ import yaml
 import re
 import argparse
 
-env_var_pattern = re.compile(r'ENV\("([^"]+)"\)')
-arg_var_pattern = re.compile(r'ARG\("([^"]+)"\)')
+env_var_pattern = re.compile(r'ENV\("([^"]+)"\s*(?:,\s*"([^"]+)")?\)')
+arg_var_pattern = re.compile(r'ARG\("([^"]+)"\s*(?:,\s*"([^"]+)")?\)')
 
 cli_args = {}
 parser = argparse.ArgumentParser(description="Update YAML config with CLI args.")
@@ -19,7 +19,8 @@ def env_constructor(loader, node):
     match = env_var_pattern.match(value)
     if match:
         env_var_name = match.group(1)
-        return os.getenv(env_var_name, '')
+        default = match.group(2) if match.group(2) else ''
+        return os.getenv(env_var_name, default)
     return value
 
 
@@ -28,7 +29,8 @@ def arg_constructor(loader, node):
     match = arg_var_pattern.match(value)
     if match:
         arg_var_name = match.group(1)
-        result = cli_args.get(arg_var_name, '')
+        default = match.group(2) if match.group(2) else ''
+        result = cli_args.get(arg_var_name, default)
         return result
     return value
 

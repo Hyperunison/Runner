@@ -84,6 +84,7 @@ class BiobankDataColumnFrequentValue(ModelNormal):
             'value': (str,),  # noqa: E501
             'rows_count': (int,),  # noqa: E501
             'domain_suggestions': ({str: (bool, date, datetime, dict, float, int, list, str, none_type)},),  # noqa: E501
+            'vocabulary_suggestions': ({str: (bool, date, datetime, dict, float, int, list, str, none_type)},),  # noqa: E501
         }
 
     @cached_property
@@ -95,6 +96,7 @@ class BiobankDataColumnFrequentValue(ModelNormal):
         'value': 'value',  # noqa: E501
         'rows_count': 'rowsCount',  # noqa: E501
         'domain_suggestions': 'domainSuggestions',  # noqa: E501
+        'vocabulary_suggestions': 'vocabularySuggestions',  # noqa: E501
     }
 
     read_only_vars = {
@@ -141,6 +143,7 @@ class BiobankDataColumnFrequentValue(ModelNormal):
             value (str): [optional]  # noqa: E501
             rows_count (int): [optional]  # noqa: E501
             domain_suggestions ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
+            vocabulary_suggestions ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -229,6 +232,7 @@ class BiobankDataColumnFrequentValue(ModelNormal):
             value (str): [optional]  # noqa: E501
             rows_count (int): [optional]  # noqa: E501
             domain_suggestions ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
+            vocabulary_suggestions ({str: (bool, date, datetime, dict, float, int, list, str, none_type)}): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

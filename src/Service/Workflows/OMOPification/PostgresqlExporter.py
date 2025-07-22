@@ -42,7 +42,7 @@ class PostgresqlExporter(BaseDatabaseExporter):
         result: List[str] = []
 
         for row in rows:
-            skip_reasons: List[str] = self.lines_filter.get_line_errors(row, fields_map)
+            skip_reasons: Dict[str, int] = self.lines_filter.get_line_errors(row, fields_map)
             if len(skip_reasons) == 0:
                 result = []
                 for key, val in row.items():
