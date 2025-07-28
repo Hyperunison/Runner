@@ -10,9 +10,6 @@ from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.UCDMConvertedField import UCDMConvertedField
 
 
-def log_error(name_origin, field, value):
-    logging.warning("Value '{value}' is unmapped in the field '{name_origin}'".format(name_origin=name_origin, field=field, value=value))
-
 class UCDMResolver:
     schema: DataSchema
     ucdm_mapping_resolver: UCDMMappingResolver
@@ -67,10 +64,19 @@ class UCDMResolver:
         output: List[Dict[str, UCDMConvertedField]] = []
         serials: Dict[str, SerialGenerator] = {}
 
+        all_warnings: Dict[str, int] = {}
+
         for row in result:
-            converted = self.convert_row(mapping_index, row, serials, str_to_int, fields_map, automation_strategies_map)
+            (converted, warnings) = self.convert_row(mapping_index, row, serials, str_to_int, fields_map, automation_strategies_map)
             for converted_row in converted:
                 output.append(converted_row)
+
+            for warning, count in warnings.items():
+                if not warning in all_warnings:
+                    all_warnings[warning] = 0
+                all_warnings[warning] += count
+        for warning, count in all_warnings.items():
+            logging.warning("{warning} ({count} times)".format(warning=warning, count=count))
 
         return output
 
@@ -126,7 +132,8 @@ class UCDMResolver:
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]]
-    ) -> List[Dict[str, UCDMConvertedField]]:
+    ) -> Tuple[List[Dict[str, UCDMConvertedField]], Dict[str, int]]:
+        warnings: Dict[str, int] = {}
         input_matrix: Dict[str, List[any]] = {}
         for field, value in row.items():
             field_alias = self.get_field_alias(field)
@@ -149,14 +156,15 @@ class UCDMResolver:
                     )
                     if is_concept:
                         if is_required:
-                            logging.warning("Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Skip row, field is required".format(
-                                name_origin=name_origin, field=field, value=value, bridge_id=bridge_id))
+                            warning = "Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Skip row, field is required".format(
+                                name_origin=name_origin, field=field, value=value, bridge_id=bridge_id)
+                            warnings[warning] = warnings.get(warning, 0) + 1
                             return []
                         else:
-                            logging.warning(
-                                "Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Use blank field, field is optional".format(
-                                    name_origin=name_origin, field=field, value=value, bridge_id=bridge_id))
+                            warning = "Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Use blank field, field is optional".format(
+                                    name_origin=name_origin, field=field, value=value, bridge_id=bridge_id)
                             values = [('', automation_strategy)]
+                            warnings[warning] = warnings.get(warning, 0) + 1
                     else:
                         values = [(value, automation_strategy)]
                 else:
@@ -189,7 +197,7 @@ class UCDMResolver:
                 result_row[field] = UCDMConvertedField(export_value)
             result.append(result_row)
 
-        return result
+        return (result, warnings)
 
 def decartes_multiply_array(array: Dict[str, List[any]]) -> List[Dict[str, str]]:
     if not array:

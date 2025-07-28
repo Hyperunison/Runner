@@ -14,12 +14,6 @@ from src.auto.auto_api_client.api_client import ApiClient
 
 
 if __name__ == '__main__':
-    try:
-        import pydevd_pycharm
-
-        pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
-    except:
-        pass
 
     config = ConfigurationLoader("config.yaml").get_config()
     manager = ConsoleApplicationManager()

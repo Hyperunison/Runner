@@ -51,10 +51,10 @@ class BaseSchema:
     def reconnect(self):
         raise NotImplementedError()
 
-    def sql_expression_interval(self, count: str, unit: str) -> str:
+    def sql_expression_interval(self, count: str, unit: str) -> SQLWithParameters:
         raise NotImplementedError()
 
-    def sql_expression_cast_data_type(self, expression: str, data_type: str) -> str:
+    def sql_expression_cast_data_type(self, expression: str, data_type: str) -> SQLWithParameters:
         raise NotImplementedError()
 
     def statement_callback(self, statement) -> Dict:

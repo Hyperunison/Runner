@@ -38,6 +38,13 @@ class OMOPofication(WorkflowBase):
         super().__init__(api, pipeline_executor, schema)
 
     def execute(self, message: StartOMOPoficationWorkflow, api: Api):
+        try:
+            import pydevd_pycharm
+
+            pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
+        except:
+            pass
+
         api_logger = ApiLogger(self.api)
         self.download_mapping()
         csv_transformer = CsvToMappingTransformer()

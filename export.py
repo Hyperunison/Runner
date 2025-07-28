@@ -37,24 +37,24 @@ def print_csv(csv_path: str) -> None:
 argv = sys.argv
 
 if len(argv) != 3:
-    print('Invalid arguments count!')
-    print('Correct format is: python export.py query.sql mapping.csv > result.csv')
+    print('Invalid arguments count!', file=sys.stderr)
+    print('Correct format is: python export.py var/query.sql var/mapping-values.csv > result.csv', file=sys.stderr)
     exit(1)
 
 if not os.path.isfile(argv[1]):
-    print('File with source SQL does not exist!')
-    exit(1)
+    print('File with source SQL does not exist!', file=sys.stderr)
+    exit(2)
 
 if not os.path.isfile(argv[2]):
-    print('File with mapping does not exist!')
-    exit(1)
+    print('File with mapping does not exist!', file=sys.stderr)
+    exit(3)
 
 table_name = get_table_name(argv[1])
 field_map_path = "var/" + table_name + "-fields-map.yaml"
 
 if not os.path.isfile(field_map_path):
-    print('Field map file does not exist!')
-    exit(1)
+    print('Fields map file does not exist: {}'.format(field_map_path), file=sys.stderr)
+    exit(4)
 
 with open(field_map_path) as yaml_data:
     fields_map = yaml.load(yaml_data)

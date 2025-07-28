@@ -224,10 +224,10 @@ class Database(BaseSchema):
         result: List[str] = []
         chunks = table_name.split('.')
         for chunk in chunks:
-            result.append(sql.Identifier(chunk).as_string(self.engine.connection.connection))
+            result.append(self.engine.dialect.identifier_preparer.quote(chunk))
 
         return '.'.join(result)
 
     def escape_column_name(self, table_name: str) -> str:
-        return sql.Identifier(table_name).as_string(self.engine.connection.connection)
+        return self.engine.dialect.identifier_preparer.quote(table_name)
 

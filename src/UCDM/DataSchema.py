@@ -80,6 +80,7 @@ class DataSchema:
     dst: str = ""
     schema: BaseSchema
     schema_factory: SchemaFactory
+    param_counter: int = 0
 
     def __init__(self, dsn: str, min_count: int):
         self.min_count = min_count
@@ -125,6 +126,7 @@ class DataSchema:
             distribution: bool,
             add_participant_id: bool = False,
     ) -> SQLWithParameters:
+        self.param_counter = 0
         query = self.build_cohort_definition_sql_query_internal(mapper, cohort_definition, distribution, add_participant_id)
 
         cte_part = self.get_cte_sql(query.cte)
@@ -147,7 +149,7 @@ class DataSchema:
 
         cte_list = {}
         for cte in cohort_definition.cte:
-            cte_list[cte['tableName']] = cte['cte']
+            cte_list[cte['tableName']] = SQLWithParameters(cte['cte'], {})
 
         if len(cohort_definition.with_tables) > 0:
             with_cte_list = self.build_with_cte_list(cohort_definition.with_tables)
@@ -246,6 +248,13 @@ class DataSchema:
         return converter.convert_raw_sql(sql, engine_type)
 
     def execute_cohort_definition(self, cohort_api_request: CohortAPIRequest, api: Api):
+        try:
+            import pydevd_pycharm
+
+            pydevd_pycharm.settrace('host.docker.internal', port=55147, stdoutToServer=True, stderrToServer=True)
+        except:
+            pass
+
         key = cohort_api_request.cohort_definition.key
         mapper = VariableMapper(cohort_api_request.cohort_definition.fields)
 
@@ -311,69 +320,74 @@ class DataSchema:
             logging.error(f"Error while killing PID {kill_message.pid} : {e}")
             api.set_car_status(kill_message.cohort_api_request_id, "error")
 
-    def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> str:
+    def build_sql_expression(self, statement: list, query: SQLQuery, mapper: VariableMapper) -> SQLWithParameters:
         logging.debug("Statement got {}".format(json.dumps(statement)))
 
         statement = self.schema.statement_callback(statement)
 
         if statement['type'] == 'variable':
             logging.debug("VARIABLE {} got".format(statement['name']))
-            return mapper.convert_var_name(statement['name'])
+            return SQLWithParameters(mapper.convert_var_name(statement['name']), {})
         if statement['type'] == 'constant':
-
             value = json.loads(statement['json'])
-            if isinstance(value, int):
-                return "{}".format(value)
-            if isinstance(value, float):
-                return "{}".format(value)
-            if value is None:
-                return "null"
-            return "'{}'".format(escape_string(str(value)))
+            param_name = self.uniq_param_name()
+
+            return SQLWithParameters(":{}".format(param_name), value)
+            #
+            # if isinstance(value, int):
+            #     return "{}".format(value)
+            # if isinstance(value, float):
+            #     return "{}".format(value)
+            # if value is None:
+            #     return "null"
+            # return "'{}'".format(escape_string(str(value)))
 
         if statement['type'] == 'array':
             expressions = []
+            params = {}
             for const in statement['nodes']:
-                expressions.append(self.build_sql_expression(const, query, mapper))
-            return '({})'.format(', '.join(expressions))
+                expr = self.build_sql_expression(const, query, mapper)
+                expressions.append(expr.sql)
+                params |= expr.parameters
+            return SQLWithParameters('({})'.format(', '.join(expressions)), params)
+
         if statement['type'] == 'binary':
             operator = statement['operator']
             if operator == 'in' or operator == 'not in':
                 right = self.build_sql_expression(statement['right'], query, mapper)
-                return "{} {} {}".format(
-                    self.add_staples_around_statement(statement['left'], query, mapper),
+                left = self.add_staples_around_statement(statement['left'], query, mapper)
+                return SQLWithParameters("{} {} {}".format(
+                    left.sql,
                     operator.upper(),
-                    right,
-                )
+                    right.sql,
+                ), left.parameters | right.parameters)
 
             if operator == "==":
                 operator = "="
 
-            return '{} {} {}'.format(
-                self.add_staples_around_statement(statement['left'], query, mapper),
-                operator.upper(),
-                self.add_staples_around_statement(statement['right'], query, mapper)
-            )
+            left = self.add_staples_around_statement(statement['left'], query, mapper)
+            right = self.add_staples_around_statement(statement['right'], query, mapper)
+
+            return SQLWithParameters('{} {} {}'.format(left.sql, operator.upper(), right.sql), left.parameters | right.parameters)
 
         if statement['type'] == 'unary':
             operator = statement['operator']
             node = statement['node']
+            statement = self.add_staples_around_statement(node, query, mapper)
 
-            return '{} ({})'.format(
-                operator.upper(),
-                self.add_staples_around_statement(node, query, mapper),
-            )
+            return SQLWithParameters('{} ({})'.format(operator.upper(), statement.sql), statement.parameters)
 
         if statement['type'] == 'function':
             logging.info('Function call got: {}'.format(statement['name']))
             if statement['name'] == 'ifelse':
-                condition = statement['nodes'][0]
-                result1 = statement['nodes'][1]
-                result2 = statement['nodes'][2]
-                return "\n    CASE \n" + \
-                    "        WHEN " + self.build_sql_expression(condition, query, mapper) + " " + \
-                    "THEN " + self.build_sql_expression(result1, query, mapper) + " \n" + \
-                    "        ELSE " + self.build_sql_expression(result2, query, mapper) + " \n" + \
-                    "    END"
+                condition = self.build_sql_expression(statement['nodes'][0], query, mapper)
+                result1 = self.build_sql_expression(statement['nodes'][1], query, mapper)
+                result2 = self.build_sql_expression(statement['nodes'][2], query, mapper)
+                return SQLWithParameters("\n    CASE \n" + \
+                    "        WHEN " + condition.sql + " " + \
+                    "THEN " + result1.sql + " \n" + \
+                    "        ELSE " + result2.sql + " \n" + \
+                    "    END", condition.parameters | result1.parameters | result2.parameters)
             if statement['name'] in ['hours', 'days', 'weeks', 'months', 'years']:
                 sql_exp = self.build_sql_expression(statement['nodes'][0], query, mapper)
                 return self.schema.sql_expression_interval(
@@ -391,18 +405,18 @@ class DataSchema:
             if statement['name'] in self.schema.known_functions:
                 sql = statement['name'] + "(" + ", ".join(
                     str(self.build_sql_expression(node, query, mapper)) for node in statement['nodes']) + ")"
-                return sql
+                return SQLWithParameters(sql, {})
 
             raise NotImplementedError("Unknown function {}".format(statement['name']))
 
-    def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> str:
+    def add_staples_around_statement(self, statement, query, mapper: VariableMapper) -> SQLWithParameters:
         s = self.build_sql_expression(statement, query, mapper)
         if statement['type'] == 'variable':
             return s
         if statement['type'] == 'constant':
             return s
 
-        return "({})".format(s)
+        return SQLWithParameters("({})".format(s), s.parameters)
 
     def fetch_all(self, sql: SQLWithParameters):
         return self.schema.fetch_all(sql)
@@ -494,6 +508,11 @@ class DataSchema:
 
     def reconnect(self):
         self.schema.reconnect()
+
+    def uniq_param_name(self):
+        self.param_counter += 1
+
+        return "param_{}".format(self.param_counter)
 
     def execute_sql(self, sql: str):
         self.schema.execute_sql_deprecated(sql)
