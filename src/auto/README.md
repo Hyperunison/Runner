@@ -52,7 +52,6 @@ from pprint import pprint
 from auto_api_client.api import agent_api
 from auto_api_client.model.add_run_log_chunk_request import AddRunLogChunkRequest
 from auto_api_client.model.biobank_data_table import BiobankDataTable
-from auto_api_client.model.data_item_dictionary_biobank_export_item_response import DataItemDictionaryBiobankExportItemResponse
 from auto_api_client.model.get_mappings_request import GetMappingsRequest
 from auto_api_client.model.mapping_resolve_response import MappingResolveResponse
 from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
@@ -106,8 +105,8 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**export_cdm_vocabulary_csv**](docs/AgentApi.md#export_cdm_vocabulary_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-vocabulary/export | 
 *AgentApi* | [**export_docs_for_specific_biobank**](docs/AgentApi.md#export_docs_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/docs | 
 *AgentApi* | [**export_docs_for_specific_biobank_in_csv_format**](docs/AgentApi.md#export_docs_for_specific_biobank_in_csv_format) | **GET** /api/agent/v{version}/{token}/export-mapping/docs/csv | 
+*AgentApi* | [**export_mapping_by_cdm**](docs/AgentApi.md#export_mapping_by_cdm) | **GET** /api/agent/v{version}/{token}/export-mapping/{cdmId} | 
 *AgentApi* | [**export_mapping_short_for_specific_biobank**](docs/AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 
-*AgentApi* | [**export_mapping_short_for_specific_biobank_json**](docs/AgentApi.md#export_mapping_short_for_specific_biobank_json) | **GET** /api/agent/v{version}/{token}/export-mapping/json | 
 *AgentApi* | [**get_agent_id**](docs/AgentApi.md#get_agent_id) | **GET** /api/agent/v{version}/{token}/agent-id | 
 *AgentApi* | [**get_app_agent_updateprocessitem**](docs/AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 *AgentApi* | [**get_mappings**](docs/AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
@@ -139,7 +138,6 @@ Class | Method | HTTP request | Description
  - [BiobankDataColumn](docs/BiobankDataColumn.md)
  - [BiobankDataColumnFrequentValue](docs/BiobankDataColumnFrequentValue.md)
  - [BiobankDataTable](docs/BiobankDataTable.md)
- - [DataItemDictionaryBiobankExportItemResponse](docs/DataItemDictionaryBiobankExportItemResponse.md)
  - [GetMappingsRequest](docs/GetMappingsRequest.md)
  - [GetProcessLogs](docs/GetProcessLogs.md)
  - [MappingResolveResponse](docs/MappingResolveResponse.md)

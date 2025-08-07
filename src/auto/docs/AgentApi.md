@@ -11,8 +11,8 @@ Method | HTTP request | Description
 [**export_cdm_vocabulary_csv**](AgentApi.md#export_cdm_vocabulary_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-vocabulary/export | 
 [**export_docs_for_specific_biobank**](AgentApi.md#export_docs_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/docs | 
 [**export_docs_for_specific_biobank_in_csv_format**](AgentApi.md#export_docs_for_specific_biobank_in_csv_format) | **GET** /api/agent/v{version}/{token}/export-mapping/docs/csv | 
+[**export_mapping_by_cdm**](AgentApi.md#export_mapping_by_cdm) | **GET** /api/agent/v{version}/{token}/export-mapping/{cdmId} | 
 [**export_mapping_short_for_specific_biobank**](AgentApi.md#export_mapping_short_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping | 
-[**export_mapping_short_for_specific_biobank_json**](AgentApi.md#export_mapping_short_for_specific_biobank_json) | **GET** /api/agent/v{version}/{token}/export-mapping/json | 
 [**get_agent_id**](AgentApi.md#get_agent_id) | **GET** /api/agent/v{version}/{token}/agent-id | 
 [**get_app_agent_updateprocessitem**](AgentApi.md#get_app_agent_updateprocessitem) | **GET** /api/agent/v{version}/{token}/run/{id}/process | 
 [**get_mappings**](AgentApi.md#get_mappings) | **POST** /api/agent/v{version}/{token}/mapping/resolve/{key} | 
@@ -526,6 +526,73 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **export_mapping_by_cdm**
+> file_type export_mapping_by_cdm(version, token, cdm_id)
+
+
+
+### Example
+
+
+```python
+import time
+import auto_api_client
+from auto_api_client.api import agent_api
+from pprint import pprint
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = auto_api_client.Configuration(
+    host = "http://localhost"
+)
+
+
+# Enter a context with an instance of the API client
+with auto_api_client.ApiClient() as api_client:
+    # Create an instance of the API class
+    api_instance = agent_api.AgentApi(api_client)
+    version = "1" # str | 
+    token = "z" # str | 
+    cdm_id = "4" # str | 
+
+    # example passing only required values which don't have defaults set
+    try:
+        api_response = api_instance.export_mapping_by_cdm(version, token, cdm_id)
+        pprint(api_response)
+    except auto_api_client.ApiException as e:
+        print("Exception when calling AgentApi->export_mapping_by_cdm: %s\n" % e)
+```
+
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **version** | **str**|  |
+ **token** | **str**|  |
+ **cdm_id** | **str**|  |
+
+### Return type
+
+**file_type**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/octet-stream
+
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Export biobank mappings to USAGI csv file for specified CDM |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **export_mapping_short_for_specific_biobank**
 > file_type export_mapping_short_for_specific_biobank(version, token)
 
@@ -588,72 +655,6 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Export biobank mappings to USAGI csv file |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **export_mapping_short_for_specific_biobank_json**
-> [DataItemDictionaryBiobankExportItemResponse] export_mapping_short_for_specific_biobank_json(version, token)
-
-
-
-### Example
-
-
-```python
-import time
-import auto_api_client
-from auto_api_client.api import agent_api
-from auto_api_client.model.data_item_dictionary_biobank_export_item_response import DataItemDictionaryBiobankExportItemResponse
-from pprint import pprint
-# Defining the host is optional and defaults to http://localhost
-# See configuration.py for a list of all supported configuration parameters.
-configuration = auto_api_client.Configuration(
-    host = "http://localhost"
-)
-
-
-# Enter a context with an instance of the API client
-with auto_api_client.ApiClient() as api_client:
-    # Create an instance of the API class
-    api_instance = agent_api.AgentApi(api_client)
-    version = "1" # str | 
-    token = "z" # str | 
-
-    # example passing only required values which don't have defaults set
-    try:
-        api_response = api_instance.export_mapping_short_for_specific_biobank_json(version, token)
-        pprint(api_response)
-    except auto_api_client.ApiException as e:
-        print("Exception when calling AgentApi->export_mapping_short_for_specific_biobank_json: %s\n" % e)
-```
-
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **version** | **str**|  |
- **token** | **str**|  |
-
-### Return type
-
-[**[DataItemDictionaryBiobankExportItemResponse]**](DataItemDictionaryBiobankExportItemResponse.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**200** | Export biobank mappings to JSON |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -723,7 +724,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_app_agent_updateprocessitem**
-> str get_app_agent_updateprocessitem(id, version, token)
+> get_app_agent_updateprocessitem(version, token, id)
 
 
 
@@ -746,14 +747,13 @@ configuration = auto_api_client.Configuration(
 with auto_api_client.ApiClient() as api_client:
     # Create an instance of the API class
     api_instance = agent_api.AgentApi(api_client)
-    id = 1 # int | Run ID, example: 1234. It may be taken from /next-task API method
     version = "1" # str | 
     token = "z" # str | 
+    id = "id_example" # str | 
 
     # example passing only required values which don't have defaults set
     try:
-        api_response = api_instance.get_app_agent_updateprocessitem(id, version, token)
-        pprint(api_response)
+        api_instance.get_app_agent_updateprocessitem(version, token, id)
     except auto_api_client.ApiException as e:
         print("Exception when calling AgentApi->get_app_agent_updateprocessitem: %s\n" % e)
 ```
@@ -763,13 +763,13 @@ with auto_api_client.ApiClient() as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **int**| Run ID, example: 1234. It may be taken from /next-task API method |
  **version** | **str**|  |
  **token** | **str**|  |
+ **id** | **str**|  |
 
 ### Return type
 
-**str**
+void (empty response body)
 
 ### Authorization
 
@@ -778,14 +778,14 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
+ - **Accept**: Not defined
 
 
 ### HTTP response details
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | List all bricks |  -  |
+**0** |  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

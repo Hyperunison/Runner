@@ -27,7 +27,7 @@ class WorkflowBase:
     def execute(self, message: StartWorkflow, api: Api):
         pass
 
-    def download_mapping(self):
+    def download_mapping(self, cdm_id: int):
         response = self.api.export_mapping()
 
         with open(os.path.abspath(self.mapping_file_name), 'wb') as file:

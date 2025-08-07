@@ -38,7 +38,7 @@ class OMOPofication(WorkflowBase):
 
     def execute(self, message: StartOMOPoficationWorkflow, api: Api):
         api_logger = ApiLogger(self.api)
-        self.download_mapping()
+        self.download_mapping(message.cdm_id)
         csv_transformer = CsvToMappingTransformer()
         api_logger.write(message.id, "Workflow execution task")
         logging.info(message)

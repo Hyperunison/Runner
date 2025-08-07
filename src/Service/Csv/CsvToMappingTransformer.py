@@ -7,7 +7,7 @@ class CsvToMappingTransformer:
         'fieldName': 'field_name',
         'automationStrategy': 'automation_strategy',
         'sourceCode': 'biobank_value',
-        'conceptId': 'export_value',
+        'exportValue': 'export_value',
         'isConceptId': 'is_concept_id',
         'unisonBridgeId': 'unison_bridge_id',
     }

@@ -65,14 +65,14 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
-    def test_export_mapping_short_for_specific_biobank(self):
-        """Test case for export_mapping_short_for_specific_biobank
+    def test_export_mapping_by_cdm(self):
+        """Test case for export_mapping_by_cdm
 
         """
         pass
 
-    def test_export_mapping_short_for_specific_biobank_json(self):
-        """Test case for export_mapping_short_for_specific_biobank_json
+    def test_export_mapping_short_for_specific_biobank(self):
+        """Test case for export_mapping_short_for_specific_biobank
 
         """
         pass

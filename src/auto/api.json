@@ -957,15 +957,6 @@
                 "operationId": "get_app_agent_updateprocessitem",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Run ID, example: 1234. It may be taken from /next-task API method",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
                         "name": "version",
                         "in": "path",
                         "required": true,
@@ -982,18 +973,19 @@
                             "type": "string",
                             "pattern": "[\\w-]+"
                         }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "List all bricks",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                    "default": {
+                        "description": ""
                     }
                 }
             },
@@ -1719,6 +1711,56 @@
                 }
             }
         },
+        "/api/agent/v{version}/{token}/export-mapping/{cdmId}": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportMappingByCdm",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    },
+                    {
+                        "name": "cdmId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "\\d+"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Export biobank mappings to USAGI csv file for specified CDM",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/agent/v{version}/{token}/export-mapping": {
             "get": {
                 "tags": [
@@ -1753,49 +1795,6 @@
                                 "schema": {
                                     "type": "string",
                                     "format": "binary"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/agent/v{version}/{token}/export-mapping/json": {
-            "get": {
-                "tags": [
-                    "Agent"
-                ],
-                "operationId": "exportMappingShortForSpecificBiobankJson",
-                "parameters": [
-                    {
-                        "name": "version",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "pattern": "[\\d.]+"
-                        }
-                    },
-                    {
-                        "name": "token",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "pattern": "[\\w-]+"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Export biobank mappings to JSON",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/DataItemDictionaryBiobankExportItemResponse"
-                                    }
                                 }
                             }
                         }
@@ -2071,68 +2070,6 @@
                         "type": "integer"
                     },
                     "cte": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "DataItemDictionaryBiobankExportItemResponse": {
-                "properties": {
-                    "sourceCode": {
-                        "type": "string"
-                    },
-                    "sourceName": {
-                        "type": "string"
-                    },
-                    "sourceFrequency": {
-                        "type": "string"
-                    },
-                    "sourceAutoAssignedConceptIds": {
-                        "type": "string"
-                    },
-                    "matchScore": {
-                        "type": "string"
-                    },
-                    "mappingStatus": {
-                        "type": "string"
-                    },
-                    "equivalence": {
-                        "type": "string"
-                    },
-                    "statusSetBy": {
-                        "type": "string"
-                    },
-                    "statusSetOn": {
-                        "type": "string"
-                    },
-                    "conceptId": {
-                        "type": "string"
-                    },
-                    "conceptName": {
-                        "type": "string"
-                    },
-                    "domainId": {
-                        "type": "string"
-                    },
-                    "mappingType": {
-                        "type": "string"
-                    },
-                    "comment": {
-                        "type": "string"
-                    },
-                    "createdBy": {
-                        "type": "string"
-                    },
-                    "createdOn": {
-                        "type": "string"
-                    },
-                    "assignedReviewer": {
-                        "type": "string"
-                    },
-                    "automationStrategy": {
-                        "type": "string"
-                    },
-                    "varName": {
                         "type": "string"
                     }
                 },
