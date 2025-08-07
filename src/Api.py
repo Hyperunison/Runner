@@ -135,12 +135,13 @@ class Api:
             )
         )
 
-    def export_mapping(self):
+    def export_mapping(self, cdm_id: int):
         logging.info("Export mapping to response body file")
 
-        return self.api_instance.export_mapping_short_for_specific_biobank(
+        return self.api_instance.export_mapping_by_cdm(
             version=self.version,
-            token=self.token
+            token=self.token,
+            cdm_id=str(cdm_id)
         )
 
     def export_cdm_concept(self, cdm_id: str):
