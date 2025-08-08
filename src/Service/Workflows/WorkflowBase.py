@@ -73,7 +73,7 @@ class WorkflowBase:
 
     def get_ucdm(self, message: StartWorkflow) -> List[Dict[str, UCDMConvertedField]]:
         self.api.add_log_chunk(message.run_id, "Downloading mappings from Unison platform\n")
-        self.download_mapping()
+        self.download_mapping(message.cohort_definition['cdmId'])
         query = CohortDefinition(message.cohort_definition)
         sql_final = self.get_sql_final(query)
         self.api.add_log_chunk(message.run_id, "Executing SQL query marmonizing the result\n{}\n".format(sql_final))
