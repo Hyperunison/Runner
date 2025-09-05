@@ -24,6 +24,11 @@ class WorkflowBase:
         self.pipeline_executor = pipeline_executor
         self.schema = schema
 
+    def define_paths(self, cdm_id: int):
+        self.mapping_file_name = "var/" + str(round(cdm_id)) + "/mapping-values.csv"
+        self.cdm_concept_file_name = "var/" + str(round(cdm_id)) + "/concept.csv"
+        self.cdm_vocabulary_file_name = "var/" + str(round(cdm_id)) + "/vocabulary.csv"
+
     def execute(self, message: StartWorkflow, api: Api):
         pass
 

@@ -10,9 +10,7 @@ from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.DqdOmop54 import DqdOmop54
 from src.Service.Workflows import PipelineExecutor
 from src.Service.Workflows.OMOPification import BaseDatabaseExporter
-from src.Service.Workflows.OMOPification.CsvWritter import CsvWritter
 from src.Service.Workflows.OMOPification.ExporterFactory import exporter_factory
-from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
 from src.Service.Workflows.OMOPification.SQLiteExporter import SQLiteExporter
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.Api import Api
@@ -20,7 +18,6 @@ from src.Message.partial.CohortDefinition import CohortDefinition
 from src.Service.Csv.CsvToMappingTransformer import CsvToMappingTransformer
 from src.Service.UCDMMappingResolver import UCDMMappingResolver
 from src.Service.UCDMResolver import UCDMResolver
-from src.Service.UCDMConvertedField import UCDMConvertedField
 from src.UCDM.DataSchema import DataSchema
 from src.Service.ApiLogger import ApiLogger
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
@@ -36,7 +33,18 @@ class OMOPofication(WorkflowBase):
         self.may_upload_private_data = may_upload_private_data
         super().__init__(api, pipeline_executor, schema)
 
+    def define_paths(self, cdm_id: int):
+        super().define_paths(cdm_id)
+        self.dir = "var/" + str(round(cdm_id)) + "/"
+        os.makedirs(self.dir, exist_ok=True)
+        self.manual_file_name = "var/" + str(round(cdm_id)) + "/manual.pdf"
+        self.manual_csv_file_name = "var/" + str(round(cdm_id)) + "/manual.csv"
+
+    def get_base_dir(self) -> str:
+        return "var/"
+
     def execute(self, message: StartOMOPoficationWorkflow, api: Api):
+        self.define_paths(message.cdm_id)
         api_logger = ApiLogger(self.api)
         self.download_mapping(message.cdm_id)
         csv_transformer = CsvToMappingTransformer()
@@ -47,7 +55,7 @@ class OMOPofication(WorkflowBase):
 
         automation_strategies_map = message.automation_strategies_map
 
-        filename = os.path.abspath(self.dir + '/automation_strategies_map.json')
+        filename = os.path.abspath(self.dir + 'automation_strategies_map.json')
         with open(filename, 'w') as file:
             json.dump(automation_strategies_map, file, indent=4)
 
@@ -56,7 +64,7 @@ class OMOPofication(WorkflowBase):
 
         if self.may_upload_private_data:
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(
-                os.path.abspath(self.dir+'/automation_strategies_map.json'),
+                os.path.abspath(self.dir+'automation_strategies_map.json'),
                 s3_folder + 'automation_strategies_map.json',
                 message.aws_id,
                 message.aws_key,
@@ -168,7 +176,7 @@ class OMOPofication(WorkflowBase):
             if full_dump is not None and self.may_upload_private_data:
                 self.pipeline_executor.adapter.upload_local_file_to_s3(
                     os.path.abspath(full_dump),
-                    s3_folder + full_dump.replace('var/', ''),
+                    s3_folder + full_dump.replace(self.get_base_dir(), ''),
                     message.aws_id,
                     message.aws_key,
                     False
@@ -197,7 +205,7 @@ class OMOPofication(WorkflowBase):
             return None
         api_logger.write(message.id, "Start running DQD, SQLite filename {}".format(exporter.file_name))
         dqd = DqdOmop54()
-        sqlite = exporter.file_name.replace("var/", "")
+        sqlite = exporter.file_name.replace(self.get_base_dir(), "")
         try:
             data = dqd.generate_results_json(sqlite, message.id)
 
