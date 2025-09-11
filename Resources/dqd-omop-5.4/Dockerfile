@@ -37,8 +37,9 @@ RUN export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/; echo 
 RUN echo 'if (!require("DbDiagnostics")){remotes::install_github("OHDSI/DbDiagnostics")}' | r
 RUN echo 'if (!require("OHDSI/DatabaseConnector")){remotes::install_github("OHDSI/DatabaseConnector")}' | r
 RUN echo 'if (!require("DT")){install.packages("DT")}' | r
-#COPY qc-lib.r /app/
-#RUN export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/; r /app/qc-lib.r
+COPY qc.r /app/
+COPY server.py /app/
+RUN #export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/; r /app/qc-lib.r
 
 
 RUN apt-get install -y python3
