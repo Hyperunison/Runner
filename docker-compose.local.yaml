@@ -10,25 +10,7 @@ services:
       UNISON_API_TOKEN: ${UNISON_API_TOKEN}
       UNISON_DSN: ${UNISON_DSN}
     volumes:
-      - ./:/app:delegated
-      - ./Resources/.kube/:/root/.kube
-      - ./Resources/.aws:/root/.aws
-      - ./Resources/gcloud/:/root/.config/gcloud
-
-  filebeat:
-    container_name: ${CONTAINER_NAME:-unison-agent}-filebeat
-    image: elastic/filebeat:8.10.3
-    entrypoint: filebeat -e -strict.perms=false
-    user: root
-    environment:
-      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
-      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
-      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST}
-      WORKER_NAME: ${CONTAINER_NAME}
-    volumes:
-      - ./Resources/docker/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./var:/app/var:delegated
 
   dqd-omop-5.4:
     container_name: ${CONTAINER_NAME:-unison-agent}-dqd-omop-5.4
@@ -36,4 +18,3 @@ services:
     ports: [8080]
     volumes:
       - ./var:/data:delegated
-      - ./Resources/dqd-omop-5.4/:/app
