@@ -58,7 +58,7 @@ with open(field_map_path) as json_data:
     fields_map = json.load(json_data)
 
 config = ConfigurationLoader("config.yaml").get_config()
-allow_private_upload_data_to_unison = config['allow_private_upload_data_to_unison'] == 1
+allow_private_upload_data_to_unison = str(config['allow_private_upload_data_to_unison']) == '1'
 manager = ConsoleApplicationManager()
 configuration = manager.initialize(config)
 

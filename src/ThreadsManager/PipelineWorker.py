@@ -36,7 +36,7 @@ class PipelineWorker:
         with ApiClient(self.configuration) as api_client:
             runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
             api_instance = agent_api.AgentApi(api_client)
-            api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
+            api = Api(api_instance, self.config['api_version'], self.config['agent_token'], self.config['api_request_cookie'])
             pipeline_executor = create_by_config(api, self.config, runner_instance_id)
             schema = DataSchema(self.config['phenotypic_db']['dsn'], self.config['phenotypic_db']['min_count'])
             vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)

@@ -39,8 +39,10 @@ class Api:
     version: str = None
     token: str = None
 
-    def __init__(self, api_instance: AgentApi, version: str, token: str):
+    def __init__(self, api_instance: AgentApi, version: str, token: str, api_request_cookie: str):
         self.api_instance = api_instance
+        # Add cookie foo=bar to all API calls
+        self.api_instance.api_client.cookie = api_request_cookie
         self.version = str(version)
         self.token = str(token)
 

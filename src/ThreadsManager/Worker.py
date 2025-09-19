@@ -73,7 +73,7 @@ class Worker(multiprocessing.Process):
 
     def run(self):
         try:
-            allow_private_upload_data_to_unison = self.config['allow_private_upload_data_to_unison'] == 1
+            allow_private_upload_data_to_unison = str(self.config['allow_private_upload_data_to_unison']) == "1"
 
             if self.on_start is not None:
                 self.on_start(self)
@@ -83,7 +83,7 @@ class Worker(multiprocessing.Process):
             with ApiClient(self.configuration) as api_client:
                 runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
                 api_instance = agent_api.AgentApi(api_client)
-                api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
+                api = Api(api_instance, self.config['api_version'], self.config['agent_token'], self.config['api_request_cookie'])
                 pipeline_executor = create_by_config(
                     api,
                     self.config,
