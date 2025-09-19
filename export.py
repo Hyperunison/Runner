@@ -83,7 +83,7 @@ with open('var/automation_strategies_map.json') as json_data:
 
 ucdm_mapping_resolver = UCDMMappingResolver(rows)
 ucdm_resolver = UCDMResolver(schema, ucdm_mapping_resolver)
-result = ucdm_resolver.get_ucdm_result(sql_query, str_to_int, fields_map, automation_strategies_map)
+result = ucdm_resolver.get_ucdm_result(sql_query, str_to_int, fields_map, automation_strategies_map).lines
 
 if result is None:
     print('Invalid UCDM result!')

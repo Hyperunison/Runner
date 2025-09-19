@@ -2,6 +2,7 @@ from typing import List, Dict, Tuple
 import logging
 from sqlalchemy.exc import ProgrammingError
 
+from src.Service.DTO.UCDMResult import UCDMResult
 from src.UCDM.DataSchema import DataSchema
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
@@ -26,14 +27,17 @@ class UCDMResolver:
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]],
-    ) -> List[Dict[str, UCDMConvertedField]]:
+    ) -> UCDMResult:
         try:
             mapping_index = self.build_mapping_index()
             result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
-            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map, automation_strategies_map)
+            ucdm_result_lines = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map, automation_strategies_map)
 
-            return ucdm_result
+            result = UCDMResult()
+            result.lines = ucdm_result_lines
+
+            return result
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
 

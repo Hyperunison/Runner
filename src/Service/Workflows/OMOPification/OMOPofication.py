@@ -125,12 +125,13 @@ class OMOPofication(WorkflowBase):
                 )
                 self.mapping_resolver = UCDMMappingResolver(csv_mapping)
                 self.resolver = UCDMResolver(self.schema, self.mapping_resolver)
-                ucdm = self.resolver.get_ucdm_result(
+                ucdm_result = self.resolver.get_ucdm_result(
                     sql_final,
                     str_to_int,
                     fields_map,
                     automation_strategies_map
                 )
+                ucdm = ucdm_result.lines
                 self.save_sql_query(table_name, sql_final, s3_folder, message, api_logger)
                 if ucdm is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
