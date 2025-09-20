@@ -36,10 +36,23 @@ class UCDMResolver:
 
             result = UCDMResult()
             result.lines = ucdm_result_lines
+            result.traceability = self.extract_traceability_lines(ucdm_result_lines)
 
             return result
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
+
+    def extract_traceability_lines(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, str]]:
+        result: List[Dict[str, str]] = []
+
+        for ucdm_line in ucdm_lines:
+            if not self.does_line_have_traceability(ucdm_line):
+                continue
+
+        return result
+
+    def does_line_have_traceability(self, ucdm_line: Dict[str, UCDMConvertedField]) -> bool:
+        return False
 
     def normalize(self, input_list: List[Dict[str, any]]) -> List[Dict[str, str]]:
         result: List[Dict[str, str]] = []
