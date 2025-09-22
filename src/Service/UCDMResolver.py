@@ -14,6 +14,7 @@ def log_error(name_origin, field, value):
     logging.warning("Value '{value}' is unmapped in the field '{name_origin}'".format(name_origin=name_origin, field=field, value=value))
 
 class UCDMResolver:
+    traceability_field_prefix: str = "c.__unison_audit__"
     schema: DataSchema
     ucdm_mapping_resolver: UCDMMappingResolver
 
@@ -49,7 +50,7 @@ class UCDMResolver:
             result_item: Dict[str, UCDMConvertedField] = {}
 
             for key in ucdm_line.keys():
-                if key.startswith("c.__unison_audit__"):
+                if key.startswith(self.traceability_field_prefix):
                     continue
 
                 result_item[key] = ucdm_line[key]
@@ -58,8 +59,8 @@ class UCDMResolver:
 
         return result
 
-    def extract_traceability_lines(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, str]]:
-        result: List[Dict[str, str]] = []
+    def extract_traceability_lines(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, UCDMConvertedField]]:
+        result: List[Dict[str, UCDMConvertedField]] = []
 
         for ucdm_line in ucdm_lines:
             if not self.does_line_have_traceability(ucdm_line):
@@ -71,22 +72,28 @@ class UCDMResolver:
 
     def does_line_have_traceability(self, ucdm_line: Dict[str, UCDMConvertedField]) -> bool:
         for key in ucdm_line.keys():
-            if key.startswith("c.__unison_audit__"):
+            if self.is_traceability_field(key):
                 return True
 
         return False
 
-    def get_traceability_from_line(self, ucdm_line: Dict[str, UCDMConvertedField]) -> Dict[str, str]:
-        result: Dict[str, str] = {}
+    def get_traceability_from_line(self, ucdm_line: Dict[str, UCDMConvertedField]) -> Dict[str, UCDMConvertedField]:
+        result: Dict[str, UCDMConvertedField] = {}
 
         for key in ucdm_line.keys():
-            if not key.startswith("c.__unison_audit__"):
+            if not self.is_traceability_field(key):
                 continue
 
-            result_key = key.replace("c.__unison_audit__", "")
-            result[result_key] = ucdm_line[key].export_value
+            result_key = key.replace(self.traceability_field_prefix, "")
+            result[result_key] = ucdm_line[key]
 
         return result
+
+    def is_traceability_field(self, name: str) -> bool:
+        return name.startswith(self.traceability_field_prefix)
+
+    def get_traceability_table_name(self, table_name: str) -> str:
+        return "unison__audit__" + table_name
 
     def normalize(self, input_list: List[Dict[str, any]]) -> List[Dict[str, str]]:
         result: List[Dict[str, str]] = []

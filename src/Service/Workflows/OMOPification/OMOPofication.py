@@ -8,6 +8,7 @@ import yaml
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.DqdOmop54 import DqdOmop54
+from src.Service.UCDMConvertedField import UCDMConvertedField
 from src.Service.Workflows import PipelineExecutor
 from src.Service.Workflows.OMOPification import BaseDatabaseExporter
 from src.Service.Workflows.OMOPification.ExporterFactory import exporter_factory
@@ -140,6 +141,18 @@ class OMOPofication(WorkflowBase):
                 api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:
+                    if len(ucdm_result.traceability) > 0:
+                        self.save_traceability(
+                            traceability_lines=ucdm_result.traceability,
+                            exporter=exporter,
+                            table_name=self.resolver.get_traceability_table_name(table_name),
+                            fields_map=fields_map,
+                            columns=self.get_columns(
+                                table_name=self.resolver.get_traceability_table_name(table_name),
+                                tables=message.all_tables
+                            )
+                        )
+
                     skip_rows = exporter.export(
                         table_name=table_name,
                         ucdm=ucdm,
@@ -199,6 +212,32 @@ class OMOPofication(WorkflowBase):
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
         api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
+
+    def save_traceability(
+            self,
+            traceability_lines: List[Dict[str, UCDMConvertedField]],
+            exporter: BaseDatabaseExporter,
+            table_name: str,
+            fields_map: Dict[str, Dict[str, str]],
+            columns: List[Dict[str, str]]
+    ):
+        traceability_fields_map: Dict[str, Dict[str, str]] = {}
+
+        for key in fields_map.keys():
+            print(key)
+            if not self.resolver.is_traceability_field(key):
+                continue
+
+            new_key = key.replace(self.resolver.traceability_field_prefix, "")
+            traceability_fields_map[new_key] = fields_map[key]
+            traceability_fields_map[new_key]["name"] = traceability_fields_map[new_key]["name"].replace("__unison_audit__", "")
+
+        exporter.export(
+            table_name=table_name,
+            fields_map=fields_map,
+            ucdm=traceability_lines,
+            columns=columns
+        )
 
     def run_dqd_if_needed(
         self, message: StartOMOPoficationWorkflow, exporter: BaseDatabaseExporter, api_logger: ApiLogger, s3_folder: str
