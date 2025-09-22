@@ -131,11 +131,12 @@ class OMOPofication(WorkflowBase):
                     fields_map,
                     automation_strategies_map
                 )
-                ucdm = ucdm_result.lines
                 self.save_sql_query(table_name, sql_final, s3_folder, message, api_logger)
-                if ucdm is None:
+                if ucdm_result is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
+
+                ucdm = ucdm_result.lines
                 api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
 
                 if len(ucdm) > 0:

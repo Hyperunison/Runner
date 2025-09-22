@@ -49,10 +49,30 @@ class UCDMResolver:
             if not self.does_line_have_traceability(ucdm_line):
                 continue
 
+            result.append(self.get_traceability_from_line(ucdm_line))
+            print(result)
+            exit()
+
         return result
 
     def does_line_have_traceability(self, ucdm_line: Dict[str, UCDMConvertedField]) -> bool:
+        for key in ucdm_line.keys():
+            if key.startswith("__unison_audit__"):
+                return True
+
         return False
+
+    def get_traceability_from_line(self, ucdm_line: Dict[str, UCDMConvertedField]) -> Dict[str, str]:
+        result: Dict[str, str] = {}
+
+        for key in ucdm_line.keys():
+            if not key.startswith("__unison_audit__"):
+                continue
+
+            result_key = key.replace("__unison_audit__", "")
+            result[result_key] = ucdm_line[key].export_value
+
+        return result
 
     def normalize(self, input_list: List[Dict[str, any]]) -> List[Dict[str, str]]:
         result: List[Dict[str, str]] = []
