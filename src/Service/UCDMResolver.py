@@ -35,12 +35,28 @@ class UCDMResolver:
             ucdm_result_lines = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map, automation_strategies_map)
 
             result = UCDMResult()
-            result.lines = ucdm_result_lines
+            result.lines = self.remove_traceability_fields(ucdm_result_lines)
             result.traceability = self.extract_traceability_lines(ucdm_result_lines)
 
             return result
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
+
+    def remove_traceability_fields(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, UCDMConvertedField]]:
+        result: List[Dict[str, UCDMConvertedField]] = []
+
+        for ucdm_line in ucdm_lines:
+            result_item: Dict[str, UCDMConvertedField] = {}
+
+            for key in ucdm_line.keys():
+                if key.startswith("c.__unison_audit__"):
+                    continue
+
+                result_item[key] = ucdm_line[key]
+
+            result.append(result_item)
+
+        return result
 
     def extract_traceability_lines(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, str]]:
         result: List[Dict[str, str]] = []
@@ -50,14 +66,12 @@ class UCDMResolver:
                 continue
 
             result.append(self.get_traceability_from_line(ucdm_line))
-            print(result)
-            exit()
 
         return result
 
     def does_line_have_traceability(self, ucdm_line: Dict[str, UCDMConvertedField]) -> bool:
         for key in ucdm_line.keys():
-            if key.startswith("__unison_audit__"):
+            if key.startswith("c.__unison_audit__"):
                 return True
 
         return False
@@ -66,10 +80,10 @@ class UCDMResolver:
         result: Dict[str, str] = {}
 
         for key in ucdm_line.keys():
-            if not key.startswith("__unison_audit__"):
+            if not key.startswith("c.__unison_audit__"):
                 continue
 
-            result_key = key.replace("__unison_audit__", "")
+            result_key = key.replace("c.__unison_audit__", "")
             result[result_key] = ucdm_line[key].export_value
 
         return result
