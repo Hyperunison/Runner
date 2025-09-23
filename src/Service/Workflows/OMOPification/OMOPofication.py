@@ -224,7 +224,6 @@ class OMOPofication(WorkflowBase):
         traceability_fields_map: Dict[str, Dict[str, str]] = {}
 
         for key in fields_map.keys():
-            print(key)
             if not self.resolver.is_traceability_field(key):
                 continue
 
@@ -234,7 +233,7 @@ class OMOPofication(WorkflowBase):
 
         exporter.export(
             table_name=table_name,
-            fields_map=fields_map,
+            fields_map=traceability_fields_map,
             ucdm=traceability_lines,
             columns=columns
         )
