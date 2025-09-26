@@ -87,6 +87,9 @@ class SqlBuilder:
                 if column['type'] == 'integer' and not column['required'] and value == '':
                     return 'null'
                 if column['type'] == 'jsonb':
+                    if not column['required'] and value == '':
+                        return 'null'
+
                     return "'" + self.add_slashes(value.replace("'", "\"")) + "'"
 
         return "'" + self.add_slashes(value) + "'"
