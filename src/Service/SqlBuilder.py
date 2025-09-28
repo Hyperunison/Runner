@@ -1,4 +1,5 @@
 from typing import List, Dict
+import re
 
 class SqlBuilder:
 
@@ -90,6 +91,19 @@ class SqlBuilder:
                     if not column['required'] and value == '':
                         return 'null'
 
-                    return "'" + self.add_slashes(value.replace("'", "\"")) + "'"
+                    value = self.add_slashes_for_json_fields(value)
+
+                    return "'" + value + "'"
 
         return "'" + self.add_slashes(value) + "'"
+
+    def add_slashes_for_json_fields(self, value: str) -> str:
+        value = value.replace("'", '"')
+
+        def escape_inner_quotes(match):
+            key = match.group(1)
+            val = match.group(2)
+            val_fixed = val.replace('"', r'\"')
+            return f'{key}"{val_fixed}"'
+
+        return re.sub(r'(".*?":\s*)"(.*?)"', escape_inner_quotes, value)
