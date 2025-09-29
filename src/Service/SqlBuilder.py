@@ -99,6 +99,7 @@ class SqlBuilder:
 
     def add_slashes_for_json_fields(self, value: str) -> str:
         value = value.replace("'", '"')
+        value = value.replace(": None", ': null')
 
         def escape_inner_quotes(match):
             key = match.group(1)
