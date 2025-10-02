@@ -102,6 +102,8 @@ class UCDMResolver:
             for k, v in row.items():
                 if isinstance(v, bool):
                     value = str(int(v))
+                elif isinstance(v, dict):
+                    value = v
                 else:
                     value = str(v) if v is not None else ''
                 row_result[k] = value
@@ -119,6 +121,7 @@ class UCDMResolver:
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
+        print(result[0])
         if len(result) == 0:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
@@ -235,6 +238,10 @@ class UCDMResolver:
             for field, val in row_converted.items():
                 export_value: str = val[0] if val[0] is not None else ''
                 mapping_strategy = val[1]
+
+                if self.is_traceability_field(field):
+                    result_row[field] = UCDMConvertedField(row[field])
+                    continue
 
                 if mapping_strategy == 'convertStringToInt':
                     export_value = str(str_to_int.get_int(export_value))
