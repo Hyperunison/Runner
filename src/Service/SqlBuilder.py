@@ -1,4 +1,6 @@
 from typing import List, Dict
+import re
+import json
 
 class SqlBuilder:
 
@@ -86,5 +88,10 @@ class SqlBuilder:
                     return 'null'
                 if column['type'] == 'integer' and not column['required'] and value == '':
                     return 'null'
+                if column['type'] == 'jsonb':
+                    if not column['required'] and value == '':
+                        return 'null'
+
+                    return "'" + json.dumps(value) + "'"
 
         return "'" + self.add_slashes(value) + "'"

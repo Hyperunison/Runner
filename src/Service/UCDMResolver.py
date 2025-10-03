@@ -2,6 +2,7 @@ from typing import List, Dict, Tuple
 import logging
 from sqlalchemy.exc import ProgrammingError
 
+from src.Service.DTO.UCDMResult import UCDMResult
 from src.UCDM.DataSchema import DataSchema
 from src.Service.Workflows.SerialGenerator import SerialGenerator
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
@@ -13,6 +14,7 @@ def log_error(name_origin, field, value):
     logging.warning("Value '{value}' is unmapped in the field '{name_origin}'".format(name_origin=name_origin, field=field, value=value))
 
 class UCDMResolver:
+    traceability_field_prefix: str = "c.__unison_audit__"
     schema: DataSchema
     ucdm_mapping_resolver: UCDMMappingResolver
 
@@ -26,16 +28,72 @@ class UCDMResolver:
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]],
-    ) -> List[Dict[str, UCDMConvertedField]]:
+    ) -> UCDMResult:
         try:
             mapping_index = self.build_mapping_index()
             result = self.schema.fetch_all(sql_final)
             result = self.normalize(result)
-            ucdm_result = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map, automation_strategies_map)
+            ucdm_result_lines = self.convert_to_ucdm(result, mapping_index, str_to_int, fields_map, automation_strategies_map)
 
-            return ucdm_result
+            result = UCDMResult()
+            result.lines = self.remove_traceability_fields(ucdm_result_lines)
+            result.traceability = self.extract_traceability_lines(ucdm_result_lines)
+
+            return result
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
+
+    def remove_traceability_fields(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, UCDMConvertedField]]:
+        result: List[Dict[str, UCDMConvertedField]] = []
+
+        for ucdm_line in ucdm_lines:
+            result_item: Dict[str, UCDMConvertedField] = {}
+
+            for key in ucdm_line.keys():
+                if key.startswith(self.traceability_field_prefix):
+                    continue
+
+                result_item[key] = ucdm_line[key]
+
+            result.append(result_item)
+
+        return result
+
+    def extract_traceability_lines(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, UCDMConvertedField]]:
+        result: List[Dict[str, UCDMConvertedField]] = []
+
+        for ucdm_line in ucdm_lines:
+            if not self.does_line_have_traceability(ucdm_line):
+                continue
+
+            result.append(self.get_traceability_from_line(ucdm_line))
+
+        return result
+
+    def does_line_have_traceability(self, ucdm_line: Dict[str, UCDMConvertedField]) -> bool:
+        for key in ucdm_line.keys():
+            if self.is_traceability_field(key):
+                return True
+
+        return False
+
+    def get_traceability_from_line(self, ucdm_line: Dict[str, UCDMConvertedField]) -> Dict[str, UCDMConvertedField]:
+        result: Dict[str, UCDMConvertedField] = {}
+
+        for key in ucdm_line.keys():
+            if not self.is_traceability_field(key):
+                continue
+
+            result_key = key.replace(self.traceability_field_prefix, "")
+            result[result_key] = ucdm_line[key]
+
+        return result
+
+    def is_traceability_field(self, name: str) -> bool:
+        return name.startswith(self.traceability_field_prefix)
+
+    def get_traceability_table_name(self, table_name: str) -> str:
+        return "unison__audit__" + table_name
 
     def normalize(self, input_list: List[Dict[str, any]]) -> List[Dict[str, str]]:
         result: List[Dict[str, str]] = []
@@ -44,6 +102,8 @@ class UCDMResolver:
             for k, v in row.items():
                 if isinstance(v, bool):
                     value = str(int(v))
+                elif isinstance(v, dict):
+                    value = v
                 else:
                     value = str(v) if v is not None else ''
                 row_result[k] = value
@@ -61,6 +121,7 @@ class UCDMResolver:
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]],
     ) -> List[Dict[str, UCDMConvertedField]]:
+        print(result[0])
         if len(result) == 0:
             return []
         output: List[Dict[str, UCDMConvertedField]] = []
@@ -177,6 +238,10 @@ class UCDMResolver:
             for field, val in row_converted.items():
                 export_value: str = val[0] if val[0] is not None else ''
                 mapping_strategy = val[1]
+
+                if self.is_traceability_field(field):
+                    result_row[field] = UCDMConvertedField(row[field])
+                    continue
 
                 if mapping_strategy == 'convertStringToInt':
                     export_value = str(str_to_int.get_int(export_value))

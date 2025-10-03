@@ -10,6 +10,7 @@ from src.UCDM.DataSchema import DataSchema
 class PostgresqlExporter(BaseDatabaseExporter):
     connection_string: str
     data_schema: DataSchema
+    insert_chunk_size: int
 
     def __init__(self, connection_string: str):
         super().__init__()
@@ -18,6 +19,7 @@ class PostgresqlExporter(BaseDatabaseExporter):
             dsn=connection_string,
             min_count=0
         )
+        self.insert_chunk_size = 100
 
     def insert_rows(
             self,
@@ -27,12 +29,20 @@ class PostgresqlExporter(BaseDatabaseExporter):
             columns: List[Dict[str, str]]
     ):
         database_rows = self.transform_rows_by_fields_map(rows, fields_map)
-        sql = self.sql_builder.build_insert(
-            table_name=table_name,
-            rows=database_rows,
-            columns=columns
-        )
-        self.data_schema.execute_sql(sql)
+        chunks = [database_rows[i:i + self.insert_chunk_size] for i in range(0, len(database_rows), self.insert_chunk_size)]
+
+        for index, chunk in enumerate(chunks):
+            sql = self.sql_builder.build_insert(
+                table_name=table_name,
+                rows=chunk,
+                columns=columns
+            )
+            try:
+                self.data_schema.execute_sql(sql)
+            except Exception as e:
+                with open("var/error-" + table_name + "-" + str(index)  + ".sql", "w") as f:
+                    f.write(sql)
+
 
     def get_field_names(
             self,
