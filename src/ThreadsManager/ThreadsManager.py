@@ -43,7 +43,7 @@ class ThreadsManager:
     def get_agent_id(self):
         with ApiClient(self.configuration) as api_client:
             api_instance = agent_api.AgentApi(api_client)
-            api = Api(api_instance, self.config['api_version'], self.config['agent_token'])
+            api = Api(api_instance, self.config['api_version'], self.config['agent_token'], self.config['api_request_cookie'])
 
             try:
                 return api.get_agent_id()

@@ -35,7 +35,7 @@ if __name__ == '__main__':
     with ApiClient(configuration) as api_client:
         runner_instance_id = socket.gethostname() + "-" + str(os.getpid())
         api_instance = agent_api.AgentApi(api_client)
-        api = Api(api_instance, config['api_version'], config['agent_token'])
+        api = Api(api_instance, config['api_version'], config['agent_token'], config['api_request_cookie'])
 
         while True:
             threads_manager.update_workers_status()

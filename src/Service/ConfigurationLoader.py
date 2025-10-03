@@ -52,6 +52,11 @@ class ConfigurationLoader:
 
     def __init__(self, filename: str):
         self.config = load_yaml_with_custom_vars(filename)
+
+        # default values
+        if not 'api_request_cookie' in self.config:
+            self.config['api_request_cookie'] = ''
+
         pass
 
     def get_config(self):
