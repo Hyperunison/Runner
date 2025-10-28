@@ -350,6 +350,10 @@ class OMOPofication(WorkflowBase):
             logging.error("Can't download file {} from url {}".format(filename, url))
 
     def download_server_data(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
+        if not isinstance(message.server_data_links, dict):
+            logging.info("server_data_links is not dictionary: {}")
+            return
+
         for filename, url in message.server_data_links.items():
             self.download(url, 'var/' + filename)
 
