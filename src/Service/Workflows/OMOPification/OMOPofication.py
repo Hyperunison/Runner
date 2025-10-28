@@ -22,6 +22,7 @@ from src.Service.UCDMResolver import UCDMResolver
 from src.UCDM.DataSchema import DataSchema
 from src.Service.ApiLogger import ApiLogger
 from src.Service.Workflows.StrToIntGenerator import StrToIntGenerator
+import requests
 
 class OMOPofication(WorkflowBase):
     resolver: UCDMResolver
@@ -333,25 +334,28 @@ class OMOPofication(WorkflowBase):
             if table['tableName'] == table_name:
                 return table['columns']
 
+    def download(self, url: str, filename: str):
+        try:
+            if url.startswith('/'):
+                url = self.api.api_instance.api_client.configuration.host + url;
+            url = url.format(token=self.api.token)
+            logging.info(" === Downloading server file {} from {}".format(filename, url))
+            with requests.get(url, stream=True) as response:
+                response.raise_for_status()
+                with open(filename, "wb") as file:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            file.write(chunk)
+        except requests.exceptions.RequestException as e:
+            logging.error("Can't download file {} from url {}".format(filename, url))
+
     def download_server_data(self, s3_folder: str, message: StartOMOPoficationWorkflow, api_logger: ApiLogger):
-        if message.does_server_data_omop_concept_exist():
-            self.download_cdm_concept(str(int(message.cdm_id)))
+        for filename, url in message.server_data_links.items():
+            self.download(url, 'var/' + filename)
 
             if self.may_upload_private_data:
-                s3_path = s3_folder + 'concept.csv'
+                s3_path = s3_folder + filename
 
-                if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.cdm_concept_file_name, s3_path,
+                if not self.pipeline_executor.adapter.upload_local_file_to_s3('var/' + filename, s3_path,
                                                                               message.aws_id, message.aws_key, False):
-                    api_logger.write(message.id, "Can't upload concept.csv file to S3")
-                    return
-
-        if message.does_server_data_omop_vocabularies_exist():
-            self.download_cdm_vocabulary(str(int(message.cdm_id)))
-
-            if self.may_upload_private_data:
-                s3_path = s3_folder + 'vocabulary.csv'
-
-                if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.cdm_vocabulary_file_name, s3_path,
-                                                                              message.aws_id, message.aws_key, False):
-                    api_logger.write(message.id, "Can't upload vocabulary.csv file to S3")
-                    return
+                    api_logger.write(message.id, "Can't upload {} file to S3".format(filename))

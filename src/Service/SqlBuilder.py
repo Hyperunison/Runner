@@ -1,3 +1,4 @@
+import json
 from typing import List, Dict
 import re
 import json
@@ -92,6 +93,6 @@ class SqlBuilder:
                     if not column['required'] and value == '':
                         return 'null'
 
-                    return "'" + json.dumps(value) + "'"
+                return "'" + self.add_slashes(json.dumps(value)) + "'"
 
         return "'" + self.add_slashes(value) + "'"

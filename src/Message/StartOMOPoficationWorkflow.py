@@ -16,7 +16,7 @@ class StartOMOPoficationWorkflow(BaseMessage):
     all_tables: List[Dict[str, any]]
     automation_strategies_map: Dict[str, Dict[str, str]]
     run_dqd: str
-    server_data_links: List[str]
+    server_data_links: Dict[str, str]
     cdm_id: int
 
     def __init__(self, message: RunnerMessage):
