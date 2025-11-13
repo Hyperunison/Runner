@@ -166,7 +166,7 @@ class OMOPofication(WorkflowBase):
                     filename = exporter.write_single_table_dump(table_name)
                     if self.may_upload_private_data and filename is not None:
                         if filename is not None:
-                            s3_path = s3_folder + re.sub('^.*/', '', table_name)
+                            s3_path = s3_folder + re.sub('^.*/', '', filename)
                             if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id,
                                                                                           message.aws_key, False):
                                 api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
