@@ -23,6 +23,8 @@ RUN unzip awscliv2.zip
 RUN sudo ./aws/install
 RUN rm -rf awscliv2.zip aws
 
+RUN pip install "xport==3.6.1"
+RUN pip install "numpy==1.26.4"
 RUN pip install "pip==23.3"
 RUN pip install "click==8.1.3"
 RUN pip install "certifi>=2024.7.4"
@@ -54,6 +56,7 @@ RUN pip install "psutil==7.0.0"
 RUN wget https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.14/aws-iam-authenticator_0.6.14_linux_amd64 -O /bin/aws-iam-authenticator
 RUN chmod +x /bin/aws-iam-authenticator
 
+RUN apt-get update
 # Install docker
 RUN apt-get --yes install ca-certificates curl
 RUN install -m 0755 -d /etc/apt/keyrings

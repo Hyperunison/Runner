@@ -17,7 +17,7 @@ class CSVExporter(BaseDatabaseExporter):
             ucdm: List[Dict[str, UCDMConvertedField]],
             fields_map: Dict[str, Dict[str, str]],
             columns: List[Dict[str, str]]
-    ) -> List[str]:
+    ) -> Dict[str, int]:
         csv_writter = CsvWritter()
 
         skipped_rows = csv_writter.build(self.get_export_table_filename(table_name), ucdm, fields_map)

@@ -91,10 +91,6 @@ class OMOPofication(WorkflowBase):
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
 
-        if message.format == 'sqlite':
-            exporter = SQLiteExporter()
-            exporter.remove_database_file()
-
         try:
             exporter = exporter_factory(
                 message,
@@ -212,7 +208,7 @@ class OMOPofication(WorkflowBase):
             api_logger.write(message.id, "ERROR: Can't finish export, sending error {}".format(','.join(e.args)))
             self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
             raise e
-        api_logger.write(message.id, "Writing OMOP CSV files finished successfully")
+        api_logger.write(message.id, "Writing files finished successfully")
 
     def save_traceability(
             self,
@@ -333,6 +329,8 @@ class OMOPofication(WorkflowBase):
         for table in tables:
             if table['tableName'] == table_name:
                 return table['columns']
+
+        return []
 
     def download(self, url: str, filename: str):
         try:

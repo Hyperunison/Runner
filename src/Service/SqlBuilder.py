@@ -92,7 +92,6 @@ class SqlBuilder:
                 if column['type'] == 'jsonb':
                     if not column['required'] and value == '':
                         return 'null'
-
-                return "'" + self.add_slashes(json.dumps(value)) + "'"
+                    return "'" + self.add_slashes(json.dumps(value)) + "'"
 
         return "'" + self.add_slashes(value) + "'"

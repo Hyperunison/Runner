@@ -22,11 +22,11 @@ class PostgresqlExporter(BaseDatabaseExporter):
         self.insert_chunk_size = 100
 
     def insert_rows(
-            self,
-            table_name: str,
-            rows: List[Dict[str, str]],
-            fields_map: Dict[str, Dict[str, str]],
-            columns: List[Dict[str, str]]
+        self,
+        table_name: str,
+        rows: List[Dict[str, str]],
+        fields_map: Dict[str, Dict[str, str]],
+        columns: List[Dict[str, str]]
     ):
         database_rows = self.transform_rows_by_fields_map(rows, fields_map)
         chunks = [database_rows[i:i + self.insert_chunk_size] for i in range(0, len(database_rows), self.insert_chunk_size)]

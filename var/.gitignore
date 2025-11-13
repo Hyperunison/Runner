@@ -12,3 +12,5 @@ qc-*.log
 pipeline_*
 nextflow
 last_ucdm.yaml
+*.xpt
+

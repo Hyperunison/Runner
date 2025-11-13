@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from src.Message import StartOMOPoficationWorkflow
@@ -5,6 +6,7 @@ from src.Service.Workflows.OMOPification import BaseDatabaseExporter
 from src.Service.Workflows.OMOPification.CSVExporter import CSVExporter
 from src.Service.Workflows.OMOPification.PostgresqlExporter import PostgresqlExporter
 from src.Service.Workflows.OMOPification.SQLiteExporter import SQLiteExporter
+from src.Service.Workflows.OMOPification.XPTExporter import XPTExporter
 
 
 def exporter_factory(
@@ -12,6 +14,7 @@ def exporter_factory(
         concept_path: Optional[str] = None,
         vocabulary_path: Optional[str] = None
 ) -> BaseDatabaseExporter:
+    logging.info("Exporter type: {}".format(message.format))
     if message.format == 'postgresql':
         exporter = PostgresqlExporter(
             connection_string=message.connection_string
@@ -33,6 +36,9 @@ def exporter_factory(
             concept_path,
             vocabulary_path
         )
+
+    if message.format == 'xpt':
+        return XPTExporter()
 
     return CSVExporter()
 
