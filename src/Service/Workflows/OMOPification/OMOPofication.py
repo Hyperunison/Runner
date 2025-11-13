@@ -67,7 +67,7 @@ class OMOPofication(WorkflowBase):
         if self.may_upload_private_data:
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(
                 os.path.abspath(self.dir+'automation_strategies_map.json'),
-                s3_folder + 'automation_strategies_map.json',
+                s3_folder + 'docs/automation_strategies_map.json',
                 message.aws_id,
                 message.aws_key,
                 False
@@ -76,7 +76,7 @@ class OMOPofication(WorkflowBase):
 
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(
                     os.path.abspath(self.mapping_file_name),
-                    s3_folder + 'mapping-values.csv',
+                    s3_folder + 'docs/mapping-values.csv',
                     message.aws_id,
                     message.aws_key,
                     False
@@ -129,7 +129,7 @@ class OMOPofication(WorkflowBase):
                     fields_map,
                     automation_strategies_map
                 )
-                self.save_sql_query(table_name, sql_final, s3_folder, message, api_logger)
+                self.save_sql_query(table_name, sql_final, s3_folder+'sql/', message, api_logger)
                 if ucdm_result is None:
                     api_logger.write(message.id, "Can't export {}".format(table_name))
                     continue
@@ -166,7 +166,7 @@ class OMOPofication(WorkflowBase):
                     filename = exporter.write_single_table_dump(table_name)
                     if self.may_upload_private_data and filename is not None:
                         if filename is not None:
-                            s3_path = s3_folder + table_name + '.csv'
+                            s3_path = s3_folder + re.sub('^.*/', '', table_name)
                             if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id,
                                                                                           message.aws_key, False):
                                 api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
@@ -177,7 +177,7 @@ class OMOPofication(WorkflowBase):
 
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(
                 os.path.abspath(str_filename),
-                s3_folder + 'str-to-int.csv',
+                s3_folder + 'docs/str-to-int.csv',
                 message.aws_id,
                 message.aws_key,
                 False
@@ -283,7 +283,7 @@ class OMOPofication(WorkflowBase):
                 file.write(chunk)
 
         if self.may_upload_private_data:
-            s3_path = s3_folder + 'manual.pdf'
+            s3_path = s3_folder + 'docs/manual.pdf'
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.manual_file_name, s3_path, message.aws_id, message.aws_key, False):
                 api_logger.write(message.id, "Can't upload manual.pdf file to S3")
                 return
@@ -298,7 +298,7 @@ class OMOPofication(WorkflowBase):
                 file.write(chunk)
 
         if self.may_upload_private_data:
-            s3_path = s3_folder + 'manual.csv'
+            s3_path = s3_folder + 'docs/manual.csv'
             if not self.pipeline_executor.adapter.upload_local_file_to_s3(self.manual_csv_file_name, s3_path, message.aws_id, message.aws_key, False):
                 api_logger.write(message.id, "Can't upload manual.csv file to S3")
                 return
