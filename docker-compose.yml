@@ -40,3 +40,13 @@ services:
     volumes:
       - ./var:/data:delegated
       - ./Resources/dqd-omop-5.4/:/app
+  dqd-sdtmig-3.4:
+    container_name: ${CONTAINER_NAME:-unison-agent}-dqd-sdtmig-3.4
+    image: entsupml/unison-runner-dqd-sdtmig-3.4:0.13
+#    build:
+#      context: Resources/dqd-sdtmig-3.4
+#      dockerfile: Dockerfile
+    ports: [8081]
+    volumes:
+      - ./var:/app/var:delegated
+      - ./Resources/dqd-sdtmig-3.4/:/server

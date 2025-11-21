@@ -1,3 +1,6 @@
+import logging
+import shlex
+import subprocess
 from typing import List, Dict, Optional
 import xport
 import xport.v56
@@ -10,6 +13,15 @@ class XPTExporter(BaseDatabaseExporter):
 
     def __init__(self):
         super().__init__()
+
+    def create_all_tables(self, tables: List[Dict[str, any]]):
+        logging.info("Removing all XPT files from previous exports")
+        cmd = "rm -rf " + self.dir + "*.xpt"
+        logging.info(cmd)
+        args = shlex.split(cmd)
+        p = subprocess.run(args, capture_output=True)
+        logs = str(p.stdout.decode('utf-8'))
+        logging.info(logs)
 
     def insert_rows(
         self,

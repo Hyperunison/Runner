@@ -6,6 +6,9 @@ var/tmp
 var/pgsql
 var/database.sqlite
 var/database.bin
+var/*.xpt
+var/*.xlsx
+var/*.csv
 .env
 .run
 nextflow.config
