@@ -38,4 +38,7 @@ RUN chmod +x /app/dist/output/core-ubuntu-22.04/core/core && \
     file /app/dist/output/core-ubuntu-22.04/core/core && \
     echo "Executable built successfully"
 
+RUN mkdir /server
+COPY . /server/
+
 ENTRYPOINT while true; do python3 /server/server.py; sleep 3; done
