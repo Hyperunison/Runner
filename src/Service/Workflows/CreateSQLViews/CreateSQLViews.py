@@ -177,9 +177,6 @@ class CreateSQLViews(WorkflowBase):
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
         for s, v in str_to_int.map.items():
-            if s == '':
-                # Skip not mapped values
-                continue
             schema.execute_sql("SELECT get_or_create_number('{}')".format(escape_string(s)))
 
         logging.debug('Data is imported to the __str_to_int')
@@ -198,6 +195,10 @@ class CreateSQLViews(WorkflowBase):
             to_insert = []
             for line in reader:
                 row = dict(zip(header, line))
+                if row['exportValue'] == '':
+                    # Skip not mapped values
+                    continue
+
                 to_insert.append({
                     "bridge_id": row['unisonBridgeId'],
                     "field_name": row['fieldName'],
