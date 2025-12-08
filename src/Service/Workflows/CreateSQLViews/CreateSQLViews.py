@@ -185,6 +185,7 @@ class CreateSQLViews(WorkflowBase):
 
 
     def fill_semantic_mapping_table(self, schema: DataSchema, cdm_id: int, views_schema: str):
+        self.create_semantic_mapping_table(schema, cdm_id, views_schema)
         response = self.api.export_mapping(cdm_id)
         with open(response.name, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='"')
