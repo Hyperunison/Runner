@@ -43,7 +43,7 @@ class SQLQuery:
 
 
 def escape_string(s: str) -> str:
-    return s.replace('\\', '\\\\').replace("'", "\\'")
+    return s.replace('\\', '\\\\').replace("'", "''")
 
 
 class VariableMapper:
