@@ -151,8 +151,6 @@ class CreateSQLViews(WorkflowBase):
         sql = "CREATE INDEX IF NOT EXISTS __semantic_mapping_uniq on {schema}.__semantic_mapping (bridge_id, field_name, source_value)".format(schema=views_schema)
         schema.execute_sql(sql)
 
-        self.fill_semantic_mapping_table(self.schema, cdm_id, views_schema)
-
     def fill_str_to_int_table(self, schema: DataSchema, views_schema: str):
         sql = 'CREATE SEQUENCE IF NOT EXISTS {}.__str_to_int_seq START 1'.format(views_schema)
         schema.execute_sql(sql)
