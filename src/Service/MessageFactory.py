@@ -4,6 +4,7 @@ from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.KillJob import KillJob
 from src.Message.NextflowRun import NextflowRun
+from src.Message.StartCreateSQLViewsWorkflow import StartCreateSQLViewsWorkflow
 from src.Message.StartMLTrain import StartMLTrain
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Message.StartWorkflow import StartWorkflow
@@ -31,6 +32,8 @@ class MessageFactory:
             return StartWorkflow(message)
         elif message.type == 'StartOMOPoficationWorkflow':
             return StartOMOPoficationWorkflow(message)
+        elif message.type == 'StartCreateSQLViewsWorkflow':
+            return StartCreateSQLViewsWorkflow(message)
         elif message.type == 'UpdateTablesList':
             return UpdateTablesList(message)
         elif message.type == 'UpdateTableColumnsList':

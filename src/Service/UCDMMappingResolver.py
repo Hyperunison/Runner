@@ -25,15 +25,7 @@ class UCDMMappingResolver:
                 index[row['var_name']] = {}
             if not row['unison_bridge_id'] in index[row['var_name']]:
                 index[row['var_name']][row['unison_bridge_id']] = {}
-            if not row['biobank_value'] in index[row['var_name']][row['unison_bridge_id']]:
-                index[row['var_name']][row['unison_bridge_id']][row['biobank_value']] = []
-            index[row['var_name']][row['unison_bridge_id']][row['biobank_value']].append(
-                (
-                    row['export_value'],
-                    row['automation_strategy'],
-                    row['is_concept_id']
-                )
-            )
+            index[row['var_name']][row['unison_bridge_id']][row['biobank_value']] = row['export_value']
 
         for key, val in index.items():
             for key2, val2 in val.items():

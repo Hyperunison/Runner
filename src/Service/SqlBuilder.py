@@ -3,6 +3,19 @@ from typing import List, Dict
 import re
 import json
 
+
+def get_field_type(origin_type: str) -> str:
+    if origin_type.lower() == "datetime":
+        return "timestamp"
+
+    if origin_type.lower() == "varchar(max)":
+        return "text"
+
+    if origin_type.lower() == "integer":
+        return "bigint"
+
+    return origin_type.lower()
+
 class SqlBuilder:
 
     def build_insert(self, table_name: str, rows: List[Dict[str, str]], columns: List[Dict[str, str]]) -> str:
@@ -41,7 +54,7 @@ class SqlBuilder:
             if field['name'] in used_fields:
                 continue
 
-            field_type = self.get_field_type(field['type'])
+            field_type = get_field_type(field['type'])
             field_def = f"\"{field['name']}\" {field_type} NULL"
             field_definitions.append(field_def)
             used_fields.append(field['name'])
@@ -50,18 +63,6 @@ class SqlBuilder:
         create_statement += ");"
 
         return create_statement
-
-    def get_field_type(self, origin_type: str) -> str:
-        if origin_type.lower() == "datetime":
-            return "timestamp"
-
-        if origin_type.lower() == "varchar(max)":
-            return "text"
-
-        if origin_type.lower() == "integer":
-            return "bigint"
-
-        return origin_type.lower()
 
     def transform_rows_with_types(
             self,

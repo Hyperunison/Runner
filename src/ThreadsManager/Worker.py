@@ -8,6 +8,7 @@ import multiprocessing
 import auto_api_client
 
 from src.Message import BaseMessage
+from src.Message.StartCreateSQLViewsWorkflow import StartCreateSQLViewsWorkflow
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Workflows.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.Service.Workflows.VendorPipelines import VendorPipelines
@@ -131,6 +132,8 @@ class Worker(multiprocessing.Process):
                 elif type(message) is StartWorkflow:
                     workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
                 elif type(message) is StartOMOPoficationWorkflow:
+                    workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
+                elif type(message) is StartCreateSQLViewsWorkflow:
                     workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
                 elif message is None:
                     logging.debug("Message is empty")

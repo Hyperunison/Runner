@@ -198,15 +198,16 @@ class UCDMResolver:
                 bridge_id = None
             automation_strategy = self.get_automation_strategy(automation_strategies_map, bridge_id, field_alias)
 
+            name_origin: str = fields_map[field_alias]['name']
+            is_required = fields_map[field_alias]['isRequired']
+            is_concept = self.get_is_concept(
+                automation_strategies_map,
+                bridge_id,
+                field_alias
+            )
+
             if not field_alias in mapping_index or not bridge_id in mapping_index[field_alias] or not str(value) in mapping_index[field_alias][bridge_id]:
                 if field_alias in fields_map:
-                    name_origin: str = fields_map[field_alias]['name']
-                    is_required = fields_map[field_alias]['isRequired']
-                    is_concept = self.get_is_concept(
-                        automation_strategies_map,
-                        bridge_id,
-                        field_alias
-                    )
                     if is_concept:
                         if is_required:
                             logging.warning("Value '{value}' is unmapped in the field '{name_origin}', bridge_id={bridge_id}. Skip row, field is required".format(
@@ -224,8 +225,8 @@ class UCDMResolver:
             else:
                 values = mapping_index[field_alias][bridge_id][str(value)]
 
-                if values[0][2] == 'Yes':
-                    values = [(values[0][0], automation_strategy)]
+                if is_concept:
+                    values = [(values[0], automation_strategy)]
                 else:
                     values = [(value, automation_strategy)]
             input_matrix[field] = values

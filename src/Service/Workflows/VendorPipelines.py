@@ -30,7 +30,6 @@ class VendorPipelines:
                 for version in versions:
                     if not os.path.isdir("{}/{}/{}/{}".format(self.pipelines_dir, folder, pipeline, version)):
                         continue
-                    logging.debug("{} {} {}".format(folder, pipeline, version))
                     result.append("{}/{}:{}".format(folder, pipeline, version))
 
         return result
