@@ -178,7 +178,7 @@ class CreateSQLViews(WorkflowBase):
         logging.debug('Table __str_to_int and function get_or_create_number created, filling data from csv')
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
-        for s in str_to_int.map.items():
+        for s, v in str_to_int.map.items():
             schema.execute_sql("SELECT get_or_create_number('{}')".format(escape_string(s)))
 
         logging.debug('Data is imported to the __str_to_int')
