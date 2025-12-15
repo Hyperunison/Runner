@@ -4,7 +4,6 @@ from typing import List, Dict
 
 from src.Message.StartCreateSQLViewsWorkflow import StartCreateSQLViewsWorkflow
 from src.Service.SqlBuilder import get_field_type
-from src.Service.Workflows import PipelineExecutor
 from src.Service.Workflows.WorkflowBase import WorkflowBase
 from src.Api import Api
 from src.Message.partial.CohortDefinition import CohortDefinition
@@ -18,7 +17,7 @@ class CreateSQLViews(WorkflowBase):
     api: Api
 
     def execute(self, message: StartCreateSQLViewsWorkflow, api: Api):
-        views_schema: str = 'rosetta'
+        views_schema: str = message.schema
 
         api_logger = ApiLogger(self.api)
         length = len(message.queries.items())
@@ -176,8 +175,25 @@ class CreateSQLViews(WorkflowBase):
         logging.debug('Table __str_to_int and function get_or_create_number created, filling data from csv')
         str_to_int = StrToIntGenerator()
         str_to_int.load_from_file()
-        for s, v in str_to_int.map.items():
-            schema.execute_sql("SELECT get_or_create_number('{}')".format(escape_string(s)))
+
+        def chunks(iterable, size):
+            for i in range(0, len(iterable), size):
+                yield iterable[i:i + size]
+
+        items = list(str_to_int.map.keys())
+
+        for chunk in chunks(items, 1000):
+            values_sql = ", ".join(
+                "('{}')".format(escape_string(s))
+                for s in chunk
+            )
+
+            sql = f"""
+                SELECT get_or_create_number(v.val)
+                FROM (VALUES {values_sql}) AS v(val)
+            """
+
+            schema.execute_sql(sql)
 
         logging.debug('Data is imported to the __str_to_int')
 

@@ -8,6 +8,7 @@ class StartCreateSQLViewsWorkflow(BaseMessage):
     reply_channel: str
     id: int
     connection_string: str
+    schema: str
     all_tables: List[Dict[str, any]]
     automation_strategies_map: Dict[int, Dict[str, Dict[str, str]]]
     cdm_id: int
@@ -19,6 +20,7 @@ class StartCreateSQLViewsWorkflow(BaseMessage):
         self.queries = message.data['queries']
         self.reply_channel = message.data['replyChannel']
         self.connection_string = message.data['connectionString']
+        self.schema = message.data['schema']
         self.all_tables = message.data['allTables']
         self.automation_strategies_map = message.data['automationStrategiesMap']
         self.cdm_id = int(message.data['cdmId']) if 'cdmId' in message.data else None
