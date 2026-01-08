@@ -39,6 +39,10 @@ RUN echo 'if (!require("OHDSI/DatabaseConnector")){remotes::install_github("OHDS
 RUN echo 'if (!require("DT")){install.packages("DT")}' | r
 COPY qc.r /app/
 COPY server.py /app/
+COPY database.sqlite /app
+RUN mkdir /data
+RUN bash -c 'export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/; cd /app/; Rscript qc.r database.sqlite /data test'
+RUN rm -rf /data
 RUN #export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/; r /app/qc-lib.r
 
 
