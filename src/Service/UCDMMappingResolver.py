@@ -8,7 +8,7 @@ class UCDMMappingResolver:
     def __init__(self, mapping: List):
         self.mapping = mapping
 
-    def resolve(self) -> Dict[str, Dict[str, List[Tuple[str, str, str]]]]:
+    def resolve(self) -> Dict[str, Dict[str, Dict[str, List[Tuple[str, str, str]]]]]:
         if self.mapping is None:
             self.load_mapping_via_api()
 
@@ -25,7 +25,9 @@ class UCDMMappingResolver:
                 index[row['var_name']] = {}
             if not row['unison_bridge_id'] in index[row['var_name']]:
                 index[row['var_name']][row['unison_bridge_id']] = {}
-            index[row['var_name']][row['unison_bridge_id']][row['biobank_value']] = row['export_value']
+            if not row['biobank_value'] in index[row['var_name']][row['unison_bridge_id']]:
+                index[row['var_name']][row['unison_bridge_id']][row['biobank_value']] = []
+            index[row['var_name']][row['unison_bridge_id']][row['biobank_value']].append(row['export_value'])
 
         for key, val in index.items():
             for key2, val2 in val.items():
