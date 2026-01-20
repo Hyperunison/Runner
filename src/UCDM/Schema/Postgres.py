@@ -61,7 +61,7 @@ class Postgres(Database):
 
         if row:
             for col in row:
-                sql_column_info = "WITH {} AS ({}) SELECT pg_typeof({}) AS pg_typeof, {} FROM {}".format(
+                sql_column_info = "WITH {} AS ({}) SELECT pg_typeof({}) AS pg_typeof, {} FROM {} LIMIT 1".format(
                     table_name, cte, col, col, table_name
                 )
                 type_row = self.fetch_row(sql_column_info)
