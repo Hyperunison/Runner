@@ -41,12 +41,12 @@ class StartOMOPoficationWorkflow(BaseMessage):
         if self.server_data_links is None:
             return False
 
-        return 'omop-concept' in self.server_data_links
+        return 'concept.csv' in self.server_data_links
 
     def does_server_data_omop_vocabularies_exist(self) -> bool:
         if self.server_data_links is None:
             return False
 
-        return 'omop-vocabularies' in self.server_data_links
+        return 'vocabulary.csv' in self.server_data_links
 
 

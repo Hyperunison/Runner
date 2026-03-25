@@ -376,7 +376,7 @@ class OMOPofication(WorkflowBase):
             return
 
         for filename, url in message.server_data_links.items():
-            self.download(url, 'var/' + filename)
+            self.download(url, self.dir + filename)
 
             if self.may_upload_private_data:
                 s3_path = s3_folder + filename

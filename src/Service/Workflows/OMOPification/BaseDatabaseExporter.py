@@ -174,7 +174,7 @@ class BaseDatabaseExporter:
     def fill_table(self, rows: List[Dict[str, any]], table_name: str, tables: List[Dict[str, any]]):
         columns = self.get_columns(table_name=table_name, tables=tables)
 
-        if columns is None:
+        if columns is None or len(rows) == 0:
             return
 
         sql = self.sql_builder.build_insert(
