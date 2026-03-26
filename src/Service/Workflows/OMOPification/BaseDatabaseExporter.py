@@ -16,6 +16,7 @@ class BaseDatabaseExporter:
     def __init__(self):
         self.lines_filter = LinesFilter()
         self.sql_builder = SqlBuilder()
+        self._exported_tables: set = set()
 
     def create_all_tables(self, tables: List[Dict[str, any]]):
         pass

@@ -32,22 +32,31 @@ class Database(BaseSchema):
 
         return result[0]
 
+    def _convert_row_types(self, item: Dict) -> Dict:
+        for key, value in item.items():
+            if isinstance(value, datetime.date):
+                item[key] = value.strftime('%Y-%m-%d')
+            if isinstance(value, Decimal):
+                if int(value) == float(value):
+                    item[key] = int(value)
+                else:
+                    item[key] = float(value)
+        return item
+
     def fetch_all(self, sql: str):
-        result_intermediate = self.engine.execute(text(sql)).fetchall()
-        columns = [col[0] for col in self.engine.execute(text(sql)).cursor.description]
-        result = [dict(zip(columns, row)) for row in result_intermediate]
-
-        for item in result:
-            for key, value in item.items():
-                if isinstance(value, datetime.date):
-                    item[key] = value.strftime('%Y-%m-%d')
-                if isinstance(value, Decimal):
-                    if int(value) == float(value):
-                        item[key] = int(value)
-                    else:
-                        item[key] = float(value)
-
+        result_proxy = self.engine.execute(text(sql))
+        columns = [col[0] for col in result_proxy.cursor.description]
+        result = [self._convert_row_types(dict(zip(columns, row))) for row in result_proxy.fetchall()]
         return result
+
+    def fetch_chunks(self, sql: str, chunk_size: int):
+        result_proxy = self.engine.execute(text(sql))
+        columns = [col[0] for col in result_proxy.cursor.description]
+        while True:
+            rows = result_proxy.fetchmany(chunk_size)
+            if not rows:
+                break
+            yield [self._convert_row_types(dict(zip(columns, row))) for row in rows]
 
     def rollback(self):
         self.engine.rollback()

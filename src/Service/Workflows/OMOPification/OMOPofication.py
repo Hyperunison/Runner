@@ -124,55 +124,54 @@ class OMOPofication(WorkflowBase):
                 )
                 self.mapping_resolver = UCDMMappingResolver(csv_mapping)
                 self.resolver = UCDMResolver(self.schema, self.mapping_resolver)
-                ucdm_result = self.resolver.get_ucdm_result(
-                    sql_final,
-                    str_to_int,
-                    fields_map,
-                    automation_strategies_map
-                )
                 self.save_sql_query(table_name, sql_final, s3_folder+'sql/', message, api_logger)
-                if ucdm_result is None:
-                    api_logger.write(message.id, "Can't export {}".format(table_name))
-                    continue
 
-                ucdm = ucdm_result.lines
-                api_logger.write(message.id, "Harmonized rows count: {}".format(len(ucdm)))
-
-                if len(ucdm) > 0:
-                    if len(ucdm_result.traceability) > 0:
-                        self.save_traceability(
-                            traceability_lines=ucdm_result.traceability,
-                            exporter=exporter,
-                            table_name=self.resolver.get_traceability_table_name(table_name),
+                skip_rows: Dict[str, int] = {}
+                exported_rows = 0
+                try:
+                    for ucdm_chunk in self.resolver.iter_ucdm_result(
+                        sql_final, str_to_int, fields_map, automation_strategies_map
+                    ):
+                        if ucdm_chunk.traceability:
+                            self.save_traceability(
+                                traceability_lines=ucdm_chunk.traceability,
+                                exporter=exporter,
+                                table_name=self.resolver.get_traceability_table_name(table_name),
+                                fields_map=fields_map,
+                                columns=self.get_columns(
+                                    table_name=self.resolver.get_traceability_table_name(table_name),
+                                    tables=message.all_tables
+                                )
+                            )
+                        chunk_skip_rows = exporter.export(
+                            table_name=table_name,
+                            ucdm=ucdm_chunk.lines,
                             fields_map=fields_map,
                             columns=self.get_columns(
-                                table_name=self.resolver.get_traceability_table_name(table_name),
+                                table_name=table_name,
                                 tables=message.all_tables
                             )
                         )
+                        exported_rows += len(ucdm_chunk.lines)
+                        for reason, count in chunk_skip_rows.items():
+                            skip_rows[reason] = skip_rows.get(reason, 0) + count
+                except Exception as e:
+                    api_logger.write(message.id, "Can't export {}: {}".format(table_name, e))
+                    continue
 
-                    skip_rows = exporter.export(
-                        table_name=table_name,
-                        ucdm=ucdm,
-                        fields_map=fields_map,
-                        columns=self.get_columns(
-                            table_name=table_name,
-                            tables=message.all_tables
-                        )
-                    )
-                    if len(skip_rows) > 0:
-                        for reason, count in skip_rows.items():
-                            api_logger.write(message.id, "Rows skipped in {}: {}, reason: {}".format(table_name, count, reason))
-                    api_logger.write(message.id, "{} data was written".format(table_name))
-                    filename = exporter.write_single_table_dump(table_name)
-                    if self.may_upload_private_data and filename is not None:
-                        if filename is not None:
-                            s3_path = s3_folder + re.sub('^.*/', '', filename)
-                            if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id,
-                                                                                          message.aws_key, False):
-                                api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
-                                self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
-                                continue
+                api_logger.write(message.id, "Harmonized rows count: {}".format(exported_rows))
+                if skip_rows:
+                    for reason, count in skip_rows.items():
+                        api_logger.write(message.id, "Rows skipped in {}: {}, reason: {}".format(table_name, count, reason))
+                api_logger.write(message.id, "{} data was written".format(table_name))
+                filename = exporter.write_single_table_dump(table_name)
+                if self.may_upload_private_data and filename is not None:
+                    s3_path = s3_folder + re.sub('^.*/', '', filename)
+                    if not self.pipeline_executor.adapter.upload_local_file_to_s3(filename, s3_path, message.aws_id,
+                                                                                  message.aws_key, False):
+                        api_logger.write(message.id, "Can't upload result file to S3, abort pipeline execution")
+                        self.send_notification_to_api(message.id, length, step, 'error', path=result_path)
+                        continue
 
             str_filename = str_to_int.save_to_file()
 
@@ -219,15 +218,16 @@ class OMOPofication(WorkflowBase):
             fields_map: Dict[str, Dict[str, str]],
             columns: List[Dict[str, str]]
     ):
+        # traceability_lines have bare field keys (e.g. "person_id") after stripping
+        # "c.__unison_audit__" prefix in get_traceability_from_line.
+        # Build the fields map by stripping "c." from the regular fields_map keys.
         traceability_fields_map: Dict[str, Dict[str, str]] = {}
-
-        for key in fields_map.keys():
-            if not self.resolver.is_traceability_field(key):
+        c_prefix = "c."
+        for key, value in fields_map.items():
+            if self.resolver.is_traceability_field(key):
                 continue
-
-            new_key = key.replace(self.resolver.traceability_field_prefix, "")
-            traceability_fields_map[new_key] = fields_map[key]
-            traceability_fields_map[new_key]["name"] = traceability_fields_map[new_key]["name"].replace("__unison_audit__", "")
+            new_key = key[len(c_prefix):] if key.startswith(c_prefix) else key
+            traceability_fields_map[new_key] = value
 
         exporter.export(
             table_name=table_name,

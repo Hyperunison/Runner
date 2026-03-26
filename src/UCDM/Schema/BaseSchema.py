@@ -18,6 +18,13 @@ class BaseSchema:
     def fetch_all(self, sql: str):
         raise NotImplementedError()
 
+    def fetch_chunks(self, sql: str, chunk_size: int):
+        # Default fallback: load all rows and yield as a single chunk.
+        # Subclasses that support server-side cursors should override this.
+        rows = self.fetch_all(sql)
+        if rows:
+            yield rows
+
     def rollback(self):
         raise NotImplementedError()
 

@@ -51,6 +51,8 @@ RUN pip install "pure-sasl==0.6.2"
 RUN pip install "thrift==0.21.0"
 RUN pip install "thrift-sasl==0.4.3"
 RUN pip install "psutil==7.0.0"
+RUN pip uninstall -y setuptools
+RUN pip install "setuptools<81"
 
 
 RUN wget https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.6.14/aws-iam-authenticator_0.6.14_linux_amd64 -O /bin/aws-iam-authenticator
@@ -87,3 +89,4 @@ RUN apt-get clean
 
 # ENTRYPOINT pip install -r requirements.txt; (while true; do echo 1; sleep 1; done) | xargs -P 5 -I {} python main.py
 ENTRYPOINT pip install -r requirements.txt; while true; do python main.py; sleep 3; done
+

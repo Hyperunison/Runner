@@ -18,9 +18,11 @@ class CSVExporter(BaseDatabaseExporter):
             fields_map: Dict[str, Dict[str, str]],
             columns: List[Dict[str, str]]
     ) -> Dict[str, int]:
-        csv_writter = CsvWritter()
+        append = table_name in self._exported_tables
+        self._exported_tables.add(table_name)
 
-        skipped_rows = csv_writter.build(self.get_export_table_filename(table_name), ucdm, fields_map)
+        csv_writter = CsvWritter()
+        skipped_rows = csv_writter.build(self.get_export_table_filename(table_name), ucdm, fields_map, append=append)
 
         return skipped_rows
 

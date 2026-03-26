@@ -14,12 +14,15 @@ class CsvWritter:
             self,
             filename: str,
             ucdm: List[Dict[str, UCDMConvertedField]],
-            fields_map: Dict[str, Dict[str, str]]
+            fields_map: Dict[str, Dict[str, str]],
+            append: bool = False,
     ) -> Dict[str, int]:
-        with open(filename, 'w', newline='', encoding='utf-8') as file:
+        mode = 'a' if append else 'w'
+        with open(filename, mode, newline='', encoding='utf-8') as file:
             header = [item['name'] for item in fields_map.values()]
             writer = csv.DictWriter(file, fieldnames=header)
-            writer.writeheader()
+            if not append:
+                writer.writeheader()
             skip_rows: Dict[str, int] = {}
             for row in ucdm:
                 output = {}

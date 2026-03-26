@@ -43,6 +43,26 @@ class UCDMResolver:
         except ProgrammingError as e:
             logging.error("SQL query error: {}".format(e.orig))
 
+    def iter_ucdm_result(
+            self,
+            sql_final: str,
+            str_to_int: StrToIntGenerator,
+            fields_map: Dict[str, Dict[str, str]],
+            automation_strategies_map: Dict[str, Dict[str, str]],
+            chunk_size: int = 1000,
+    ):
+        mapping_index = self.build_mapping_index()
+        serials: Dict[str, SerialGenerator] = {}
+        for raw_chunk in self.schema.fetch_chunks(sql_final, chunk_size):
+            normalized = self.normalize(raw_chunk)
+            ucdm_lines = self.convert_to_ucdm(
+                normalized, mapping_index, str_to_int, fields_map, automation_strategies_map, serials=serials
+            )
+            chunk_result = UCDMResult()
+            chunk_result.lines = self.remove_traceability_fields(ucdm_lines)
+            chunk_result.traceability = self.extract_traceability_lines(ucdm_lines)
+            yield chunk_result
+
     def remove_traceability_fields(self, ucdm_lines: List[Dict[str, UCDMConvertedField]]) -> List[Dict[str, UCDMConvertedField]]:
         result: List[Dict[str, UCDMConvertedField]] = []
 
@@ -120,12 +140,13 @@ class UCDMResolver:
             str_to_int: StrToIntGenerator,
             fields_map: Dict[str, Dict[str, str]],
             automation_strategies_map: Dict[str, Dict[str, str]],
+            serials: Dict[str, SerialGenerator] = None,
     ) -> List[Dict[str, UCDMConvertedField]]:
-        print(result[0])
         if len(result) == 0:
             return []
+        if serials is None:
+            serials = {}
         output: List[Dict[str, UCDMConvertedField]] = []
-        serials: Dict[str, SerialGenerator] = {}
 
         for row in result:
             converted = self.convert_row(mapping_index, row, serials, str_to_int, fields_map, automation_strategies_map)
@@ -236,13 +257,13 @@ class UCDMResolver:
         result: List[Dict[str, UCDMConvertedField]] = []
         for row_converted in multiplied:
             result_row: Dict[str, UCDMConvertedField] = {}
+            serial_fields: set = set()
             for field, val in row_converted.items():
+                if self.is_traceability_field(field):
+                    continue
+
                 export_value: str = val[0] if val[0] is not None else ''
                 mapping_strategy = val[1]
-
-                if self.is_traceability_field(field):
-                    result_row[field] = UCDMConvertedField(row[field])
-                    continue
 
                 if mapping_strategy == 'convertStringToInt':
                     export_value = str(str_to_int.get_int(export_value))
@@ -251,7 +272,17 @@ class UCDMResolver:
                     if not field in serials:
                         serials[field] = SerialGenerator()
                     export_value = str(serials[field].get_next_value())
+                    serial_fields.add(field)
                 result_row[field] = UCDMConvertedField(export_value)
+
+            for field in row_converted.keys():
+                if not self.is_traceability_field(field):
+                    continue
+                regular_field = field.replace(self.traceability_field_prefix, "c.")
+                if regular_field in serial_fields:
+                    result_row[field] = result_row[regular_field]
+                else:
+                    result_row[field] = UCDMConvertedField(row[field])
             result.append(result_row)
 
         return result

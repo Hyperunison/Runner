@@ -388,6 +388,9 @@ class DataSchema:
     def fetch_all(self, sql: str):
         return self.schema.fetch_all(sql)
 
+    def fetch_chunks(self, sql: str, chunk_size: int):
+        return self.schema.fetch_chunks(sql, chunk_size)
+
     def update_tables_list(self, api: Api, protected_schemas: List[str], protected_tables: List[str]):
         logging.info("Update tables list packet got")
         tables = self.schema.get_tables_list()
