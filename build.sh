@@ -8,4 +8,5 @@ fi
 echo "==$version=="
 docker build -t unison-runner_intermediate -f Resources/docker/Dockerfile .
 docker build -t entsupml/unison-runner:$version -f Resources/docker/Dockerfile_full .
-#docker push entsupml/unison-runner:$version
+docker push entsupml/unison-runner:$version
+
