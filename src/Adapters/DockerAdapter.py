@@ -201,7 +201,7 @@ class DockerAdapter(BaseAdapter):
                 os.makedirs(os.path.dirname(dst_path) or '.', exist_ok=True)
             logging.debug("Copying {} -> {}".format(src_path, dst_path))
             if os.path.isdir(src_path):
-                shutil.copytree(src_path, dst_path)
+                shutil.copytree(src_path, dst_path, dirs_exist_ok=True)
             else:
                 shutil.copy(src_path, dst_path)
 

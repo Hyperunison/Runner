@@ -335,6 +335,28 @@ class DataSchema:
                 self.add_staples_around_statement(statement['right'], query, mapper)
             )
 
+        if statement['type'] == 'not_exists':
+            joins = statement.get('join', [])
+            sub_wheres = statement.get('where', [])
+            if not joins:
+                logging.warning("not_exists block has no join info, skipping")
+                return "true"
+            # Build the subquery: NOT EXISTS (SELECT 1 FROM table alias JOIN ... WHERE on_condition AND ...)
+            primary = joins[0]
+            from_clause = "{} as {}".format(primary['table'], primary['alias'])
+            # Additional joins within the subquery
+            extra_joins = ""
+            for j in joins[1:]:
+                extra_joins += " JOIN {} as {} ON {} ".format(j['table'], j['alias'], j['on'])
+            # Build WHERE conditions for the subquery
+            sub_conditions = [primary['on']]
+            for w in sub_wheres:
+                sub_conditions.append(self.build_sql_expression(w, query, mapper))
+            sub_where = " AND ".join(sub_conditions)
+            return "NOT EXISTS (SELECT 1 FROM {}{} WHERE {})".format(
+                from_clause, extra_joins, sub_where
+            )
+
         if statement['type'] == 'unary':
             operator = statement['operator']
             node = statement['node']

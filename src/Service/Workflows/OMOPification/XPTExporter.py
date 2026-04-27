@@ -1,4 +1,5 @@
 import logging
+import math
 import shlex
 import subprocess
 from typing import List, Dict, Optional
@@ -23,6 +24,35 @@ class XPTExporter(BaseDatabaseExporter):
         logs = str(p.stdout.decode('utf-8'))
         logging.info(logs)
 
+    NUMERIC_TYPES = {'integer', 'bigint', 'int', 'float', 'double', 'numeric', 'decimal', 'real', 'smallint'}
+
+    def _cast_to_numeric_types(
+        self,
+        rows: List[Dict[str, str]],
+        columns: List[Dict[str, str]]
+    ) -> List[Dict[str, any]]:
+        col_types = {col['name']: col['type'].lower() for col in columns} if columns else {}
+        result = []
+        for row in rows:
+            typed_row = {}
+            for col_name, value in row.items():
+                col_type = col_types.get(col_name, '')
+                if col_type in self.NUMERIC_TYPES:
+                    if value is None or value == '':
+                        typed_row[col_name] = math.nan
+                    else:
+                        try:
+                            if col_type in ('float', 'double', 'numeric', 'decimal', 'real'):
+                                typed_row[col_name] = float(value)
+                            else:
+                                typed_row[col_name] = int(value)
+                        except (ValueError, TypeError):
+                            typed_row[col_name] = value
+                else:
+                    typed_row[col_name] = value
+            result.append(typed_row)
+        return result
+
     def insert_rows(
         self,
         table_name: str,
@@ -33,7 +63,8 @@ class XPTExporter(BaseDatabaseExporter):
         if not rows:
             raise ValueError("No rows provided for export.")
 
-        safe_rows = self._shorten_columns(rows)
+        typed_rows = self._cast_to_numeric_types(rows, columns)
+        safe_rows = self._shorten_columns(typed_rows)
         dataset = xport.Dataset(safe_rows, name=table_name[:8])
 
         xpt_path = f"{self.dir}/{table_name}.xpt"
