@@ -320,6 +320,8 @@ class DataSchema:
             operator = statement['operator']
             if operator == 'in' or operator == 'not in':
                 right = self.build_sql_expression(statement['right'], query, mapper)
+                if right == '()':
+                    right = '(null)'
                 return "{} {} {}".format(
                     self.add_staples_around_statement(statement['left'], query, mapper),
                     operator.upper(),
