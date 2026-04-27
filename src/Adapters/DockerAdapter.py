@@ -75,7 +75,8 @@ class DockerAdapter(BaseAdapter):
 
     def run_container(self, workdir: str, command: str, labels: Dict[str, str]) -> str:
         name = self.container_prefix + '-' + _random_word(16)
-        cmd = ['docker', 'run', '-t', '-d', '--name', name, '-w', workdir]
+        docker_gid = os.stat('/var/run/docker.sock').st_gid
+        cmd = ['docker', 'run', '-t', '-d', '--name', name, '-w', workdir, '--group-add', str(docker_gid)]
         for k, v in labels.items():
             cmd += ['-l', '{}={}'.format(k, v)]
         for src, dst in self.volumes.items():
