@@ -12,7 +12,7 @@ from src.Message.StartCreateSQLViewsWorkflow import StartCreateSQLViewsWorkflow
 from src.Service.ConsoleApplicationManager import ConsoleApplicationManager
 from src.Service.Workflows.NextflowCohortWorkflowExecutor import NextflowCohortWorkflowExecutor
 from src.Service.Workflows.VendorPipelines import VendorPipelines
-from src.UCDM.DataSchema import DataSchema
+from src.UCDM.DataSchema import DataSchema, DataProtection
 from src.auto.auto_api_client.api import agent_api
 from src.Api import Api
 from src.Adapters.AdapterFactory import create_by_config
@@ -92,6 +92,7 @@ class Worker(multiprocessing.Process):
                     self.agent_id
                 )
                 schema = DataSchema(self.config['phenotypic_db']['dsn'], self.config['phenotypic_db']['min_count'])
+                protection = DataProtection(self.config['data_protected'])
                 vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)
                 workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema, vendor_pipelines)
 
@@ -110,24 +111,14 @@ class Worker(multiprocessing.Process):
                 elif type(message) is KillCohortAPIRequest:
                     schema.kill_cohort_definition(message, api)
                 elif type(message) is UpdateTablesList:
-                    schema.update_tables_list(
-                        api,
-                        self.config['data_protected']['schemas'],
-                        self.config['data_protected']['tables']
-                    )
+                    schema.update_tables_list(api, protection)
                 elif type(message) is UpdateTableColumnsList:
-                    schema.update_table_columns_list(
-                        api,
-                        message,
-                        self.config['data_protected']['columns']
-                    )
+                    schema.update_table_columns_list(api, message, protection)
                 elif type(message) is UpdateTableColumnStats:
                     schema.update_table_column_stats(
-                        api,
-                        message,
+                        api, message,
                         self.config['phenotypic_db']['min_count'],
-                        self.config['data_protected']['tables'],
-                        self.config['data_protected']['columns']
+                        protection
                     )
                 elif type(message) is StartWorkflow:
                     workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)

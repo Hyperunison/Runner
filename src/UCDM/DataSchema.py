@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import sys
 import time
 import signal
@@ -64,6 +65,48 @@ class VariableMapper:
     def declare_var(self, ucdm: str, local: str):
         logging.info("Dealaring var {}: {}".format(ucdm, local))
         self.map[ucdm] = local
+
+
+class DataProtection:
+    """Checks schemas, tables and columns against regex-based protection patterns
+    loaded from config['data_protected'].
+    """
+
+    def __init__(self, config: Dict):
+        self.schemas: List[str] = config.get('schemas', [])
+        self.tables: List[str] = config.get('tables', [])
+        self.columns: List[str] = config.get('columns', [])
+
+    @staticmethod
+    def _matches(name: str, patterns: List[str]) -> bool:
+        for pattern in patterns:
+            try:
+                if re.fullmatch(pattern, name):
+                    return True
+            except re.error:
+                logging.warning("Invalid regex pattern in data_protected: '{}'".format(pattern))
+                if pattern == name:
+                    return True
+        return False
+
+    def is_protected_schema(self, table_name: str) -> bool:
+        """Check if the schema part of 'schema.table' is protected."""
+        if '.' in table_name:
+            return self._matches(table_name.split('.')[0], self.schemas)
+        return False
+
+    def is_protected_table(self, table_name: str) -> bool:
+        """Check if a table is protected (by full name or bare table name)."""
+        if self._matches(table_name, self.tables):
+            return True
+        if '.' in table_name and self._matches(table_name.split('.')[1], self.tables):
+            return True
+        return False
+
+    def is_protected_column(self, table_name: str, column_name: str) -> bool:
+        """Check if a column is protected (by 'table.column' or bare column name)."""
+        full_name = table_name + "." + column_name
+        return self._matches(full_name, self.columns) or self._matches(column_name, self.columns)
 
 
 class DataSchema:
@@ -415,23 +458,33 @@ class DataSchema:
     def fetch_chunks(self, sql: str, chunk_size: int):
         return self.schema.fetch_chunks(sql, chunk_size)
 
-    def update_tables_list(self, api: Api, protected_schemas: List[str], protected_tables: List[str]):
+    def update_tables_list(self, api: Api, protection: DataProtection):
         logging.info("Update tables list packet got")
         tables = self.schema.get_tables_list()
         result: List[str] = []
         for table in tables:
-            if table in protected_tables or ('.' in table and table.split('.')[1] in protected_tables):
-                logging.debug("Skip table {}, as it's listed in protected_tables".format(table))
+            if protection.is_protected_table(table):
+                logging.debug("Skip table {}, as it matches protected_tables".format(table))
                 continue
-            if '.' in table and table.split('.')[0] in protected_schemas:
-                logging.debug("Skip table {}, as it's listed in protected_schemas".format(table))
+            if protection.is_protected_schema(table):
+                logging.debug("Skip table {}, as it matches protected_schemas".format(table))
                 continue
             result.append(table)
         api.set_tables_list(result)
 
-    def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protected_columns: List[str]):
+    def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protection: DataProtection):
         table_name = message.table_name
         cte = message.cte
+        with_cte_label = 'with CTE' if cte else ''
+
+        if protection.is_protected_table(table_name):
+            logging.error("Skip table {} {}, as it matches protected_tables".format(table_name, with_cte_label))
+            return
+
+        if protection.is_protected_schema(table_name):
+            logging.error("Skip table {} {}, as it matches protected_schemas".format(table_name, with_cte_label))
+            return
+
         if cte:
             logging.info("Update tables columns list packet got for complex expression alias = {}, with CTE".format(table_name))
             rows_count, columns = self.schema.get_cte_columns(table_name, cte)
@@ -442,8 +495,8 @@ class DataSchema:
         types_result: List[str] = []
         nullable_result: List[str] = []
         for column in columns:
-            if column in protected_columns:
-                logging.debug("Skip column {}.{}, as it's listed in protected_columns".format(table_name, column))
+            if protection.is_protected_column(table_name, column['column']):
+                logging.debug("Skip column {}.{}, as it matches protected_columns".format(table_name, column['column']))
                 continue
             result.append(column['column'])
             types_result.append(column['type'])
@@ -451,7 +504,7 @@ class DataSchema:
         api.set_table_stats(table_name, rows_count, result, types_result, nullable_result)
 
     def update_table_column_stats(self, api: Api, message: UpdateTableColumnStats, min_count,
-                                  protected_tables: List[str], protected_columns: List[str]):
+                                  protection: DataProtection):
         table_name = message.table_name
         column_name = message.column_name
         with_cte_label = 'with CTE' if message.cte else ''
@@ -461,20 +514,19 @@ class DataSchema:
             with_cte_label
         ))
 
-        if table_name in protected_tables or ('.' in table_name and table_name.split('.')[1] in protected_tables):
-            logging.error("Skip column {}.{} {}, as it's listed in protected_tables".format(
-                table_name,
-                column_name,
-                with_cte_label
-            ))
+        if protection.is_protected_schema(table_name):
+            logging.error("Skip column {}.{} {}, as it matches protected_schemas".format(
+                table_name, column_name, with_cte_label))
             return
 
-        if table_name + "." + column_name in protected_columns:
-            logging.error("Skip column {}.{} {}, as it's listed in protected_columns".format(
-                table_name,
-                column_name,
-                with_cte_label
-            ))
+        if protection.is_protected_table(table_name):
+            logging.error("Skip column {}.{} {}, as it matches protected_tables".format(
+                table_name, column_name, with_cte_label))
+            return
+
+        if protection.is_protected_column(table_name, column_name):
+            logging.error("Skip column {}.{} {}, as it matches protected_columns".format(
+                table_name, column_name, with_cte_label))
             return
         stat = self.schema.get_table_column_stats(table_name, column_name, message.cte)
 

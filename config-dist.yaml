@@ -32,11 +32,28 @@ phenotypic_db:
   dsn: ENV("UNISON_DSN", "postgresql+psycopg2://***:***@***:***/***")
   min_count: 3                                      # Minimum number of unique patients with list of properties to allow system to export this properties
 
-# You may describe data forbidden to access by Runner
+# You may describe data forbidden to access by Runner.
+# All patterns are regular expressions matched against the full name (re.fullmatch).
+# Plain strings still work as before (exact match).
+#
+# Examples:
+#   Exact match:        "personal"
+#   Wildcard:           "pass.*"                     — matches "password", "passport", etc.
+#   Multiple prefixes:  "(tmp|temp)_.*"              — matches "tmp_data", "temp_cache", etc.
+#
+#   All schemas EXCEPT one:
+#     "(?!public$).*"                                — protects everything except "public"
+#
+#   All schemas EXCEPT two:
+#     "(?!public$|research$).*"                      — protects everything except "public" and "research"
+#
+#   All tables EXCEPT those in one schema:
+#     "(?!public\\.).*"                              — protects all tables not starting with "public."
+#
 data_protected:
-  schemas: []                                       # List of protected schemes. For example: ["public", "personal"]
-  tables: []                                        # List of protected tables. For example: ["public.participant", "personal.addresses"]
-  columns: []
+  schemas: []                                       # List of protected schema patterns. For example: ["personal", "(?!public$).*"]
+  tables: []                                        # List of protected table patterns. For example: ["public.participant", ".*\\.tmp_.*"]
+  columns: []                                       # List of protected column patterns. For example: [".*\\.ssn", ".*password.*"]
 
 pipeline:
   file_transfer:
