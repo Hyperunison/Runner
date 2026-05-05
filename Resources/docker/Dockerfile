@@ -19,7 +19,7 @@ RUN rm -rf awscliv2.zip aws
 RUN pip install "xport==3.6.1" \
      "numpy==1.26.4" \
      "pip==23.3" \
-     "click==8.1.3 \"
+     "click==8.1.3" \
      "certifi>=2024.7.4" \
      "frozendict~=2.3.4" \
      "python-dateutil~=2.7.0" \
@@ -34,13 +34,12 @@ RUN pip install "xport==3.6.1" \
      "labkey==2.6.1" \
      "python-json-logger" \
      "sqlglot===25.24.5" \
-     "PyMySQL===1.1.1"
-
-RUN pip install "pyhive==0.7.0" \
-  "pure-sasl==0.6.2" \
-  "thrift==0.21.0" \
-  "thrift-sasl==0.4.3" \
-  "psutil==7.0.0"
+     "PyMySQL===1.1.1" \
+     "pyhive==0.7.0" \
+     "pure-sasl==0.6.2" \
+     "thrift==0.21.0" \
+     "thrift-sasl==0.4.3" \
+     "psutil==7.0.0"
 
 # Install docker
 RUN apt-get --yes install ca-certificates curl
