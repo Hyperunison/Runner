@@ -15,7 +15,7 @@ last_ucdm.yaml
 *.xpt
 *.xlsx
 *.log
-pipelines
-params.yaml
+pipelines/
+*.yaml
 
 
