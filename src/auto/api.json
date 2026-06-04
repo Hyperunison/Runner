@@ -1652,6 +1652,74 @@
                 }
             }
         },
+        "/api/agent/v{version}/{token}/cte-materialization-status": {
+            "post": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "setCteMaterializationStatus",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "biobankDataTableId",
+                                    "jobId",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "biobankDataTableId": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "jobId": {
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "default": null
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Update CTE materialization status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/agent/v{version}/{token}/pipelines/installed/": {
             "post": {
                 "tags": [
@@ -1933,6 +2001,55 @@
                 }
             }
         },
+        "/api/agent/v{version}/{token}/{cdmId}/cdm-quantexa-reference-code/export": {
+            "get": {
+                "tags": [
+                    "Agent"
+                ],
+                "operationId": "exportCdmQuantexaReferenceCodeCSV",
+                "parameters": [
+                    {
+                        "name": "version",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\d.]+"
+                        }
+                    },
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[\\w-]+"
+                        }
+                    },
+                    {
+                        "name": "cdmId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Export CDM values to CSV file",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/agent/v{version}/{token}/{cdmId}/cdm-vocabulary/export": {
             "get": {
                 "tags": [
@@ -2071,6 +2188,18 @@
                     },
                     "cte": {
                         "type": "string"
+                    },
+                    "materializationEnabled": {
+                        "type": "boolean"
+                    },
+                    "materializationStatus": {
+                        "type": "string"
+                    },
+                    "materializationJob": {
+                        "$ref": "#/components/schemas/Job"
+                    },
+                    "materializationJobId": {
+                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -2207,6 +2336,41 @@
                     },
                     "mappingRuleCount": {
                         "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "Job": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "retryCount": {
+                        "type": "integer"
+                    },
+                    "result": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "replyChannelName": {
+                        "type": "string"
+                    },
+                    "logs": {
+                        "type": "string"
+                    },
+                    "added": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"

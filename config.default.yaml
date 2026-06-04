@@ -15,6 +15,7 @@ log:
 
 phenotypic_db:
   min_count: 3  # minimum number of unique patients required to export a set of properties
+  materialization_view_prefix: "__unison_"  # prefix (and optional schema) for materialized view names, e.g. "myschema.__unison_"
 
 # You may describe data forbidden to access by Runner.
 # All patterns are regular expressions matched against the full name (re.fullmatch).

@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -116,3 +116,26 @@ class Postgres(Database):
     def get_nulls_count_query(self, table_name: str, column_name: str, cte: str) -> str:
         nulls_count_sql = "SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name)
         return self.wrap_sql_by_cte(nulls_count_sql, table_name, cte)
+
+    def get_materialized_view_definition(self, name: str) -> Optional[str]:
+        """Returns stored MD5 checksum of original CTE SQL, or None if view doesn't exist."""
+        rows = self.fetch_all_params(
+            "SELECT pg_catalog.obj_description(c.oid, 'pg_class') AS comment "
+            "FROM pg_class c WHERE c.relname = :name AND c.relkind = 'm'",
+            {'name': name}
+        )
+        if not rows:
+            return None  # view does not exist → caller should CREATE
+        return rows[0]['comment'] or ''  # '' if no checksum stored yet → caller should DROP+CREATE
+
+    def create_materialized_view(self, name: str, sql: str) -> None:
+        import hashlib
+        self.execute_sql("CREATE MATERIALIZED VIEW {} AS ({})".format(name, sql))
+        checksum = hashlib.md5(sql.strip().encode()).hexdigest()
+        self.execute_sql("COMMENT ON MATERIALIZED VIEW {} IS '{}'".format(name, checksum))
+
+    def drop_materialized_view(self, name: str) -> None:
+        self.execute_sql("DROP MATERIALIZED VIEW {}".format(name))
+
+    def refresh_materialized_view(self, name: str) -> None:
+        self.execute_sql("REFRESH MATERIALIZED VIEW {}".format(name))

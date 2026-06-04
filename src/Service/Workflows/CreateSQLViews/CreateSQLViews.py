@@ -20,6 +20,9 @@ class CreateSQLViews(WorkflowBase):
         views_schema: str = message.schema
 
         api_logger = ApiLogger(self.api)
+        if isinstance(message.queries, List) and len(message.queries) == 0:
+            api_logger.write(message.id, "No queries provided")
+            return
         length = len(message.queries.items())
         step = 0
         cdm_id = message.cdm_id
@@ -128,7 +131,7 @@ class CreateSQLViews(WorkflowBase):
                 self.schema.execute_sql(view_sql)
                 logging.debug("View for table {} created".format(table_name))
 
-            except Exce1ption as e:
+            except Exception as e:
                 logging.debug("Can't create view for table {}".format(table_name))
                 api_logger.write(message.id, "ERROR: Can't create view for table {}, sending error {}".format(
                     table_name,

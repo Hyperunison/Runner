@@ -3,6 +3,7 @@ from src.Message.CohortAPIRequest import CohortAPIRequest
 from src.Message.KillCohortAPIRequest import KillCohortAPIRequest
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.KillJob import KillJob
+from src.Message.MaterializeCte import MaterializeCte
 from src.Message.NextflowRun import NextflowRun
 from src.Message.StartCreateSQLViewsWorkflow import StartCreateSQLViewsWorkflow
 from src.Message.StartMLTrain import StartMLTrain
@@ -40,5 +41,7 @@ class MessageFactory:
             return UpdateTableColumnsList(message)
         elif message.type == 'UpdateTableColumnStats':
             return UpdateTableColumnStats(message)
+        elif message.type == 'MaterializeCte':
+            return MaterializeCte(message)
         else:
             return

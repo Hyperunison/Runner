@@ -12,15 +12,11 @@ import sys
 import unittest
 
 import auto_api_client
-from auto_api_client.model.biobank_data_column import BiobankDataColumn
 from auto_api_client.model.job import Job
-globals()['BiobankDataColumn'] = BiobankDataColumn
-globals()['Job'] = Job
-from auto_api_client.model.biobank_data_table import BiobankDataTable
 
 
-class TestBiobankDataTable(unittest.TestCase):
-    """BiobankDataTable unit test stubs"""
+class TestJob(unittest.TestCase):
+    """Job unit test stubs"""
 
     def setUp(self):
         pass
@@ -28,10 +24,10 @@ class TestBiobankDataTable(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testBiobankDataTable(self):
-        """Test BiobankDataTable"""
+    def testJob(self):
+        """Test Job"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = BiobankDataTable()  # noqa: E501
+        # model = Job()  # noqa: E501
         pass
 
 

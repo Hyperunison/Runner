@@ -57,6 +57,7 @@ from auto_api_client.model.mapping_resolve_response import MappingResolveRespons
 from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
+from auto_api_client.model.set_cte_materialization_status_request import SetCteMaterializationStatusRequest
 from auto_api_client.model.set_installed_pipelines_request import SetInstalledPipelinesRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
@@ -101,6 +102,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**accept_task**](docs/AgentApi.md#accept_task) | **POST** /api/agent/v{version}/{token}/task/{id} | 
 *AgentApi* | [**add_run_log_chunk**](docs/AgentApi.md#add_run_log_chunk) | **POST** /api/agent/v{version}/{token}/run/{id}/log-chunk | 
 *AgentApi* | [**block_task**](docs/AgentApi.md#block_task) | **POST** /api/agent/v{version}/{token}/task/{id}/block | 
+*AgentApi* | [**export_cdm_quantexa_reference_code_csv**](docs/AgentApi.md#export_cdm_quantexa_reference_code_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-quantexa-reference-code/export | 
 *AgentApi* | [**export_cdm_values_csv**](docs/AgentApi.md#export_cdm_values_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-values/export | 
 *AgentApi* | [**export_cdm_vocabulary_csv**](docs/AgentApi.md#export_cdm_vocabulary_csv) | **GET** /api/agent/v{version}/{token}/{cdmId}/cdm-vocabulary/export | 
 *AgentApi* | [**export_docs_for_specific_biobank**](docs/AgentApi.md#export_docs_for_specific_biobank) | **GET** /api/agent/v{version}/{token}/export-mapping/docs | 
@@ -115,6 +117,7 @@ Class | Method | HTTP request | Description
 *AgentApi* | [**post_app_agent_addjoblogs**](docs/AgentApi.md#post_app_agent_addjoblogs) | **POST** /api/agent/v{version}/{token}/job/runner-message/{runId}/add-logs | 
 *AgentApi* | [**set_car_status**](docs/AgentApi.md#set_car_status) | **POST** /api/agent/v{version}/{token}/car/{id}/status | 
 *AgentApi* | [**set_cohort_definition_aggregation**](docs/AgentApi.md#set_cohort_definition_aggregation) | **POST** /api/agent/v{version}/{token}/cohort/aggregation/{key} | 
+*AgentApi* | [**set_cte_materialization_status**](docs/AgentApi.md#set_cte_materialization_status) | **POST** /api/agent/v{version}/{token}/cte-materialization-status | 
 *AgentApi* | [**set_error_for_cohort_api_request**](docs/AgentApi.md#set_error_for_cohort_api_request) | **PUT** /api/agent/v{version}/{token}/cohort/{id}/error | 
 *AgentApi* | [**set_installed_pipelines**](docs/AgentApi.md#set_installed_pipelines) | **POST** /api/agent/v{version}/{token}/pipelines/installed/ | 
 *AgentApi* | [**set_job_state**](docs/AgentApi.md#set_job_state) | **PUT** /api/agent/v{version}/{token}/job/runner-message/{runId}/set-state | 
@@ -140,11 +143,13 @@ Class | Method | HTTP request | Description
  - [BiobankDataTable](docs/BiobankDataTable.md)
  - [GetMappingsRequest](docs/GetMappingsRequest.md)
  - [GetProcessLogs](docs/GetProcessLogs.md)
+ - [Job](docs/Job.md)
  - [MappingResolveResponse](docs/MappingResolveResponse.md)
  - [NextflowRun](docs/NextflowRun.md)
  - [PostAppAgentAddjoblogsRequest](docs/PostAppAgentAddjoblogsRequest.md)
  - [RunnerMessage](docs/RunnerMessage.md)
  - [SetCohortDefinitionAggregationRequest](docs/SetCohortDefinitionAggregationRequest.md)
+ - [SetCteMaterializationStatusRequest](docs/SetCteMaterializationStatusRequest.md)
  - [SetInstalledPipelinesRequest](docs/SetInstalledPipelinesRequest.md)
  - [SetJobStateRequest](docs/SetJobStateRequest.md)
  - [SetProcessLogsRequest](docs/SetProcessLogsRequest.md)

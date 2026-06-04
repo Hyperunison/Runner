@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from src.UCDM import TableStat
 
 
@@ -70,4 +70,17 @@ class BaseSchema:
         return sql
 
     def execute_sql(self, sql: str) -> str:
+        raise NotImplementedError()
+
+    def get_materialized_view_definition(self, name: str) -> Optional[str]:
+        """Return stored SQL definition of a materialized view, or None if not exists."""
+        raise NotImplementedError()
+
+    def create_materialized_view(self, name: str, sql: str) -> None:
+        raise NotImplementedError()
+
+    def drop_materialized_view(self, name: str) -> None:
+        raise NotImplementedError()
+
+    def refresh_materialized_view(self, name: str) -> None:
         raise NotImplementedError()

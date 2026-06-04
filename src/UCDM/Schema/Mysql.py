@@ -1,7 +1,7 @@
 import decimal
 import logging
 from decimal import Decimal
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import create_engine
 from sqlalchemy import text
@@ -162,3 +162,19 @@ class Mysql(Database):
     def get_nulls_count_query(self, table_name: str, column_name: str, cte: str) -> str:
         nulls_count_sql = "SELECT COUNT(*) as cnt FROM {} WHERE `{}` is null".format(table_name, column_name)
         return self.wrap_sql_by_cte(nulls_count_sql, table_name, cte)
+
+    def get_materialized_view_definition(self, name: str) -> Optional[str]:
+        # MySQL has no native materialized views; definition cannot be recovered
+        return None
+
+    def create_materialized_view(self, name: str, sql: str) -> None:
+        # Simulate with a regular table; always recreate since definition is not tracked
+        self.execute_sql("DROP TABLE IF EXISTS {}".format(name))
+        self.execute_sql("CREATE TABLE {} AS ({})".format(name, sql))
+
+    def drop_materialized_view(self, name: str) -> None:
+        self.execute_sql("DROP TABLE IF EXISTS {}".format(name))
+
+    def refresh_materialized_view(self, name: str) -> None:
+        # Unreachable: get_materialized_view_definition always returns None for MySQL
+        raise NotImplementedError("MySQL does not support materialized view refresh")

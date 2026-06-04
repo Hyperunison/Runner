@@ -1,5 +1,6 @@
 import json
 import logging
+import requests
 from typing import List, Dict, Optional
 
 from src.auto.auto_api_client.api.agent_api import AgentApi
@@ -294,3 +295,19 @@ class Api:
     def set_car_status(self, car_id: int, status: str, pid: int = None):
         logging.info("Update CAR {} status to {}, pid={}".format(int(car_id), status, pid))
         self.api_instance.set_car_status(int(car_id), status=status, pid=str(pid), token=self.token, version=self.version)
+
+    def set_cte_materialization_status(self, biobank_data_table_id: int, job_id: int, status: str):
+        logging.info("Set CTE materialization status: table={}, job={}, status={}".format(biobank_data_table_id, job_id, status))
+        host = self.api_instance.api_client.configuration.host
+        url = "{}/api/agent/v{}/{}/cte-materialization-status".format(host, self.version, self.token)
+        cookie = self.api_instance.api_client.cookie
+        resp = requests.post(
+            url,
+            data={
+                'biobankDataTableId': str(biobank_data_table_id),
+                'jobId': str(job_id),
+                'status': status,
+            },
+            headers={'Cookie': cookie} if cookie else {},
+        )
+        logging.info("CTE materialization status response: {}".format(resp.status_code))

@@ -22,6 +22,7 @@ from src.Message.KillJob import KillJob
 from src.Message.GetProcessLogs import GetProcessLogs
 from src.Message.NextflowRun import NextflowRun
 from src.Message.StartWorkflow import StartWorkflow
+from src.Message.MaterializeCte import MaterializeCte
 from src.Message.UpdateTablesList import UpdateTablesList
 from src.Message.UpdateTableColumnsList import UpdateTableColumnsList
 from src.Message.UpdateTableColumnStats import UpdateTableColumnStats
@@ -91,7 +92,7 @@ class Worker(multiprocessing.Process):
                     runner_instance_id,
                     self.agent_id
                 )
-                schema = DataSchema(self.config['phenotypic_db']['dsn'], self.config['phenotypic_db']['min_count'])
+                schema = DataSchema(self.config['phenotypic_db']['dsn'], self.config['phenotypic_db']['min_count'], self.config['phenotypic_db']['materialization_view_prefix'])
                 protection = DataProtection(self.config['data_protected'])
                 vendor_pipelines = VendorPipelines(api, pipeline_executor, schema)
                 workflow_executor = NextflowCohortWorkflowExecutor(api, pipeline_executor, schema, vendor_pipelines)
@@ -120,6 +121,8 @@ class Worker(multiprocessing.Process):
                         self.config['phenotypic_db']['min_count'],
                         protection
                     )
+                elif type(message) is MaterializeCte:
+                    schema.materialize_cte(api, message)
                 elif type(message) is StartWorkflow:
                     workflow_executor.execute_workflow(message, allow_private_upload_data_to_unison)
                 elif type(message) is StartOMOPoficationWorkflow:

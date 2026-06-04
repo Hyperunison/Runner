@@ -41,6 +41,12 @@ class TestAgentApi(unittest.TestCase):
         """
         pass
 
+    def test_export_cdm_quantexa_reference_code_csv(self):
+        """Test case for export_cdm_quantexa_reference_code_csv
+
+        """
+        pass
+
     def test_export_cdm_values_csv(self):
         """Test case for export_cdm_values_csv
 
@@ -121,6 +127,12 @@ class TestAgentApi(unittest.TestCase):
 
     def test_set_cohort_definition_aggregation(self):
         """Test case for set_cohort_definition_aggregation
+
+        """
+        pass
+
+    def test_set_cte_materialization_status(self):
+        """Test case for set_cte_materialization_status
 
         """
         pass

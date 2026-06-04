@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -5,6 +6,7 @@ import re
 import sys
 import time
 import signal
+import traceback
 from typing import List, Dict, Tuple, Optional
 from src.Api import Api
 from src.Database.Converters.ConvertRawSql import ConvertRawSql
@@ -115,8 +117,9 @@ class DataSchema:
     schema: BaseSchema
     schema_factory: SchemaFactory
 
-    def __init__(self, dsn: str, min_count: int):
+    def __init__(self, dsn: str, min_count: int, materialization_view_prefix: str):
         self.min_count = min_count
+        self.materialization_view_prefix = materialization_view_prefix
         self.schema_factory = SchemaFactory()
         self.schema = self.create_schema(dsn, min_count)
         super().__init__()
@@ -180,8 +183,15 @@ class DataSchema:
         query = SQLQuery()
 
         cte_list = {}
+        materialized_table_map = {}
         for cte in cohort_definition.cte:
-            cte_list[cte['tableName']] = cte['cte']
+            if cte.get('materialized'):
+                physical_name = self.materialization_view_prefix + cte['tableName']
+                materialized_table_map[cte['tableName']] = physical_name
+                # Keep a thin CTE alias so field SQL expressions can still reference the CTE by name
+                cte_list[cte['tableName']] = 'SELECT * FROM {}'.format(physical_name)
+            else:
+                cte_list[cte['tableName']] = cte['cte']
 
         if len(cohort_definition.with_tables) > 0:
             with_cte_list = self.build_with_cte_list(cohort_definition.with_tables)
@@ -232,7 +242,8 @@ class DataSchema:
         sql += "FROM {}\n".format(cohort_definition.participant_table)
 
         for j in cohort_definition.joins:
-            sql += "JOIN {} as {} ON {} \n".format(j['table'], j['alias'], j['on'])
+            table = materialized_table_map.get(j['table'], j['table'])
+            sql += "JOIN {} as {} ON {} \n".format(table, j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
@@ -483,6 +494,7 @@ class DataSchema:
     def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protection: DataProtection):
         table_name = message.table_name
         cte = message.cte
+        materialized_as = getattr(message, 'materialized_as', None)
         with_cte_label = 'with CTE' if cte else ''
 
         if protection.is_protected_table(table_name):
@@ -493,7 +505,10 @@ class DataSchema:
             logging.error("Skip table {} {}, as it matches protected_schemas".format(table_name, with_cte_label))
             return
 
-        if cte:
+        if materialized_as:
+            logging.info("Update table columns list for materialized table {} -> {}".format(table_name, materialized_as))
+            rows_count, columns = self.schema.get_table_columns(materialized_as)
+        elif cte:
             logging.info("Update tables columns list packet got for complex expression alias = {}, with CTE".format(table_name))
             rows_count, columns = self.schema.get_cte_columns(table_name, cte)
         else:
@@ -510,6 +525,57 @@ class DataSchema:
             types_result.append(column['type'])
             nullable_result.append(column['nullable'])
         api.set_table_stats(table_name, rows_count, result, types_result, nullable_result)
+
+    def materialize_cte(self, api: Api, message):
+        table_name = message.table_name
+        materialized_as = self.materialization_view_prefix + table_name
+        cte = message.cte
+        indexes = message.indexes
+        job_id = message.job_id
+        biobank_data_table_id = message.biobank_data_table_id
+
+        logging.info("Materializing CTE {} as {}".format(table_name, materialized_as))
+        try:
+            stored_checksum = self.schema.get_materialized_view_definition(materialized_as)
+            new_checksum = hashlib.md5(cte.strip().encode()).hexdigest()
+            if stored_checksum is not None:
+                if stored_checksum == new_checksum:
+                    sql = "REFRESH MATERIALIZED VIEW {}".format(materialized_as)
+                    logging.info("SQL: {}".format(sql))
+                    self.schema.refresh_materialized_view(materialized_as)
+                    logging.info("Materialized view {} refreshed (SQL unchanged)".format(materialized_as))
+                else:
+                    logging.info("Materialized view {} SQL changed, recreating".format(materialized_as))
+                    drop_sql = "DROP MATERIALIZED VIEW {}".format(materialized_as)
+                    logging.info("SQL: {}".format(drop_sql))
+                    self.schema.drop_materialized_view(materialized_as)
+                    create_sql = "CREATE MATERIALIZED VIEW {} AS ({})".format(materialized_as, cte)
+                    logging.info("SQL: {}".format(create_sql))
+                    self.schema.create_materialized_view(materialized_as, cte)
+                    logging.info("Materialized view {} recreated successfully".format(materialized_as))
+            else:
+                create_sql = "CREATE MATERIALIZED VIEW {} AS ({})".format(materialized_as, cte)
+                logging.info("SQL: {}".format(create_sql))
+                self.schema.create_materialized_view(materialized_as, cte)
+                logging.info("Materialized view {} created successfully".format(materialized_as))
+
+            for index_def in indexes:
+                index_name = index_def.get('name')
+                column = index_def.get('column')
+                index_sql = "CREATE INDEX IF NOT EXISTS {} ON {} (\"{}\")".format(index_name, materialized_as, column)
+                logging.info("SQL: {}".format(index_sql))
+                try:
+                    self.schema.execute_sql(index_sql)
+                    logging.info("Index {} on {}.{} created".format(index_name, materialized_as, column))
+                except Exception as e:
+                    logging.warning("Index {} failed, skipping: {}".format(index_name, e))
+
+            api.set_cte_materialization_status(biobank_data_table_id, job_id, 'success')
+        except Exception as e:
+            logging.error("Materialization of {} failed: {}".format(materialized_as, e))
+            api.add_job_logs(message.runner_message_id, traceback.format_exc())
+            api.set_cte_materialization_status(biobank_data_table_id, job_id, 'error')
+            raise e
 
     def update_table_column_stats(self, api: Api, message: UpdateTableColumnStats, min_count,
                                   protection: DataProtection):

@@ -28,6 +28,7 @@ from auto_api_client.model.mapping_resolve_response import MappingResolveRespons
 from auto_api_client.model.post_app_agent_addjoblogs_request import PostAppAgentAddjoblogsRequest
 from auto_api_client.model.runner_message import RunnerMessage
 from auto_api_client.model.set_cohort_definition_aggregation_request import SetCohortDefinitionAggregationRequest
+from auto_api_client.model.set_cte_materialization_status_request import SetCteMaterializationStatusRequest
 from auto_api_client.model.set_installed_pipelines_request import SetInstalledPipelinesRequest
 from auto_api_client.model.set_job_state_request import SetJobStateRequest
 from auto_api_client.model.set_process_logs_request import SetProcessLogsRequest
@@ -284,6 +285,81 @@ class AgentApi(object):
             headers_map={
                 'accept': [
                     'application/json'
+                ],
+                'content_type': [],
+            },
+            api_client=api_client
+        )
+        self.export_cdm_quantexa_reference_code_csv_endpoint = _Endpoint(
+            settings={
+                'response_type': (file_type,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/{cdmId}/cdm-quantexa-reference-code/export',
+                'operation_id': 'export_cdm_quantexa_reference_code_csv',
+                'http_method': 'GET',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'cdm_id',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                    'cdm_id',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\w-]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'cdm_id':
+                        (str,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                    'cdm_id': 'cdmId',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'cdm_id': 'path',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/octet-stream'
                 ],
                 'content_type': [],
             },
@@ -1336,6 +1412,81 @@ class AgentApi(object):
                     'channel': 'query',
                     'raw_only': 'query',
                     'set_cohort_definition_aggregation_request': 'body',
+                },
+                'collection_format_map': {
+                }
+            },
+            headers_map={
+                'accept': [
+                    'application/json'
+                ],
+                'content_type': [
+                    'application/json'
+                ]
+            },
+            api_client=api_client
+        )
+        self.set_cte_materialization_status_endpoint = _Endpoint(
+            settings={
+                'response_type': (str,),
+                'auth': [],
+                'endpoint_path': '/api/agent/v{version}/{token}/cte-materialization-status',
+                'operation_id': 'set_cte_materialization_status',
+                'http_method': 'POST',
+                'servers': None,
+            },
+            params_map={
+                'all': [
+                    'version',
+                    'token',
+                    'set_cte_materialization_status_request',
+                ],
+                'required': [
+                    'version',
+                    'token',
+                ],
+                'nullable': [
+                ],
+                'enum': [
+                ],
+                'validation': [
+                    'version',
+                    'token',
+                ]
+            },
+            root_map={
+                'validations': {
+                    ('version',): {
+
+                        'regex': {
+                            'pattern': r'[\d.]+',  # noqa: E501
+                        },
+                    },
+                    ('token',): {
+
+                        'regex': {
+                            'pattern': r'[\w-]+',  # noqa: E501
+                        },
+                    },
+                },
+                'allowed_values': {
+                },
+                'openapi_types': {
+                    'version':
+                        (str,),
+                    'token':
+                        (str,),
+                    'set_cte_materialization_status_request':
+                        (SetCteMaterializationStatusRequest,),
+                },
+                'attribute_map': {
+                    'version': 'version',
+                    'token': 'token',
+                },
+                'location_map': {
+                    'version': 'path',
+                    'token': 'path',
+                    'set_cte_materialization_status_request': 'body',
                 },
                 'collection_format_map': {
                 }
@@ -2882,6 +3033,96 @@ class AgentApi(object):
             id
         return self.block_task_endpoint.call_with_http_info(**kwargs)
 
+    def export_cdm_quantexa_reference_code_csv(
+        self,
+        version,
+        token,
+        cdm_id,
+        **kwargs
+    ):
+        """export_cdm_quantexa_reference_code_csv  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.export_cdm_quantexa_reference_code_csv(version, token, cdm_id, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+            cdm_id (str):
+
+        Keyword Args:
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            file_type
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        kwargs['cdm_id'] = \
+            cdm_id
+        return self.export_cdm_quantexa_reference_code_csv_endpoint.call_with_http_info(**kwargs)
+
     def export_cdm_values_csv(
         self,
         version,
@@ -4125,6 +4366,93 @@ class AgentApi(object):
         kwargs['key'] = \
             key
         return self.set_cohort_definition_aggregation_endpoint.call_with_http_info(**kwargs)
+
+    def set_cte_materialization_status(
+        self,
+        version,
+        token,
+        **kwargs
+    ):
+        """set_cte_materialization_status  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+
+        >>> thread = api.set_cte_materialization_status(version, token, async_req=True)
+        >>> result = thread.get()
+
+        Args:
+            version (str):
+            token (str):
+
+        Keyword Args:
+            set_cte_materialization_status_request (SetCteMaterializationStatusRequest): [optional]
+            _return_http_data_only (bool): response data without head status
+                code and headers. Default is True.
+            _preload_content (bool): if False, the urllib3.HTTPResponse object
+                will be returned without reading/decoding response data.
+                Default is True.
+            _request_timeout (int/float/tuple): timeout setting for this request. If
+                one number provided, it will be total request timeout. It can also
+                be a pair (tuple) of (connection, read) timeouts.
+                Default is None.
+            _check_input_type (bool): specifies if type checking
+                should be done one the data sent to the server.
+                Default is True.
+            _check_return_type (bool): specifies if type checking
+                should be done one the data received from the server.
+                Default is True.
+            _spec_property_naming (bool): True if the variable names in the input data
+                are serialized names, as specified in the OpenAPI document.
+                False if the variable names in the input data
+                are pythonic names, e.g. snake case (default)
+            _content_type (str/None): force body content-type.
+                Default is None and content-type will be predicted by allowed
+                content-types and body.
+            _host_index (int/None): specifies the index of the server
+                that we want to use.
+                Default is read from the configuration.
+            _request_auths (list): set to override the auth_settings for an a single
+                request; this effectively ignores the authentication
+                in the spec for a single request.
+                Default is None
+            async_req (bool): execute request asynchronously
+
+        Returns:
+            str
+                If the method is called asynchronously, returns the request
+                thread.
+        """
+        kwargs['async_req'] = kwargs.get(
+            'async_req', False
+        )
+        kwargs['_return_http_data_only'] = kwargs.get(
+            '_return_http_data_only', True
+        )
+        kwargs['_preload_content'] = kwargs.get(
+            '_preload_content', True
+        )
+        kwargs['_request_timeout'] = kwargs.get(
+            '_request_timeout', None
+        )
+        kwargs['_check_input_type'] = kwargs.get(
+            '_check_input_type', True
+        )
+        kwargs['_check_return_type'] = kwargs.get(
+            '_check_return_type', True
+        )
+        kwargs['_spec_property_naming'] = kwargs.get(
+            '_spec_property_naming', False
+        )
+        kwargs['_content_type'] = kwargs.get(
+            '_content_type')
+        kwargs['_host_index'] = kwargs.get('_host_index')
+        kwargs['_request_auths'] = kwargs.get('_request_auths', None)
+        kwargs['version'] = \
+            version
+        kwargs['token'] = \
+            token
+        return self.set_cte_materialization_status_endpoint.call_with_http_info(**kwargs)
 
     def set_error_for_cohort_api_request(
         self,

@@ -49,6 +49,12 @@ class Database(BaseSchema):
         result = [self._convert_row_types(dict(zip(columns, row))) for row in result_proxy.fetchall()]
         return result
 
+    def fetch_all_params(self, sql: str, params: dict):
+        result_proxy = self.engine.execute(text(sql), params)
+        columns = [col[0] for col in result_proxy.cursor.description]
+        result = [self._convert_row_types(dict(zip(columns, row))) for row in result_proxy.fetchall()]
+        return result
+
     def fetch_chunks(self, sql: str, chunk_size: int):
         result_proxy = self.engine.execute(text(sql))
         columns = [col[0] for col in result_proxy.cursor.description]

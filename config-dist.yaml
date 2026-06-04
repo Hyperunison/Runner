@@ -31,6 +31,7 @@ phenotypic_db:
   # dsn: "postgresql+psycopg2://myusername:mypassword@myhost:5432/mydatabase?sslmode=require"
   dsn: ENV("UNISON_DSN", "postgresql+psycopg2://***:***@***:***/***")
   min_count: 3                                      # Minimum number of unique patients with list of properties to allow system to export this properties
+  materialization_view_prefix: "__unison_"          # Prefix (and optional schema) for materialized view names, e.g. "myschema.__unison_"
 
 # You may describe data forbidden to access by Runner.
 # All patterns are regular expressions matched against the full name (re.fullmatch).
@@ -104,3 +105,6 @@ threads:
     general:
       threads_max_count: 10
       timeout: 1800
+    materialization:
+      threads_max_count: 1
+      timeout: 3600

@@ -13,7 +13,7 @@ services:
       - ./Resources/.kube/:/root/.kube
       - ./Resources/.aws:/root/.aws
       - ./Resources/gcloud/:/root/.config/gcloud
-      #- /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
 
   filebeat:
     container_name: ${CONTAINER_NAME:-unison-agent}-filebeat
