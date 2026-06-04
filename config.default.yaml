@@ -1,0 +1,57 @@
+api_version: 1.0
+api_url: "https://api.hyperunison.com"
+idle_delay: 5.0                         # delay between requests to Hyperunison backend to get new tasks
+check_runs_status_interval: 30.0
+api_request_cookie: ""
+sentry_dsn: ""                          # Generate sentryDSN in https://sentry.io/ and use in here to monitor errors
+
+# may be 0 or 1. If 1 - export files will be uploaded to Unison S3 storage and available for download from Unison platform
+# if 0 - no private data will be exported
+allow_private_upload_data_to_unison: 0
+
+log:
+  level: 20     # 10 - debug, 50 - critical
+  filename: ""  # filename or empty for stdout
+
+phenotypic_db:
+  min_count: 3  # minimum number of unique patients required to export a set of properties
+
+# You may describe data forbidden to access by Runner.
+# All patterns are regular expressions matched against the full name (re.fullmatch).
+#
+# Examples:
+#   Exact match:        "personal"
+#   Wildcard:           "pass.*"                     — matches "password", "passport", etc.
+#   Multiple prefixes:  "(tmp|temp)_.*"              — matches "tmp_data", "temp_cache", etc.
+#
+#   All schemas EXCEPT one:
+#     "(?!public$).*"                                — protects everything except "public"
+#
+#   All schemas EXCEPT two:
+#     "(?!public$|research$).*"                      — protects everything except "public" and "research"
+#
+#   All tables EXCEPT those in one schema:
+#     "(?!public\\.).*"                              — protects all tables not starting with "public."
+#
+data_protected:
+  schemas: []   # list of protected schema patterns
+  tables: []    # list of protected table patterns
+  columns: []   # list of protected column patterns
+
+# TCP keepalive for HTTP connections to the backend.
+# Prevents "Connection aborted / TimeoutError(110)" on long-running SQL queries
+# by probing idle connections before the remote LB silently closes them.
+tcp_keepalive:
+  enabled: true
+  idle: 60      # seconds of idle before first keepalive probe
+  interval: 10  # seconds between probes
+  count: 3      # number of failed probes before the connection is dropped
+
+threads:
+  queues:
+    cohort:
+      threads_max_count: 10
+      timeout: 1800
+    general:
+      threads_max_count: 10
+      timeout: 1800

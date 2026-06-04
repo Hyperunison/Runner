@@ -47,17 +47,30 @@ def load_yaml_with_custom_vars(filepath):
     with open(filepath, 'r') as file:
         return yaml.load(file, Loader=yaml.FullLoader)
 
+
+def deep_merge(base: dict, override: dict) -> dict:
+    result = base.copy()
+    for key, value in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge(result[key], value)
+        else:
+            result[key] = value
+    return result
+
+
 class ConfigurationLoader:
     config: any
 
     def __init__(self, filename: str):
-        self.config = load_yaml_with_custom_vars(filename)
+        config_dir = os.path.dirname(os.path.abspath(filename))
+        defaults_path = os.path.join(config_dir, 'config.default.yaml')
 
-        # default values
-        if not 'api_request_cookie' in self.config:
-            self.config['api_request_cookie'] = ''
+        if os.path.exists(defaults_path):
+            defaults = load_yaml_with_custom_vars(defaults_path)
+        else:
+            defaults = {}
 
-        pass
+        self.config = deep_merge(defaults, load_yaml_with_custom_vars(filename))
 
     def get_config(self):
         return self.config

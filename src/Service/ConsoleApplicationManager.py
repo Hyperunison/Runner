@@ -29,6 +29,15 @@ class ConsoleApplicationManager:
         configure_logs(config, "main")
         configuration = Configuration(host=config['api_url'])
 
+        tcp_keepalive = config.get('tcp_keepalive', {})
+        if tcp_keepalive.get('enabled', True):
+            configuration.socket_options = [
+                (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, tcp_keepalive['idle']),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, tcp_keepalive['interval']),
+                (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, tcp_keepalive['count']),
+            ]
+
         if 'sentry_dsn' in config:
             sentry_sdk.init(
                 dsn=config['sentry_dsn'],

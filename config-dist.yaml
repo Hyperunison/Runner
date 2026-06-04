@@ -87,6 +87,15 @@ pipeline:
       last_connect: '{last_connect}'
       agent_id: '{agent_id}'
 
+# TCP keepalive for HTTP connections to the backend.
+# Prevents "Connection aborted / TimeoutError(110)" on long-running SQL queries
+# by probing idle connections before the remote LB silently closes them.
+tcp_keepalive:
+  enabled: true
+  idle: 60       # seconds of idle before first keepalive probe
+  interval: 10   # seconds between probes
+  count: 3       # number of failed probes before the connection is dropped
+
 threads:
   queues:
     cohort:

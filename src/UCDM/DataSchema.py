@@ -290,16 +290,8 @@ class DataSchema:
         try:
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
-            api.set_cohort_definition_aggregation(
-                result,
-                sql,
-                cohort_api_request.reply_channel,
-                key,
-                cohort_api_request.raw_only
-            )
-            api.set_car_status(cohort_api_request.cohort_api_request_id, "success", child_pid)
         except Exception as e:
-            logging.info("SQL query error: {}".format(e))
+            logging.error("SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
             self.schema.rollback()
             api.set_cohort_definition_aggregation(
@@ -313,6 +305,24 @@ class DataSchema:
             api.set_cohort_error(
                 cohort_api_request.cohort_api_request_id,
                 "SQL query error: {}".format(e)
+            )
+            return
+
+        try:
+            api.set_cohort_definition_aggregation(
+                result,
+                sql,
+                cohort_api_request.reply_channel,
+                key,
+                cohort_api_request.raw_only
+            )
+            api.set_car_status(cohort_api_request.cohort_api_request_id, "success", child_pid)
+        except Exception as e:
+            logging.error("API error while sending cohort result: {}".format(e))
+            api.set_car_status(cohort_api_request.cohort_api_request_id, "error", child_pid)
+            api.set_cohort_error(
+                cohort_api_request.cohort_api_request_id,
+                "API error: {}".format(e)
             )
 
     def kill_cohort_definition(self, kill_message: KillCohortAPIRequest, api: Api):
