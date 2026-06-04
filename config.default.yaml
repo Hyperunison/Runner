@@ -55,3 +55,26 @@ threads:
     general:
       threads_max_count: 10
       timeout: 1800
+
+
+pipeline:
+  file_transfer:
+    type: docker
+    base_dir: "{home}/var/pipelines/"
+
+  executor:
+    type: docker
+    work_dir: "{runner_folder_on_host}/var/pipelines"
+    container_prefix: "unison-dev-worker"
+    image: 'nextflow.azurecr.io/nextflow-dev-latest:latest'
+    volumes:
+      '{runner_folder_on_host}/var/pipelines': '{runner_folder_on_host}/var/pipelines'
+      '{runner_folder_on_host}/var/nextflow/data': /data/nextflow/data
+      /var/run/docker.sock: /var/run/docker.sock
+
+    labels:
+      type: '{container_prefix}'
+      run_id: '{run_id}'
+      instance: '{instance}'
+      last_connect: '{last_connect}'
+      agent_id: '{agent_id}'
