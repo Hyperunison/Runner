@@ -119,11 +119,21 @@ class Postgres(Database):
 
     def get_materialized_view_definition(self, name: str) -> Optional[str]:
         """Returns stored MD5 checksum of original CTE SQL, or None if view doesn't exist."""
-        rows = self.fetch_all_params(
-            "SELECT pg_catalog.obj_description(c.oid, 'pg_class') AS comment "
-            "FROM pg_class c WHERE c.relname = :name AND c.relkind = 'm'",
-            {'name': name}
-        )
+        if '.' in name:
+            schema, relname = name.split('.', 1)
+            rows = self.fetch_all_params(
+                "SELECT pg_catalog.obj_description(c.oid, 'pg_class') AS comment "
+                "FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE c.relname = :name AND c.relkind = 'm' AND n.nspname = :schema",
+                {'name': relname, 'schema': schema}
+            )
+        else:
+            rows = self.fetch_all_params(
+                "SELECT pg_catalog.obj_description(c.oid, 'pg_class') AS comment "
+                "FROM pg_class c WHERE c.relname = :name AND c.relkind = 'm'",
+                {'name': name}
+            )
         if not rows:
             return None  # view does not exist → caller should CREATE
         return rows[0]['comment'] or ''  # '' if no checksum stored yet → caller should DROP+CREATE
