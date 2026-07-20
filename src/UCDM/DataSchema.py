@@ -631,3 +631,6 @@ class DataSchema:
 
     def execute_sql(self, sql: str):
         self.schema.execute_sql(sql)
+
+    def execute_sql_params(self, sql: str, params) -> None:
+        self.schema.execute_sql_params(sql, params)

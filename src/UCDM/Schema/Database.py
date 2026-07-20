@@ -80,6 +80,12 @@ class Database(BaseSchema):
     def execute_sql(self, sql: str):
         self.engine.execute(text(sql))
 
+    def execute_sql_params(self, sql: str, params) -> None:
+        # params may be a single dict or a list of dicts (executemany).
+        # Values are bound by the driver, so quotes / backslashes / percent
+        # signs in the data never collide with the SQL or paramstyle.
+        self.engine.execute(text(sql), params)
+
     def get_table_column_stats(self, table_name: str, column_name: str, cte: str) -> TableStat:
         with_cte_label = 'with CTE' if cte else ''
         try:

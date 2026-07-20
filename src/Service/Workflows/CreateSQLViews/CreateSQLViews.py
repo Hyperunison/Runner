@@ -186,17 +186,15 @@ class CreateSQLViews(WorkflowBase):
         items = list(str_to_int.map.keys())
 
         for chunk in chunks(items, 1000):
-            values_sql = ", ".join(
-                "('{}')".format(escape_string(s))
-                for s in chunk
-            )
+            params = {"v{}".format(i): s for i, s in enumerate(chunk)}
+            values_sql = ", ".join("(:v{})".format(i) for i in range(len(chunk)))
 
             sql = f"""
                 SELECT get_or_create_number(v.val)
                 FROM (VALUES {values_sql}) AS v(val)
             """
 
-            schema.execute_sql(sql)
+            schema.execute_sql_params(sql, params)
 
         logging.debug('Data is imported to the __str_to_int')
 
@@ -234,21 +232,11 @@ class CreateSQLViews(WorkflowBase):
 
     def insert_into_samantic(self, to_insert: List[Dict[str, str]], schema: DataSchema, views_schema: str) -> None:
         logging.debug("inserting next {} rows into {}.__semantic_mapping".format(len(to_insert), views_schema))
-        sql = "INSERT INTO {}.__semantic_mapping VALUES \n".format(views_schema)
-        first = True
-        for row in to_insert:
-            if not first:
-                sql += ",\n"
-            first = False
-            sql += "('{}', '{}', '{}', '{}')".format(
-                escape_string(row['bridge_id']),
-                escape_string(row['field_name']),
-                escape_string(row['source_value']),
-                escape_string(row['mapped_value'])
-            )
-        sql += ""
-
-        schema.execute_sql(sql)
+        sql = (
+            "INSERT INTO {}.__semantic_mapping "
+            "VALUES (:bridge_id, :field_name, :source_value, :mapped_value)".format(views_schema)
+        )
+        schema.execute_sql_params(sql, to_insert)
 
 
 

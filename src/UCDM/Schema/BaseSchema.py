@@ -72,6 +72,9 @@ class BaseSchema:
     def execute_sql(self, sql: str) -> str:
         raise NotImplementedError()
 
+    def execute_sql_params(self, sql: str, params) -> None:
+        raise NotImplementedError()
+
     def get_materialized_view_definition(self, name: str) -> Optional[str]:
         """Return stored SQL definition of a materialized view, or None if not exists."""
         raise NotImplementedError()
