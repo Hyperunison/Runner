@@ -13,7 +13,7 @@ class LinesFilter:
         skip_reasons: Dict[str, int] = {}
         for key, val in row.items():
             value = val.export_value
-            if (value == '' or value is None or value == '0' or value == 0) and fields_map[key]['isRequired']:
+            if (value == '' or value is None) and fields_map[key]['isRequired']:
                 reason = "{} is empty, but required (value={})".format(fields_map[key]['name'], value)
                 if not reason in skip_reasons:
                     skip_reasons[reason] = 0
