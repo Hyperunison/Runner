@@ -243,7 +243,7 @@ class DataSchema:
 
         for j in cohort_definition.joins:
             table = materialized_table_map.get(j['table'], j['table'])
-            sql += "JOIN {} as {} ON {} \n".format(table, j['alias'], j['on'])
+            sql += "LEFT JOIN {} as {} ON {} \n".format(table, j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
