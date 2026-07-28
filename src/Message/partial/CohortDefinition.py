@@ -23,6 +23,7 @@ class CohortDefinition:
         self.export = cohort_definition['export']
         self.cte = cohort_definition['cte']
         self.limit = cohort_definition['limit']
+        self.ranked_cte = cohort_definition.get('rankedCte', [])
 
         self.with_tables = {}
         for table_name in cohort_definition['withTables']:

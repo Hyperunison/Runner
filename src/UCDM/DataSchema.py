@@ -209,6 +209,10 @@ class DataSchema:
             with_cte_list: Dict[str, str] = {}
         cte_list = dict(list(cte_list.items()) + list(with_cte_list.items()))
 
+        # Ranked CTEs must come after withTables CTEs (they may reference them)
+        for ranked_cte in cohort_definition.ranked_cte:
+            cte_list[ranked_cte['tableName']] = ranked_cte['cte']
+
         for exp in cohort_definition.where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
         if len(query.conditions) > 0:
