@@ -175,7 +175,7 @@ class DataSchema:
         parts = self.build_cohort_definition_sql_query_internal(mapper, cohort_definition, distribution, add_participant_id)
 
         cte_part = self.get_cte_sql(parts[1])
-        sql = '{} {}'.format(cte_part, parts[0])
+        sql = '{}\n{}'.format(cte_part, parts[0]) if cte_part else parts[0]
         sql = self.transform_sql_to_specific_database(sql)
 
         logging.info("Generated SQL query: \n{}".format(sql))
