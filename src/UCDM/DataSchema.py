@@ -209,6 +209,50 @@ class DataSchema:
             with_cte_list: Dict[str, str] = {}
         cte_list = dict(list(cte_list.items()) + list(with_cte_list.items()))
 
+        # Build ranked CTEs for joins with firstBy/lastBy
+        for j in cohort_definition.joins:
+            first_by = j.get('firstBy')
+            last_by = j.get('lastBy')
+            if not first_by and not last_by:
+                continue
+
+            order_by_var = first_by if first_by else last_by
+            order_field_qualified = mapper.convert_var_name(order_by_var)
+            # Strip alias prefix for use inside CTE (e.g. c1_xxx."date" → "date")
+            order_field = self._strip_alias_prefix(order_field_qualified, j['alias'])
+            order_dir = 'ASC' if first_by else 'DESC'
+            table = materialized_table_map.get(j['table'], j['table'])
+            cte_name = j['alias'] + '_ranked'
+
+            # Build inline WHERE for the CTE — expressions reference aliased columns,
+            # strip alias prefix so they work inside the CTE
+            inline_where_parts = []
+            for iw in j.get('inlineWhere', []):
+                expr = self.build_sql_expression(iw, query, mapper)
+                expr = self._strip_alias_prefix(expr, j['alias'])
+                inline_where_parts.append(expr)
+            where_clause = ' AND '.join(inline_where_parts) if inline_where_parts else 'true'
+
+            # Extract the partition key from the ON expression
+            partition_field = self._extract_partition_field(j['on'], j['alias'])
+
+            cte_sql = (
+                "SELECT *, ROW_NUMBER() OVER ("
+                "PARTITION BY {partition} ORDER BY {order} {dir}"
+                ") AS rn FROM {table} WHERE {where}"
+            ).format(
+                partition=partition_field,
+                order=order_field,
+                dir=order_dir,
+                table=table,
+                where=where_clause,
+            )
+            cte_list[cte_name] = cte_sql
+
+            # Replace table in join with CTE and add rn=1 filter
+            j['table'] = cte_name
+            j['on'] = j['on'] + ' AND {}.rn = 1'.format(j['alias'])
+
         for exp in cohort_definition.where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
         if len(query.conditions) > 0:
@@ -269,6 +313,43 @@ class DataSchema:
             sql += "\nLIMIT {}".format(cohort_definition.limit)
 
         return (sql, cte_list)
+
+    @staticmethod
+    def _strip_alias_prefix(expression: str, alias: str) -> str:
+        """Remove alias prefix from SQL expression for use inside a CTE.
+
+        E.g. with alias='c1_xxx':
+          'c1_xxx."condition_start_date"' → '"condition_start_date"'
+          'c1_xxx.person_id' → 'person_id'
+        Handles all occurrences in the expression.
+        """
+        pattern = re.compile(r'\b' + re.escape(alias) + r'\.', re.IGNORECASE)
+        return pattern.sub('', expression)
+
+    @staticmethod
+    def _extract_partition_field(on_expression: str, alias: str) -> str:
+        """Extract the join column on the joined-table side from an ON expression.
+
+        Given ON like: "c1_xxx.person_id = patients.id"
+        and alias "c1_xxx", returns "person_id" (unqualified, for use inside CTE).
+
+        Falls back to the raw left-side token if pattern doesn't match.
+        """
+        # Try to find alias.column pattern on either side of =
+        pattern = re.compile(
+            r'\b' + re.escape(alias) + r'\.\s*"?(\w+)"?',
+            re.IGNORECASE
+        )
+        match = pattern.search(on_expression)
+        if match:
+            return match.group(1)
+
+        # Fallback: return person_id as a safe default
+        logging.warning(
+            "Could not extract partition field from ON expression '{}' for alias '{}', "
+            "falling back to 'person_id'".format(on_expression, alias)
+        )
+        return 'person_id'
 
     def get_cte_sql(self, cte_list: Dict[str, str]) -> str:
         if len(cte_list) == 0:
