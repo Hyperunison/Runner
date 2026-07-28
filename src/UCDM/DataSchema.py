@@ -23,6 +23,16 @@ from src.UCDM.Schema.BaseSchema import BaseSchema
 from src.UCDM.Schema.SchemaFactory import SchemaFactory
 
 
+ALLOWED_JOIN_TYPES = {'LEFT', 'INNER'}
+
+
+def validate_join_type(value: str) -> str:
+    jt = value.upper() if value else 'LEFT'
+    if jt not in ALLOWED_JOIN_TYPES:
+        raise ValueError(f"Invalid joinType: '{value}'. Allowed: {ALLOWED_JOIN_TYPES}")
+    return jt
+
+
 class SQLJoin:
     table: str
     alias: str
@@ -243,7 +253,8 @@ class DataSchema:
 
         for j in cohort_definition.joins:
             table = materialized_table_map.get(j['table'], j['table'])
-            sql += "LEFT JOIN {} as {} ON {} \n".format(table, j['alias'], j['on'])
+            join_type = validate_join_type(j.get('joinType', 'LEFT'))
+            sql += "{} JOIN {} as {} ON {} \n".format(join_type, table, j['alias'], j['on'])
 
         sql += "WHERE\n{}\n".format(sql_where)
         if distribution and len(group_array) > 0:
@@ -412,7 +423,8 @@ class DataSchema:
             from_clause = "{} as {}".format(primary['table'], primary['alias'])
             extra_joins = ""
             for j in joins[1:]:
-                extra_joins += " JOIN {} as {} ON {} ".format(j['table'], j['alias'], j['on'])
+                sub_join_type = validate_join_type(j.get('joinType', 'LEFT'))
+                extra_joins += " {} JOIN {} as {} ON {} ".format(sub_join_type, j['table'], j['alias'], j['on'])
             sub_conditions = [primary['on']]
             for w in sub_wheres:
                 sub_conditions.append(self.build_sql_expression(w, query, mapper))
