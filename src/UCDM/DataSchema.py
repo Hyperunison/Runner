@@ -228,9 +228,13 @@ class DataSchema:
             # strip alias prefix so they work inside the CTE
             inline_where_parts = []
             for iw in j.get('inlineWhere', []):
-                expr = self.build_sql_expression(iw, query, mapper)
-                expr = self._strip_alias_prefix(expr, j['alias'])
-                inline_where_parts.append(expr)
+                # If this is an exists/not_exists referencing the same alias as the parent join,
+                # flatten its conditions into the CTE WHERE instead of building a subquery
+                flattened = self._flatten_self_referencing_exists(iw, j['alias'])
+                for flat_iw in flattened:
+                    expr = self.build_sql_expression(flat_iw, query, mapper)
+                    expr = self._strip_alias_prefix(expr, j['alias'])
+                    inline_where_parts.append(expr)
             where_clause = ' AND '.join(inline_where_parts) if inline_where_parts else 'true'
 
             # Extract the partition key from the ON expression
@@ -313,6 +317,38 @@ class DataSchema:
             sql += "\nLIMIT {}".format(cohort_definition.limit)
 
         return (sql, cte_list)
+
+    @staticmethod
+    def _flatten_self_referencing_exists(node: dict, parent_alias: str) -> list:
+        """If the node is an exists/not_exists that references the same alias as the parent join,
+        return its inner WHERE conditions directly (flattened).
+        Otherwise return the node as-is in a list.
+
+        This handles the case where exists(condition_occurrence: c1, ...) is used inside
+        a first_by inline where for the same c1 — the EXISTS subquery would fail inside
+        the CTE because it can't reference main query tables. Instead, we just use the
+        inner conditions as plain WHERE filters in the CTE.
+        """
+        if node.get('type') not in ('exists', 'not_exists'):
+            return [node]
+
+        # Check if any of the joins reference the parent alias
+        joins = node.get('join', [])
+        is_self_ref = False
+        for jn in joins:
+            if jn.get('alias', '').startswith(parent_alias + '_') or jn.get('alias') == parent_alias:
+                is_self_ref = True
+                break
+
+        if not is_self_ref:
+            return [node]
+
+        # Flatten: return inner WHERE conditions directly
+        inner_wheres = node.get('where', [])
+        if not inner_wheres:
+            return []
+
+        return inner_wheres
 
     @staticmethod
     def _strip_alias_prefix(expression: str, alias: str) -> str:
