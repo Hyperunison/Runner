@@ -209,59 +209,6 @@ class DataSchema:
             with_cte_list: Dict[str, str] = {}
         cte_list = dict(list(cte_list.items()) + list(with_cte_list.items()))
 
-        # Build ranked CTEs for joins with firstBy/lastBy
-        for j in cohort_definition.joins:
-            first_by = j.get('firstBy')
-            last_by = j.get('lastBy')
-            if not first_by and not last_by:
-                continue
-
-            order_by_var = first_by if first_by else last_by
-            order_field_qualified = mapper.convert_var_name(order_by_var)
-            # Strip alias prefix for use inside CTE (e.g. c1_xxx."date" → "date")
-            order_field = self._strip_alias_prefix(order_field_qualified, j['alias'])
-            order_dir = 'ASC' if first_by else 'DESC'
-            table = materialized_table_map.get(j['table'], j['table'])
-            cte_name = j['alias'] + '_ranked'
-
-            # Build inline WHERE for the CTE — expressions reference aliased columns,
-            # strip alias prefix so they work inside the CTE.
-            # Also replace participant table references with unqualified column names,
-            # since inside the CTE the participant table is not available but the CTE's
-            # source table has the join column.
-            participant_table = cohort_definition.participant_table
-            inline_where_parts = []
-            for iw in j.get('inlineWhere', []):
-                # If this is an exists/not_exists referencing the same alias as the parent join,
-                # flatten its conditions into the CTE WHERE instead of building a subquery
-                flattened = self._flatten_self_referencing_exists(iw, j['alias'])
-                for flat_iw in flattened:
-                    expr = self.build_sql_expression(flat_iw, query, mapper)
-                    expr = self._strip_alias_prefix(expr, j['alias'])
-                    expr = self._strip_alias_prefix(expr, participant_table)
-                    inline_where_parts.append(expr)
-            where_clause = ' AND '.join(inline_where_parts) if inline_where_parts else 'true'
-
-            # Extract the partition key from the ON expression
-            partition_field = self._extract_partition_field(j['on'], j['alias'])
-
-            cte_sql = (
-                "SELECT *, ROW_NUMBER() OVER ("
-                "PARTITION BY {partition} ORDER BY {order} {dir}"
-                ") AS rn FROM {table} WHERE {where}"
-            ).format(
-                partition=partition_field,
-                order=order_field,
-                dir=order_dir,
-                table=table,
-                where=where_clause,
-            )
-            cte_list[cte_name] = cte_sql
-
-            # Replace table in join with CTE and add rn=1 filter
-            j['table'] = cte_name
-            j['on'] = j['on'] + ' AND {}.rn = 1'.format(j['alias'])
-
         for exp in cohort_definition.where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
         if len(query.conditions) > 0:
@@ -322,75 +269,6 @@ class DataSchema:
             sql += "\nLIMIT {}".format(cohort_definition.limit)
 
         return (sql, cte_list)
-
-    @staticmethod
-    def _flatten_self_referencing_exists(node: dict, parent_alias: str) -> list:
-        """If the node is an exists/not_exists that references the same alias as the parent join,
-        return its inner WHERE conditions directly (flattened).
-        Otherwise return the node as-is in a list.
-
-        This handles the case where exists(condition_occurrence: c1, ...) is used inside
-        a first_by inline where for the same c1 — the EXISTS subquery would fail inside
-        the CTE because it can't reference main query tables. Instead, we just use the
-        inner conditions as plain WHERE filters in the CTE.
-        """
-        if node.get('type') not in ('exists', 'not_exists'):
-            return [node]
-
-        # Check if any of the joins reference the parent alias
-        joins = node.get('join', [])
-        is_self_ref = False
-        for jn in joins:
-            if jn.get('alias', '').startswith(parent_alias + '_') or jn.get('alias') == parent_alias:
-                is_self_ref = True
-                break
-
-        if not is_self_ref:
-            return [node]
-
-        # Flatten: return inner WHERE conditions directly
-        inner_wheres = node.get('where', [])
-        if not inner_wheres:
-            return []
-
-        return inner_wheres
-
-    @staticmethod
-    def _strip_alias_prefix(expression: str, alias: str) -> str:
-        """Remove alias prefix from SQL expression for use inside a CTE.
-
-        E.g. with alias='c1_xxx':
-          'c1_xxx."condition_start_date"' → '"condition_start_date"'
-          'c1_xxx.person_id' → 'person_id'
-        Handles all occurrences in the expression.
-        """
-        pattern = re.compile(r'\b' + re.escape(alias) + r'\.', re.IGNORECASE)
-        return pattern.sub('', expression)
-
-    @staticmethod
-    def _extract_partition_field(on_expression: str, alias: str) -> str:
-        """Extract the join column on the joined-table side from an ON expression.
-
-        Given ON like: "c1_xxx.person_id = patients.id"
-        and alias "c1_xxx", returns "person_id" (unqualified, for use inside CTE).
-
-        Falls back to the raw left-side token if pattern doesn't match.
-        """
-        # Try to find alias.column pattern on either side of =
-        pattern = re.compile(
-            r'\b' + re.escape(alias) + r'\.\s*"?(\w+)"?',
-            re.IGNORECASE
-        )
-        match = pattern.search(on_expression)
-        if match:
-            return match.group(1)
-
-        # Fallback: return person_id as a safe default
-        logging.warning(
-            "Could not extract partition field from ON expression '{}' for alias '{}', "
-            "falling back to 'person_id'".format(on_expression, alias)
-        )
-        return 'person_id'
 
     def get_cte_sql(self, cte_list: Dict[str, str]) -> str:
         if len(cte_list) == 0:
