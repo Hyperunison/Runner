@@ -225,7 +225,11 @@ class DataSchema:
             cte_name = j['alias'] + '_ranked'
 
             # Build inline WHERE for the CTE — expressions reference aliased columns,
-            # strip alias prefix so they work inside the CTE
+            # strip alias prefix so they work inside the CTE.
+            # Also replace participant table references with unqualified column names,
+            # since inside the CTE the participant table is not available but the CTE's
+            # source table has the join column.
+            participant_table = cohort_definition.participant_table
             inline_where_parts = []
             for iw in j.get('inlineWhere', []):
                 # If this is an exists/not_exists referencing the same alias as the parent join,
@@ -234,6 +238,7 @@ class DataSchema:
                 for flat_iw in flattened:
                     expr = self.build_sql_expression(flat_iw, query, mapper)
                     expr = self._strip_alias_prefix(expr, j['alias'])
+                    expr = self._strip_alias_prefix(expr, participant_table)
                     inline_where_parts.append(expr)
             where_clause = ' AND '.join(inline_where_parts) if inline_where_parts else 'true'
 
