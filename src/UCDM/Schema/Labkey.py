@@ -52,8 +52,8 @@ class Labkey(BaseSchema):
             columns.append(item)
         return count, columns
 
-    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
-        sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
+    def get_cte_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
+        sql_columns = self.wrap_sql_by_cte("SELECT * from {} LIMIT 1".format(table_name), self._ctes)
         rows = self.engine.query.execute_sql(self.schema, sql=sql_columns)
         fields = rows['metaData']['fields']
         count = rows['rowCount']
@@ -70,7 +70,7 @@ class Labkey(BaseSchema):
         with_cte_label = 'with CTE' if cte else ''
         try:
             sql = "SELECT count(distinct \"{v}\") as unique_count from {table}".format(v=column_name, table=table_name)
-            sql = self.wrap_sql_by_cte(sql, table_name, cte)
+            sql = self.wrap_sql_by_cte(sql, self._ctes)
             result = self.engine.query.execute_sql(self.schema, sql=sql)
             unique_count = result['rows'][0]['unique_count']
         except ProgrammingError as e:
@@ -83,7 +83,7 @@ class Labkey(BaseSchema):
         try:
             sql = "SELECT min(\"{v}\") as min_value, max(\"{v}\") as max_value, avg(\"{v}\") as avg_value from {table}".format(
                 v=column_name, table=table_name)
-            sql = self.wrap_sql_by_cte(sql, table_name, cte)
+            sql = self.wrap_sql_by_cte(sql, self._ctes)
             logging.info(sql)
             result = self.engine.query.execute_sql(self.schema, sql=sql)
 
@@ -114,7 +114,7 @@ class Labkey(BaseSchema):
 
         sql = "SELECT \"{column}\" as value, count(*) as cnt from {table} WHERE NOT \"{column}\" IS NULL GROUP BY \"{column}\" HAVING COUNT(*) >= {min} ORDER BY 1 DESC LIMIT 100".format(
             column=column_name, table=table_name, min=self.min_count)
-        sql = self.wrap_sql_by_cte(sql, table_name, cte)
+        sql = self.wrap_sql_by_cte(sql, self._ctes)
         logging.debug(sql)
         values_counts = self.fetch_all(sql)
         logging.info("Frequent values counts for {}.{} {}: {}".format(
@@ -125,7 +125,7 @@ class Labkey(BaseSchema):
         ))
 
         nulls_count_sql = "SELECT COUNT(*) as cnt FROM {} WHERE \"{}\" is null".format(table_name, column_name)
-        nulls_count_sql = self.wrap_sql_by_cte(nulls_count_sql, table_name, cte)
+        nulls_count_sql = self.wrap_sql_by_cte(nulls_count_sql, self._ctes)
         nulls_count = self.fetch_row(nulls_count_sql)['cnt']
 
         stat = TableStat()
@@ -156,7 +156,7 @@ class Labkey(BaseSchema):
             min=min,
             max=max
         )
-        sql = self.wrap_sql_by_cte(sql, table, cte)
+        sql = self.wrap_sql_by_cte(sql, self._ctes)
         return self.fetch_row(sql)['med']
 
     def fetch_row(self, sql: str) -> Dict:

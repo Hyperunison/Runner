@@ -507,6 +507,16 @@ class DataSchema:
             result.append(table)
         api.set_tables_list(result)
 
+    @staticmethod
+    def _build_ctes_dict(table_name: str, cte: str, dependency_ctes: dict = None) -> dict:
+        """Build ordered dict {name: sql} from dependency CTEs and the main CTE."""
+        result = {}
+        if dependency_ctes:
+            result.update(dependency_ctes)
+        if cte:
+            result[table_name] = cte
+        return result
+
     def update_table_columns_list(self, api: Api, message: UpdateTableColumnsList, protection: DataProtection):
         table_name = message.table_name
         cte = message.cte
@@ -521,12 +531,14 @@ class DataSchema:
             logging.error("Skip table {} {}, as it matches protected_schemas".format(table_name, with_cte_label))
             return
 
+        self.schema._ctes = self._build_ctes_dict(table_name, cte, getattr(message, 'dependency_ctes', None))
+
         if materialized_as:
             logging.info("Update table columns list for materialized table {} -> {}".format(table_name, materialized_as))
             rows_count, columns = self.schema.get_table_columns(materialized_as)
         elif cte:
             logging.info("Update tables columns list packet got for complex expression alias = {}, with CTE".format(table_name))
-            rows_count, columns = self.schema.get_cte_columns(table_name, cte)
+            rows_count, columns = self.schema.get_cte_columns(table_name)
         else:
             logging.info("Update tables columns list packet got for table {}".format(table_name))
             rows_count, columns = self.schema.get_table_columns(table_name)
@@ -545,7 +557,13 @@ class DataSchema:
     def materialize_cte(self, api: Api, message):
         table_name = message.table_name
         materialized_as = self.materialization_view_prefix + table_name
-        cte = message.cte
+        dependency_ctes = getattr(message, 'dependency_ctes', None)
+        # For materialization, wrap CTE with its dependencies as a single SQL statement
+        if dependency_ctes:
+            ctes_dict = self._build_ctes_dict(table_name, message.cte, dependency_ctes)
+            cte = self.schema.wrap_sql_by_cte("SELECT * FROM {}".format(table_name), ctes_dict)
+        else:
+            cte = message.cte
         indexes = message.indexes
         job_id = message.job_id
         biobank_data_table_id = message.biobank_data_table_id
@@ -618,6 +636,7 @@ class DataSchema:
             logging.error("Skip column {}.{} {}, as it matches protected_columns".format(
                 table_name, column_name, with_cte_label))
             return
+        self.schema._ctes = self._build_ctes_dict(table_name, message.cte, getattr(message, 'dependency_ctes', None))
         stat = self.schema.get_table_column_stats(table_name, column_name, message.cte)
 
         api.set_table_info(stat.table_name, stat.abandoned)

@@ -62,9 +62,9 @@ class Mysql(Database):
 
         return count, columns
 
-    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
-        sql_columns = "WITH {} AS ({}) SELECT * from {} LIMIT 1".format(table_name, cte, table_name)
-        sql_count = "WITH {} AS ({}) SELECT COUNT(*) AS cnt from {}".format(table_name, cte, table_name)
+    def get_cte_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
+        sql_count = self.wrap_sql_by_cte("SELECT COUNT(*) AS cnt from {}".format(table_name), self._ctes)
+        sql_columns = self.wrap_sql_by_cte("SELECT * from {} LIMIT 1".format(table_name), self._ctes)
 
         count = self.fetch_row(sql_count)['cnt']
         columns: List[Dict[str, str]] = []
@@ -72,8 +72,9 @@ class Mysql(Database):
 
         if row:
             for col in row:
-                sql_column_info = "WITH {} AS ({}) SELECT '{}' AS type_info, {} FROM {} LIMIT 1".format(
-                    table_name, cte, col, col, table_name
+                sql_column_info = self.wrap_sql_by_cte(
+                    "SELECT '{}' AS type_info, {} FROM {} LIMIT 1".format(col, col, table_name),
+                    self._ctes
                 )
                 type_row = self.fetch_row(sql_column_info)
 
@@ -107,7 +108,7 @@ class Mysql(Database):
         sql = sql.replace("{max}", str(max))
         sql = sql.replace("{min}", str(min))
 
-        sql = self.wrap_sql_by_cte(sql, table, cte)
+        sql = self.wrap_sql_by_cte(sql, self._ctes)
 
         return self.fetch_row(sql)['median']
 
@@ -153,7 +154,7 @@ class Mysql(Database):
         sql = "SELECT min(`{v}`) as min_value, max(`{v}`) as max_value, avg(`{v}`) as avg_value from {table}".format(
             v=column_name, table=table_name
         )
-        return self.wrap_sql_by_cte(sql, table_name, cte)
+        return self.wrap_sql_by_cte(sql, self._ctes)
 
     def get_values_count_query(self, table_name: str, column_name: str, cte: str) -> str:
         return "SELECT `{}` as value, count(*) as cnt from {} WHERE NOT `{}` IS NULL GROUP BY 1 HAVING COUNT(*) >= {} ORDER BY 1 DESC LIMIT 100".format(
@@ -161,7 +162,7 @@ class Mysql(Database):
 
     def get_nulls_count_query(self, table_name: str, column_name: str, cte: str) -> str:
         nulls_count_sql = "SELECT COUNT(*) as cnt FROM {} WHERE `{}` is null".format(table_name, column_name)
-        return self.wrap_sql_by_cte(nulls_count_sql, table_name, cte)
+        return self.wrap_sql_by_cte(nulls_count_sql, self._ctes)
 
     def get_materialized_view_definition(self, name: str) -> Optional[str]:
         # MySQL has no native materialized views; definition cannot be recovered

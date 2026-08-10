@@ -136,7 +136,7 @@ class Database(BaseSchema):
             median88_value = None
 
         sql = self.get_values_count_query(table_name, column_name, cte)
-        sql = self.wrap_sql_by_cte(sql, table_name, cte)
+        sql = self.wrap_sql_by_cte(sql, self._ctes)
         logging.debug(sql)
         values_counts = self.fetch_all(sql)
         logging.info("Frequent values counts for {}.{} {}: {}".format(
@@ -177,7 +177,7 @@ class Database(BaseSchema):
         if min is None or max is None:
             return None
         sql = self.get_median_query(table, column, min, max, cte)
-        sql = self.wrap_sql_by_cte(sql, table, cte)
+        sql = self.wrap_sql_by_cte(sql, self._ctes)
 
         return self.fetch_row(sql)['median']
 
@@ -196,7 +196,7 @@ class Database(BaseSchema):
 
     def get_unique_values_count(self, table_name: str, column_name: str, cte: str) -> int:
         sql = self.get_unique_values_count_query(table_name, column_name)
-        sql = self.wrap_sql_by_cte(sql, table_name, cte)
+        sql = self.wrap_sql_by_cte(sql, self._ctes)
         row = self.fetch_row(sql)
         return row['unique_count']
 

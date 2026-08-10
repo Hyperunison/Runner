@@ -7,12 +7,14 @@ class BaseSchema:
     engine = None
     min_count: int = 0
     dsn: str
+    _ctes: dict
 
     known_functions = []
 
     def __init__(self, dsn: str, min_count: int):
         self.min_count = min_count
         self.dsn = dsn
+        self._ctes = {}
         super().__init__()
 
     def fetch_all(self, sql: str):
@@ -34,7 +36,7 @@ class BaseSchema:
     def get_table_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
         raise NotImplementedError()
 
-    def get_cte_columns(self, table_name: str, cte: str) -> Tuple[int, List[Dict[str, str]]]:
+    def get_cte_columns(self, table_name: str) -> Tuple[int, List[Dict[str, str]]]:
         raise NotImplementedError()
 
     def get_tables_list(self) -> List[str]:
@@ -58,16 +60,13 @@ class BaseSchema:
     def statement_callback(self, statement) -> Dict:
         return statement
 
-    def wrap_sql_by_cte(self, sql: str, table_name: str, cte: str) -> str:
+    def wrap_sql_by_cte(self, sql: str, ctes: dict) -> str:
+        """Wrap a SQL statement with a WITH clause built from a {name: cte_sql} dict."""
+        if not ctes:
+            return sql
 
-        if cte:
-            return "WITH {table_name} AS ({cte}) {origin_sql}".format(
-                table_name=table_name,
-                cte=cte,
-                origin_sql=sql
-            )
-
-        return sql
+        parts = ["{} AS ({})".format(name, cte_sql) for name, cte_sql in ctes.items()]
+        return "WITH {} {}".format(", ".join(parts), sql)
 
     def execute_sql(self, sql: str) -> str:
         raise NotImplementedError()
