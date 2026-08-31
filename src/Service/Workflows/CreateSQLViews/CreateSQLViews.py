@@ -276,7 +276,8 @@ class JoinDefinition:
 
 class Strategy:
     name: str
-    bridge_ids: List[int] = []
+    bridge_ids: List[int]
     select: str
     def __init__(self, name: str):
         self.name = name
+        self.bridge_ids = []
