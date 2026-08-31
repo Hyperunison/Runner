@@ -5,6 +5,7 @@ import re
 from typing import List, Dict, Optional
 
 import yaml
+import traceback
 
 from src.Message.StartOMOPoficationWorkflow import StartOMOPoficationWorkflow
 from src.Service.DqdOmop54 import DqdOmop54
@@ -156,7 +157,7 @@ class OMOPofication(WorkflowBase):
                         for reason, count in chunk_skip_rows.items():
                             skip_rows[reason] = skip_rows.get(reason, 0) + count
                 except Exception as e:
-                    api_logger.write(message.id, "Can't export {}: {}".format(table_name, e))
+                    api_logger.write(message.id, "Can't export {}: {}\n{}".format(table_name, e, traceback.format_exc()))
                     continue
 
                 api_logger.write(message.id, "Harmonized rows count: {}".format(exported_rows))
