@@ -73,7 +73,8 @@ rows = t.transform_with_file_path(
 
 schema = DataSchema(
     config['phenotypic_db']['dsn'],
-    config['phenotypic_db']['min_count']
+    config['phenotypic_db']['min_count'],
+    config['phenotypic_db']['materialization_view_prefix']
 )
 str_to_int = StrToIntGenerator()
 str_to_int.load_from_file()
