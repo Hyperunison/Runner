@@ -44,6 +44,7 @@ class CreateSQLViews(WorkflowBase):
                 sql += 'SELECT\n'
                 joins: List[JoinDefinition] = []
                 select: List[str] = []
+                where_filters: List[str] = []
                 index = 0
                 for var_name, field in fields_map.items():
                     index += 1
@@ -64,16 +65,30 @@ class CreateSQLViews(WorkflowBase):
                     for strategy_name, strategy in strategies.items():
                         if strategy_name == 'conceptId':
                             alias = "__unison_concept_" + str(index)
+                            bridge_ids_sql = ', '.join([str(bid) for bid in strategy.bridge_ids])
+                            # Use LEFT JOIN when multiple strategies exist: rows from plain/none/serial
+                            # bridges have no entry in __semantic_mapping and would be dropped by INNER JOIN
+                            use_inner = is_required and len(strategies) == 1
                             joins.append(JoinDefinition(
                                 "{}.__semantic_mapping".format(views_schema),
                                 alias,
-                                '{a}.bridge_id="c.__bridge_id" AND {a}.field_name=\'{field}\' AND {a}.source_value="{var}"'.format(
+                                '{a}.bridge_id="c.__bridge_id" AND {a}.field_name=\'{field}\' AND {a}.source_value="{var}" AND "c.__bridge_id"::bigint IN ({bridge_ids})'.format(
                                     field=escape_string(table_name + "." + field_name),
                                     a=escape_string(alias),
                                     var=escape_string(var_name),
+                                    bridge_ids=bridge_ids_sql,
                                 ),
-                                is_required
+                                use_inner
                             ))
+                            # LEFT JOIN is used for mixed strategies, but is_required semantics
+                            # must still filter unmapped conceptId rows
+                            if is_required and not use_inner:
+                                where_filters.append(
+                                    '("c.__bridge_id"::bigint NOT IN ({bridge_ids}) OR {a}.mapped_value IS NOT NULL)'.format(
+                                        bridge_ids=bridge_ids_sql,
+                                        a=alias,
+                                    )
+                                )
                             strategy.select = '{a}.mapped_value'.format(
                                 field_name=escape_string(field_name),
                                 var=escape_string(var_name),
@@ -125,6 +140,8 @@ class CreateSQLViews(WorkflowBase):
                     if not join.inner:
                         sql += 'LEFT '
                     sql += 'JOIN {} AS {} ON {}\n'.format(join.tbl, join.alias, join.on)
+                if where_filters:
+                    sql += 'WHERE ' + ' AND '.join(where_filters) + '\n'
 
                 self.schema.execute_sql('DROP VIEW IF EXISTS {}.{}'.format(views_schema, table_name))
                 view_sql = 'CREATE OR REPLACE VIEW {}.{} AS {}'.format(views_schema, table_name, sql)
