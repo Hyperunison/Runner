@@ -34,7 +34,9 @@ class Database(BaseSchema):
 
     def _convert_row_types(self, item: Dict) -> Dict:
         for key, value in item.items():
-            if isinstance(value, datetime.date):
+            if isinstance(value, datetime.datetime):
+                item[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(value, datetime.date):
                 item[key] = value.strftime('%Y-%m-%d')
             if isinstance(value, Decimal):
                 if int(value) == float(value):
