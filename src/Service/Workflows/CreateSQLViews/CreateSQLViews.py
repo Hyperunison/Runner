@@ -127,9 +127,10 @@ class CreateSQLViews(WorkflowBase):
                     else:
                         s = '(CASE\n'
                         for name, strategy in strategies.items():
-                            s += ' WHEN "c.__bridge_id" IN ({ids}) THEN {s}\n'.format(
+                            s += ' WHEN "c.__bridge_id" IN ({ids}) THEN ({s})::{data_type}\n'.format(
                                 ids=', '.join([str(val) for val in strategy.bridge_ids]),
                                 s=strategy.select,
+                                data_type=data_type,
                             )
                         s += 'END)::{} AS {}'.format(data_type, field_name)
                         select.append(s)
