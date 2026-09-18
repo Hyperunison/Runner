@@ -146,7 +146,7 @@ class Postgres(Database):
         self.execute_sql("COMMENT ON MATERIALIZED VIEW {} IS '{}'".format(name, checksum))
 
     def drop_materialized_view(self, name: str) -> None:
-        self.execute_sql("DROP MATERIALIZED VIEW {}".format(name))
+        self.execute_sql("DROP MATERIALIZED VIEW {} CASCADE".format(name))
 
     def refresh_materialized_view(self, name: str) -> None:
         self.execute_sql("REFRESH MATERIALIZED VIEW {}".format(name))

@@ -316,6 +316,10 @@ class DataSchema:
         try:
             result = self.schema.fetch_all(sql)
             logging.info("Cohort definition result: {}".format(str(result)))
+            if self.min_count > 1:
+                for row in result:
+                    if 'count_uniq_participants' in row:
+                        row['count_uniq_participants'] = (row['count_uniq_participants'] // self.min_count) * self.min_count
         except Exception as e:
             logging.error("SQL query error: {}".format(e))
             # rollback transaction to avoid error state in transaction
