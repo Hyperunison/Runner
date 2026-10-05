@@ -150,11 +150,13 @@ class DataSchema:
             for cohort_definition in with_tables[table_name]:
                 mapper = VariableMapper(cohort_definition.fields)
                 cohort_definition.limit = None
+                # No DISTINCT per branch: the outer query always deduplicates (DISTINCT / count distinct)
                 parts = self.build_cohort_definition_sql_query_internal(
                     mapper,
                     cohort_definition,
                     False,
                     True,
+                    False,
                 )
                 sql_part = parts[0]
                 result = dict(list(result.items()) + list(parts[1].items()))
@@ -188,6 +190,7 @@ class DataSchema:
             cohort_definition: CohortDefinition,
             distribution: bool,
             add_participant_id: bool = False,
+            use_distinct: bool = True,
     ) -> Tuple[str, Dict[str, str]]:
         logging.info("Cohort request got: {}".format(json.dumps(cohort_definition.where)))
         query = SQLQuery()
@@ -215,6 +218,9 @@ class DataSchema:
 
         for exp in cohort_definition.where:
             query.conditions.append(self.build_sql_expression(exp, query, mapper))
+        for exp in cohort_definition.export:
+            if exp.get('as') in cohort_definition.not_null_exports:
+                query.conditions.append('{} IS NOT NULL'.format(self.build_sql_expression(exp, query, mapper)))
         if len(query.conditions) > 0:
             sql_where = "    (" + (")\nAND\n    (".join(query.conditions)) + ")"
         else:
@@ -250,7 +256,7 @@ class DataSchema:
             )
         else:
             # distinct is useful, as without participant_id may be a lot of duplicates
-            sql += "SELECT\n    DISTINCT {}\n".format(select_string)
+            sql += "SELECT\n    {}{}\n".format('DISTINCT ' if use_distinct else '', select_string)
             # sql += "{}.{} as participant_id\n".format(participantTable, participantIdField)
 
         sql += "FROM {}\n".format(cohort_definition.participant_table)

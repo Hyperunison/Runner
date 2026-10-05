@@ -12,6 +12,7 @@ class CohortDefinition:
     cte: List[Dict[str, str]]
     limit: Optional[int]
     with_tables: Dict[str, List[any]]
+    not_null_exports: List[str]
 
     def __init__(self, cohort_definition: Dict[str, any]):
         self.key = cohort_definition['key']
@@ -24,6 +25,7 @@ class CohortDefinition:
         self.cte = cohort_definition['cte']
         self.limit = cohort_definition['limit']
         self.ranked_cte = cohort_definition.get('rankedCte', [])
+        self.not_null_exports = cohort_definition.get('notNullExports', [])
 
         self.with_tables = {}
         for table_name in cohort_definition['withTables']:
