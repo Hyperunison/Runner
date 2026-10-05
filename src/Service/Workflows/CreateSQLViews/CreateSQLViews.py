@@ -272,11 +272,12 @@ class CreateSQLViews(WorkflowBase):
         sql += 'IF value IS NULL THEN RETURN NULL; END IF;\n'
         sql += 'SELECT num INTO result FROM {}.__str_to_int WHERE str = value;\n'.format(views_schema)
         sql += 'IF result IS NOT NULL THEN RETURN result; END IF;\n'
-        sql += "result := nextval('{}.__str_to_int_seq');\n".format(views_schema)
-        sql += 'BEGIN\n'
-        sql += 'INSERT INTO {}.__str_to_int (str, num) VALUES (value, result); EXCEPTION WHEN unique_violation THEN\n'.format(views_schema)
+        # ON CONFLICT instead of an EXCEPTION block: each EXCEPTION block opens a subtransaction,
+        # and one view read over a big table hits the 2^28 subtransactions-per-transaction limit
+        sql += "INSERT INTO {0}.__str_to_int (str, num) VALUES (value, nextval('{0}.__str_to_int_seq')) ON CONFLICT (str) DO NOTHING RETURNING num INTO result;\n".format(views_schema)
+        sql += 'IF result IS NULL THEN\n'
         sql += ' SELECT num INTO result FROM {}.__str_to_int WHERE str = value;\n'.format(views_schema)
-        sql += 'END;\n'
+        sql += 'END IF;\n'
         sql += 'return result;\n'
         sql += 'END; $$;\n'
 
